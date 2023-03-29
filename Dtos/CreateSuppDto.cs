@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-
+﻿
 namespace FurnitureERP.Dtos
 {
     public class CreateSuppDto
@@ -11,6 +8,5 @@ namespace FurnitureERP.Dtos
         public string? SuppCompany { get; set; }
         public string? Remark { get; set; }
         public bool? IsUsing { get; set; }
-        public Guid MerchantGuid { get; set; }
     }
 }

@@ -16,9 +16,15 @@ public partial class AppDbContext : DbContext
     {
     }
 
+    public virtual DbSet<CustomProperty> CustomProperties { get; set; }
+
+    public virtual DbSet<ErpModule> ErpModules { get; set; }
+
     public virtual DbSet<Item> Items { get; set; }
 
     public virtual DbSet<ItemImp> ItemImps { get; set; }
+
+    public virtual DbSet<ItemPackage> ItemPackages { get; set; }
 
     public virtual DbSet<Menu> Menus { get; set; }
 
@@ -47,6 +53,23 @@ public partial class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<CustomProperty>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__custom_property");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
+        modelBuilder.Entity<ErpModule>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__module");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.SerialNo).HasDefaultValueSql("((0))");
+        });
+
         modelBuilder.Entity<Item>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__t_item__3214EC0710AB74EC");
@@ -59,6 +82,15 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<ItemImp>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__itemimp14EC0710AB74EC");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.IsUsing).HasDefaultValueSql("((1))");
+        });
+
+        modelBuilder.Entity<ItemPackage>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__item_package14EC0710AB74EC");
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");

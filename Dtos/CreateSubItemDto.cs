@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-
+﻿
 namespace FurnitureERP.Dtos
 {
     public class CreateSubItemDto
@@ -17,9 +14,5 @@ namespace FurnitureERP.Dtos
         public DateTime CreateTime { get; set; }
 
         public string? Creator { get; set; }
-
-        public string? SellerNick { get; set; }
-
-        public Guid MerchantGuid { get; set; }
     }
 }

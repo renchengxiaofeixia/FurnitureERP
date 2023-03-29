@@ -1,10 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.IdentityModel.Tokens;
-using FurnitureERP.Database;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-
+﻿
 namespace FurnitureERP.Utils
 {
     public class PermissionHandler : AuthorizationHandler<PermissionRequirement>

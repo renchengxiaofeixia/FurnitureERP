@@ -1,7 +1,4 @@
-﻿using FurnitureERP.Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-
+﻿
 namespace FurnitureERP.Utils
 {
     public class JwtToken

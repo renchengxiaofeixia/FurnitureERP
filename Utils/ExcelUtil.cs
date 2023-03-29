@@ -1,10 +1,4 @@
-﻿using Microsoft.Identity.Client;
-using OfficeOpenXml;
-using OfficeOpenXml.Drawing;
-using OfficeOpenXml.Export.HtmlExport;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Collections.Generic;
-
+﻿
 namespace FurnitureERP.Utils
 {
     public class ExcelUtil
@@ -22,7 +16,7 @@ namespace FurnitureERP.Utils
             , string pictureFieldName = ""
             , int tableHeaderRow = 4) where T : new()
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             using var ep = new ExcelPackage(fs);
             var excelWorksheets = ep.Workbook.Worksheets[0];
             var worksheet = excelWorksheets.Cells.Worksheet;

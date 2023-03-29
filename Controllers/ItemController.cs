@@ -1,15 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using FurnitureERP.Database;
-using FurnitureERP.Models;
-using Microsoft.EntityFrameworkCore;
-using FurnitureERP.Dtos;
-using FurnitureERP.Utils;
-using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using FurnitureERP.Parameters;
-using OfficeOpenXml.Style;
-using System.Security.Claims;
-
+﻿
 namespace FurnitureERP.Controllers
 {
     public class ItemController
@@ -22,13 +11,14 @@ namespace FurnitureERP.Controllers
                 return Results.BadRequest("存在相同的商品名称或编码");
             }
             var r = mapper.Map<Item>(itemDto);
-            r.Creator = request.HttpContext.User.Identity?.Name;
+            r.Creator = request.GetCurrentUser().UserName;
+            r.MerchantGuid = request.GetCurrentUser().MerchantGuid;
             if (itemDto.SubItems != null && itemDto.SubItems.Count > 0)
             {
                 var subItems = mapper.Map<List<SubItem>>(itemDto.SubItems);
                 subItems.ForEach(si =>
                 {
-                    si.Creator = request.HttpContext.User.Identity?.Name;
+                    si.Creator = request.GetCurrentUser().UserName;
                 });
                 await db.SubItems.AddRangeAsync(subItems);
                 //标记成组合商品
@@ -114,7 +104,7 @@ namespace FurnitureERP.Controllers
                 var subItems = mapper.Map<List<SubItem>>(itemDto.SubItems);
                 subItems.ForEach(si =>
                 {
-                    si.Creator = request.HttpContext.User.Identity?.Name;
+                    si.Creator = request.GetCurrentUser().UserName;
                 });
                 await db.SubItems.AddRangeAsync(subItems);
 
@@ -129,6 +119,7 @@ namespace FurnitureERP.Controllers
             et.Price = itemDto.Price;
             et.IsUsing = itemDto.IsUsing;
             et.IsCom = itemDto.IsCom;
+            et.MerchantGuid = request.GetCurrentUser().MerchantGuid;
             await db.SaveChangesAsync();
             return Results.Ok(et);
         }
@@ -209,7 +200,7 @@ namespace FurnitureERP.Controllers
             {
                 items.ForEach(it => {
                     it.Guid = Guid.NewGuid();
-                    it.Creator = request.HttpContext.User.Identity?.Name;
+                    it.Creator = request.GetCurrentUser().UserName;
                     it.CreateTime = DateTime.Now;
                 });
                 await db.SubItemImps.AddRangeAsync(items);
@@ -237,7 +228,7 @@ namespace FurnitureERP.Controllers
                 items.ForEach(it =>
                 {
                     it.Guid = Guid.NewGuid();
-                    it.Creator = request.HttpContext.User.Identity?.Name;
+                    it.Creator = request.GetCurrentUser().UserName;
                     it.CreateTime = DateTime.Now;
                 });
                 await db.ItemImps.AddRangeAsync(items);

@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-
+﻿
 namespace FurnitureERP.Dtos
 {
     public class ItemDto
@@ -13,6 +10,7 @@ namespace FurnitureERP.Dtos
         public decimal Volume { get; set; }
         public decimal CostPrice { get; set; }
         public decimal PackageQty { get; set; }
+        public string? SuppName { get; set; }
         public int PurchaseDays { get; set; }
         public bool IsCom { get; set; }
         public string? Remark { get; set; }
@@ -22,8 +20,6 @@ namespace FurnitureERP.Dtos
         public string? PicPath { get; set; }
         public int SafeQty { get; set; }
         public decimal Price { get; set; }
-        public string? SellerNick { get; set; }
-        public Guid MerchantGuid { get; set; }
 
         //public IList<ItemDto> SubItems { get; set; }
     }

@@ -1,11 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using FurnitureERP.Database;
-using FurnitureERP.Models;
-using Microsoft.EntityFrameworkCore;
-using FurnitureERP.Dtos;
-using FurnitureERP.Utils;
-using AutoMapper;
-
+﻿
 namespace FurnitureERP.Controllers
 {
     public class RoleController
@@ -18,7 +11,8 @@ namespace FurnitureERP.Controllers
                 return Results.BadRequest("存在相同的角色名");
             }
             var r = mapper.Map<Role>(roleDto);
-            r.Creator = request.HttpContext.User.Identity?.Name;
+            r.Creator = request.GetCurrentUser().UserName;
+            r.MerchantGuid = request.GetCurrentUser().MerchantGuid;
             db.Roles.Add(r);
             await db.SaveChangesAsync();
             return Results.Created($"/role/{r.Id}", r);
@@ -78,7 +72,7 @@ namespace FurnitureERP.Controllers
                 RoleId = userRole.RoleId,
                 UserId = uid,
                 CreateTime = DateTime.Now,
-                Creator = request.HttpContext.User.Identity?.Name
+                Creator = request.GetCurrentUser().UserName                
             }));
             await db.SaveChangesAsync();
             var role = await db.Roles.SingleOrDefaultAsync(x => x.Id == userRole.RoleId);

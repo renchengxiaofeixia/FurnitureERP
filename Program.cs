@@ -1,29 +1,4 @@
-﻿using System.ComponentModel;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics;
-using System.IdentityModel.Tokens.Jwt;
-using System.Reflection;
-using System.Security.Claims;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.Routing;
-using Microsoft.AspNetCore.Http.Json;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.IdentityModel.Tokens;
-using FurnitureERP.Database;
-using FurnitureERP.Utils;
-using Microsoft.Extensions.Options;
-using FurnitureERP.Parameters;
-
-
+﻿
 /*
 dotnet ef dbcontext scaffold Name=ConnectionStrings:SqlConnection Microsoft.EntityFrameworkCore.SqlServer --data-annotations --context AppDbContext --context-dir Database --output-dir Models --force
  */

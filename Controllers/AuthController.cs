@@ -1,12 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using FurnitureERP.Database;
-using FurnitureERP.Dtos;
-using FurnitureERP.Utils;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using FurnitureERP.Models;
-using System.Linq;
-
+﻿
 namespace FurnitureERP.Controllers
 {
     public class AuthController
@@ -29,6 +21,7 @@ namespace FurnitureERP.Controllers
                                      select ur.RoleId).ToListAsync();
                 var claims = roleIds.Select(r => new Claim(ClaimTypes.Role, r.ToString())).ToList();
                 claims.Add(new Claim(ClaimTypes.GroupSid, et.MerchantGuid.ToString()));
+                claims.Add(new Claim(ClaimTypes.GivenName, et.MerchantName));
                 var rolePermits = await db.RolePermits.Where(p => roleIds.Any(rid => rid == p.RoleId)).Select(k => k.PermitData).ToListAsync();
                 var token = JwtToken.Build(claims.ToArray(), permitReq, et);
                 return Results.Ok(new { et.Id, user.UserName, et.MerchantName, et.MerchantGuid, Token = token, Permit = rolePermits, IsAdministrator = false});
@@ -41,7 +34,10 @@ namespace FurnitureERP.Controllers
                     return Results.BadRequest("用户名或密码错误");
                 }
 
-                var claims = new[] { new Claim(ClaimTypes.Role, "0"), new Claim(ClaimTypes.GroupSid, merchant.Guid.ToString()) };
+                var claims = new[] { 
+                    new Claim(ClaimTypes.Role, "0")
+                    , new Claim(ClaimTypes.GroupSid, merchant.Guid.ToString())
+                    , new Claim(ClaimTypes.GivenName, merchant.MerchantName)};
                 var token = JwtToken.Build(claims, permitReq, new User { Id = 0,UserName = merchant.MerchantName });
                 return Results.Ok(new { Id = 0, user.UserName , merchant.MerchantName, MerchantGuid = merchant.Guid, Token = token, IsAdministrator = true });
             }

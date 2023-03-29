@@ -1,10 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using FurnitureERP.Database;
-using FurnitureERP.Models;
-using Microsoft.EntityFrameworkCore;
-using FurnitureERP.Utils;
-using FurnitureERP.Dtos;
-using AutoMapper;
+﻿
 
 namespace FurnitureERP.Controllers
 {
@@ -18,7 +12,8 @@ namespace FurnitureERP.Controllers
                 return Results.BadRequest("存在相同的供应商名");
             }
             var supp = mapper.Map<Supp>(SuppDto);
-            supp.Creator = request.HttpContext.User.Identity?.Name;
+            supp.Creator = request.GetCurrentUser().UserName;
+            supp.MerchantGuid = request.GetCurrentUser().MerchantGuid;
             db.Supps.Add(supp);
             await db.SaveChangesAsync();
             return Results.Created($"/supplier/{supp.Id}", supp);
@@ -54,7 +49,8 @@ namespace FurnitureERP.Controllers
             et.SuppCompany = SuppDto.SuppCompany;
             et.SuppMobile = SuppDto.SuppMobile;
             et.Remark = SuppDto.Remark;
-            et.Creator = request.HttpContext.User.Identity?.Name;
+            et.Creator = request.GetCurrentUser().UserName;
+            et.MerchantGuid = request.GetCurrentUser().MerchantGuid;
             await db.SaveChangesAsync();
             return Results.Ok(et);
         }

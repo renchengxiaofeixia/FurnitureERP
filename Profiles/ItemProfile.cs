@@ -1,7 +1,4 @@
-﻿using FurnitureERP.Dtos;
-using FurnitureERP.Models;
-using AutoMapper;
-
+﻿
 namespace FurnitureERP.Profiles
 {
     public class ItemProfile : Profile

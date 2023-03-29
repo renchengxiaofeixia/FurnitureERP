@@ -1,10 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using FurnitureERP.Database;
+﻿
+
 using FurnitureERP.Models;
-using Microsoft.EntityFrameworkCore;
-using FurnitureERP.Utils;
-using FurnitureERP.Dtos;
-using AutoMapper;
 
 namespace FurnitureERP.Controllers
 {
@@ -18,7 +14,9 @@ namespace FurnitureERP.Controllers
                 return Results.BadRequest("存在相同的用户名");
             }
             var user = mapper.Map<User>(userDto);
-            user.Creator = request.HttpContext.User.Identity?.Name;
+            user.Creator = request.GetCurrentUser().UserName;
+            user.MerchantGuid = request.GetCurrentUser().MerchantGuid;
+            user.MerchantName = request.GetCurrentUser().MerchantName;
             db.Users.Add(user);
             await db.SaveChangesAsync();
             return Results.Created($"/user/{user.Id}", user);
@@ -53,6 +51,8 @@ namespace FurnitureERP.Controllers
             et.UserName = userDto.UserName;
             et.Password = userDto.Password;
             et.Remark = userDto.Remark;
+            et.MerchantGuid = request.GetCurrentUser().MerchantGuid;
+            et.MerchantName = request.GetCurrentUser().MerchantName;
             await db.SaveChangesAsync();
             return Results.Ok(et);
         }

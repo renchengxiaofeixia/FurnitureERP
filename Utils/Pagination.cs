@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.EntityFrameworkCore;
-
+﻿
 namespace FurnitureERP.Utils
 {
     public class Pagination<T>
