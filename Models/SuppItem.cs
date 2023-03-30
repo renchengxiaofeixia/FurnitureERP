@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Table("erp_module")]
-public partial class ErpModule
+[Table("supp_item")]
+public partial class SuppItem
 {
     [Key]
     public long Id { get; set; }
@@ -15,11 +15,16 @@ public partial class ErpModule
     public Guid Guid { get; set; }
 
     [StringLength(50)]
-    public string ModuleName { get; set; } = null!;
+    public string? SuppName { get; set; }
 
-    [StringLength(50)]
-    public string ModuleNo { get; set; } = null!;
+    [StringLength(200)]
+    public string? ItemNo { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime CreateTime { get; set; }
+
+    [StringLength(50)]
+    public string? Creator { get; set; }
+
+    public Guid MerchantGuid { get; set; }
 }

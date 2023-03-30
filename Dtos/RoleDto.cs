@@ -11,6 +11,5 @@ namespace FurnitureERP.Dtos
         public DateTime CreateTime { get; set; }
         public string? Creator { get; set; }
         public bool? IsUsing { get; set; }
-        public Guid MerchantGuid { get; set; }
     }
 }

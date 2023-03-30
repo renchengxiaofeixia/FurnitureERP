@@ -1,4 +1,6 @@
 ﻿
+using Azure.Core;
+
 namespace FurnitureERP.Controllers
 {
     public class ItemController
@@ -6,7 +8,7 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> Create(AppDbContext db, CreateItemDto itemDto, HttpRequest request,IMapper mapper)
         {
-            if (await db.Items.FirstOrDefaultAsync(x => x.ItemNo == itemDto.ItemNo || x.ItemName == itemDto.ItemName) != null)
+            if (await db.Items.FirstOrDefaultAsync(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid && (x.ItemNo == itemDto.ItemNo || x.ItemName == itemDto.ItemName)) != null)
             {
                 return Results.BadRequest("存在相同的商品名称或编码");
             }
@@ -30,9 +32,9 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Get(AppDbContext db, IMapper mapper)
+        public static async Task<IResult> Get(AppDbContext db, IMapper mapper, HttpRequest request)
         {
-            var ets = await db.Items.ToListAsync();
+            var ets = await db.Items.Where(x=> x.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
             return Results.Ok(mapper.Map<List<ItemDto>>(ets));
         }
 
@@ -105,6 +107,7 @@ namespace FurnitureERP.Controllers
                 subItems.ForEach(si =>
                 {
                     si.Creator = request.GetCurrentUser().UserName;
+                    si.MerchantGuid = request.GetCurrentUser().MerchantGuid;
                 });
                 await db.SubItems.AddRangeAsync(subItems);
 
@@ -202,6 +205,7 @@ namespace FurnitureERP.Controllers
                     it.Guid = Guid.NewGuid();
                     it.Creator = request.GetCurrentUser().UserName;
                     it.CreateTime = DateTime.Now;
+                    it.MerchantGuid = request.GetCurrentUser().MerchantGuid;
                 });
                 await db.SubItemImps.AddRangeAsync(items);
                 await db.SaveChangesAsync();
@@ -229,6 +233,7 @@ namespace FurnitureERP.Controllers
                 {
                     it.Guid = Guid.NewGuid();
                     it.Creator = request.GetCurrentUser().UserName;
+                    it.MerchantGuid = request.GetCurrentUser().MerchantGuid;
                     it.CreateTime = DateTime.Now;
                 });
                 await db.ItemImps.AddRangeAsync(items);

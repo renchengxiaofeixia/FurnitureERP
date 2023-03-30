@@ -36,6 +36,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<RolePermit> RolePermits { get; set; }
 
+    public virtual DbSet<SerialNo> SerialNos { get; set; }
+
     public virtual DbSet<Shop> Shops { get; set; }
 
     public virtual DbSet<SubItem> SubItems { get; set; }
@@ -43,6 +45,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<SubItemImp> SubItemImps { get; set; }
 
     public virtual DbSet<Supp> Supps { get; set; }
+
+    public virtual DbSet<SuppItem> SuppItems { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -67,7 +71,6 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.SerialNo).HasDefaultValueSql("((0))");
         });
 
         modelBuilder.Entity<Item>(entity =>
@@ -136,6 +139,19 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
         });
 
+        modelBuilder.Entity<SerialNo>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__serialno__3214EC07741C221B");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Creator).HasDefaultValueSql("('')");
+            entity.Property(e => e.Ending).HasDefaultValueSql("('')");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.ModuleNo).HasDefaultValueSql("('')");
+            entity.Property(e => e.Prefix).HasDefaultValueSql("('')");
+            entity.Property(e => e.Remark).HasDefaultValueSql("('')");
+        });
+
         modelBuilder.Entity<Shop>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__t_shop__3214EC076C390A4C");
@@ -178,6 +194,14 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
             entity.Property(e => e.IsUsing).HasDefaultValueSql("((1))");
+        });
+
+        modelBuilder.Entity<SuppItem>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__supp_ite__3214EC071E0BF171");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
         });
 
         modelBuilder.Entity<User>(entity =>

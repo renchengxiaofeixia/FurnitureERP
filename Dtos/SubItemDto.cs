@@ -19,7 +19,5 @@
         public string? Creator { get; set; }
 
         public string? SellerNick { get; set; }
-
-        public Guid MerchantGuid { get; set; }
     }
 }

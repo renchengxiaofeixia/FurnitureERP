@@ -7,7 +7,7 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> Create(AppDbContext db, CreateSuppDto SuppDto, HttpRequest request,IMapper mapper)
         {
-            if (await db.Supps.FirstOrDefaultAsync(x => x.SuppName == SuppDto.SuppName) != null)
+            if (await db.Supps.FirstOrDefaultAsync(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.SuppName == SuppDto.SuppName) != null)
             {
                 return Results.BadRequest("存在相同的供应商名");
             }
@@ -20,9 +20,9 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Get(AppDbContext db,IMapper mapper)
+        public static async Task<IResult> Get(AppDbContext db,IMapper mapper, HttpRequest request)
         {
-            var ets = await db.Users.ToListAsync();
+            var ets = await db.Supps.Where(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
             return Results.Ok(mapper.Map<List<SuppDto>>(ets));
         }
 
@@ -43,7 +43,7 @@ namespace FurnitureERP.Controllers
             }
             if (await db.Supps.FirstOrDefaultAsync(x => x.Id != id && x.MerchantGuid== request.GetCurrentUser().MerchantGuid && x.SuppName == SuppDto.SuppName) != null)
             {
-                return Results.BadRequest("存在相同的供应商名");
+                return Results.BadRequest("存在相同的供应商名称");
             }
             et.SuppName = SuppDto.SuppName;
             et.SuppCompany = SuppDto.SuppCompany;

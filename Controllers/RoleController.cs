@@ -6,7 +6,7 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> Create(AppDbContext db, CreateRoleDto roleDto, HttpRequest request,IMapper mapper)
         {
-            if (await db.Roles.FirstOrDefaultAsync(x => x.RoleName == roleDto.RoleName) != null)
+            if (await db.Roles.FirstOrDefaultAsync(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.RoleName == roleDto.RoleName) != null)
             {
                 return Results.BadRequest("存在相同的角色名");
             }
@@ -19,9 +19,9 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Get(AppDbContext db,IMapper mapper)
+        public static async Task<IResult> Get(AppDbContext db,IMapper mapper, HttpRequest request)
         {
-            var ets = await db.Roles.ToListAsync();
+            var ets = await db.Roles.Where(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
             return Results.Ok(mapper.Map<List<RoleDto>>(ets));
         }
 
