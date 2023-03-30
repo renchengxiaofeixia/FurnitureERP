@@ -50,7 +50,7 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest("两次输入的密码不匹配");
             }
-            var phoneCode = db.PhoneCodes.FirstOrDefault(k=>k.MobileNo == user.MobileNo && k.SmsCode == user.SmsCode);
+            var phoneCode = db.PhoneCodes.LastOrDefault(k=>k.MobileNo == user.MobileNo && k.SmsCode == user.SmsCode);
             if (phoneCode == null)
             {
                 return Results.BadRequest("验证码错误");

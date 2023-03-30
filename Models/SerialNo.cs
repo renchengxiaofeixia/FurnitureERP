@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Table("serialno")]
-public partial class Serialno
+[Table("serial_no")]
+public partial class SerialNo
 {
     [Key]
     public long Id { get; set; }
@@ -33,4 +33,6 @@ public partial class Serialno
 
     [StringLength(200)]
     public string Remark { get; set; } = null!;
+
+    public Guid MerchantGuid { get; set; }
 }

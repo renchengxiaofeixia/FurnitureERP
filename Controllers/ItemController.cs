@@ -198,7 +198,7 @@ namespace FurnitureERP.Controllers
                     { "子商品编码10","SubItemNo10"},
                     { "数量10","Num10" }
                 };
-            var (rt, items) = ExcelUtil.TryRead<SubItemImp>(fs, fieldsMapper);
+            var (rt, items) = Util.ReadExcel<SubItemImp>(fs, fieldsMapper);
             if (rt)
             {
                 items.ForEach(it => {
@@ -226,7 +226,7 @@ namespace FurnitureERP.Controllers
                 { "包件数","PackageQty" },
                 { "采购周期", "PurchaseDays" },
             };
-            var (rt, items) = ExcelUtil.TryRead<ItemImp>(fs, fieldsMapper, "商品图");
+            var (rt, items) = Util.ReadExcel<ItemImp>(fs, fieldsMapper, "商品图");
             if (rt)
             {
                 items.ForEach(it =>
