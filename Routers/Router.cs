@@ -25,12 +25,8 @@ namespace FurnitureERP.Routers
             app.MapDelete("/role/{id}", RoleController.Delete);
             app.MapPost("/userrole", RoleController.CreateUserRole);
 
-            //app.MapPost("/customprop", CustomPropController.Create);
-            //app.MapGet("/customprops/", CustomPropController.GetModules);
-            //app.MapGet("/customprop/{module}/{propName}", CustomPropController.Get);
-            //app.MapGet("/customprop/{id}", CustomPropController.Single);
-            //app.MapPut("/customprop/{id}", CustomPropController.Edit);
-            //app.MapDelete("/customprop/{id}", CustomPropController.Delete);
+            app.MapPost("/customprop", CustomPropertyController.Create);
+            app.MapGet("/customprops/", CustomPropertyController.GetMods);
 
 
             //app.MapPost("/customer", CustomerController.Create);

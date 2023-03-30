@@ -41,7 +41,7 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest();
             }
-            if (await db.Supps.FirstOrDefaultAsync(x => x.Id != id && x.SuppName == SuppDto.SuppName) != null)
+            if (await db.Supps.FirstOrDefaultAsync(x => x.Id != id && x.MerchantGuid== request.GetCurrentUser().MerchantGuid && x.SuppName == SuppDto.SuppName) != null)
             {
                 return Results.BadRequest("存在相同的供应商名");
             }

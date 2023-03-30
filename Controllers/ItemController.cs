@@ -92,7 +92,7 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest("无效的数据");
             }
-            if (await db.Items.FirstOrDefaultAsync(x => x.Id != id && (x.ItemNo == itemDto.ItemNo || x.ItemName == itemDto.ItemName)) != null)
+            if (await db.Items.FirstOrDefaultAsync(x => x.Id != id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid && (x.ItemNo == itemDto.ItemNo || x.ItemName == itemDto.ItemName)) != null)
             {
                 return Results.BadRequest("存在相同的商品名称或编码");
             }

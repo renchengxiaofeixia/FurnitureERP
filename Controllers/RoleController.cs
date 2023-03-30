@@ -40,7 +40,7 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest("无效的数据");
             }
-            if (await db.Roles.FirstOrDefaultAsync(x => x.Id != id && x.RoleName == roleDto.RoleName) != null)
+            if (await db.Roles.FirstOrDefaultAsync(x => x.Id != id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.RoleName == roleDto.RoleName) != null)
             {
                 return Results.BadRequest("存在相同的角色名");
             }

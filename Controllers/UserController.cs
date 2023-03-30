@@ -1,7 +1,4 @@
 ﻿
-
-using FurnitureERP.Models;
-
 namespace FurnitureERP.Controllers
 {
     public class UserController
@@ -44,7 +41,7 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest();
             }
-            if (await db.Users.FirstOrDefaultAsync(x => x.Id != id && x.UserName == userDto.UserName) != null)
+            if (await db.Users.FirstOrDefaultAsync(x => x.Id != id && x.MerchantGuid== request.GetCurrentUser().MerchantGuid && x.UserName == userDto.UserName) != null)
             {
                 return Results.BadRequest("存在相同的用户名");
             }
