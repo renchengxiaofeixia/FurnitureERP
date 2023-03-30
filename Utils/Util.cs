@@ -1,7 +1,9 @@
 ﻿
+using Microsoft.Data.SqlClient;
+
 namespace FurnitureERP.Utils
 {
-    public class ExcelUtil
+    public class Util
     {
         /// <summary>
         /// 读取excel的内容
@@ -12,7 +14,7 @@ namespace FurnitureERP.Utils
         /// <param name="pictureFieldName"></param>
         /// <param name="tableHeaderRow"></param>
         /// <returns></returns>
-        public static (bool, List<T>) TryRead<T>(FileStream fs, Dictionary<string, string> fieldsMapper
+        public static (bool, List<T>) ReadExcel<T>(FileStream fs, Dictionary<string, string> fieldsMapper
             , string pictureFieldName = ""
             , int tableHeaderRow = 4) where T : new()
         {
@@ -74,5 +76,32 @@ namespace FurnitureERP.Utils
             }
             return (true,dlist);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="merchantGuid">商户</param>
+        /// <param name="modNo">系统模块编号</param>
+        /// <returns></returns>
+        public static async Task<string> GetSerialNoAsync(AppDbContext db, Guid merchantGuid, string modNo, int endingNumLen = 8)
+        {
+            var serial = await db.SerialNos.FirstOrDefaultAsync(x=>x.MerchantGuid == merchantGuid && x.ModuleNo == modNo);
+            var serialNoParameter = new SqlParameter()
+            {
+                ParameterName = "OutSerNo",
+                SqlDbType = System.Data.SqlDbType.NVarChar,
+                Size = 50,
+                Direction = System.Data.ParameterDirection.Output
+            };
+            await db.Database.ExecuteSqlRawAsync("p_getserialno @ModuleNo, @MerchantGuid , @EndingNumLen, @Num, @OutSerNo OUTPUT",
+                new SqlParameter("@ModuleNo", modNo),
+                new SqlParameter("@MerchantGuid", merchantGuid),
+                new SqlParameter("@EndingNumLen", endingNumLen),
+                new SqlParameter("@Num", 1),
+                serialNoParameter);
+            return serialNoParameter.Value.ToString();
+        }
     }
+
 }
