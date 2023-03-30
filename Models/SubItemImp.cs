@@ -72,4 +72,6 @@ public partial class SubItemImp
 
     [StringLength(50)]
     public string? Creator { get; set; }
+
+    public Guid MerchantGuid { get; set; }
 }
