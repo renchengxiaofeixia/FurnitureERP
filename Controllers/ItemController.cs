@@ -1,5 +1,6 @@
 ﻿
 using Azure.Core;
+using Microsoft.Data.SqlClient;
 
 namespace FurnitureERP.Controllers
 {
@@ -143,6 +144,9 @@ namespace FurnitureERP.Controllers
             if (fi is null || fi.Length == 0)
                 return Results.BadRequest();
 
+            if (!Path.GetExtension(fi.FileName).EndsWith("jpg") && !Path.GetExtension(fi.FileName).EndsWith("png"))
+                return Results.BadRequest("图片只支持jpg和png");
+
             var svrFn = $"{DateTime.Now.Ticks}{Path.GetExtension(fi.FileName)}";
             var svrpath = Path.Combine(AppContext.BaseDirectory, "images", svrFn);
             await using var stream = fi.OpenReadStream();
@@ -163,12 +167,13 @@ namespace FurnitureERP.Controllers
             var fi = form.Files["fi"];
             if (fi is null || fi.Length == 0)
                 return Results.BadRequest();
-
+            if(!Path.GetExtension(fi.FileName).EndsWith("xlsx"))
+                return Results.BadRequest("文件格式错误");
             var svrFn = $"{DateTime.Now.Ticks}{Path.GetExtension(fi.FileName)}";
             var svrpath = Path.Combine(AppContext.BaseDirectory, "excel", svrFn);
             await using var stream = fi.OpenReadStream();
             using var fs = File.Create(svrpath);
-            await stream.CopyToAsync(fs);
+            await stream.CopyToAsync(fs); 
 
             return isCom ? await ImportItemComRelation(db, request, fs) : await ImportItem(db, request, fs);
         }
@@ -209,7 +214,9 @@ namespace FurnitureERP.Controllers
                 });
                 await db.SubItemImps.AddRangeAsync(items);
                 await db.SaveChangesAsync();
-                await db.Database.ExecuteSqlRawAsync("p_syncimpsubitem");
+                await db.Database.ExecuteSqlRawAsync("p_syncimpsubitem @MerchantGuid"
+                     ,new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)
+                    );
             }
             return Results.Ok(new { isOk = true });
         }
@@ -220,6 +227,7 @@ namespace FurnitureERP.Controllers
                 { "商品图","PicPath"},
                 { "商品名称","ItemName" },
                 { "商品编码","ItemNo" },
+                {"供应商","SuppName" },
                 { "采购价","CostPrice" },
                 { "销售价","Price" },
                 { "体积","Volume" },
@@ -238,7 +246,11 @@ namespace FurnitureERP.Controllers
                 });
                 await db.ItemImps.AddRangeAsync(items);
                 await db.SaveChangesAsync();
-                await db.Database.ExecuteSqlRawAsync("p_syncimpitem");
+                //await db.Database.ExecuteSqlRawAsync($"p_syncimpitem '{request.GetCurrentUser().MerchantGuid}'");
+                await db.Database.ExecuteSqlRawAsync("p_syncimpitem @MerchantGuid"
+                    ,new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)
+                    );
+
             }
             return Results.Ok(new { isOk = true });
         }

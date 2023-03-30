@@ -27,4 +27,7 @@ public partial class SuppItem
     public string? Creator { get; set; }
 
     public Guid MerchantGuid { get; set; }
+
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal CostPrice { get; set; }
 }

@@ -27,6 +27,21 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
+        public static async Task<IResult> GetSuppItems(AppDbContext db, IMapper mapper, int id)
+        {
+            if (!await db.Supps.AnyAsync(x => x.Id == id))
+            {
+                return Results.BadRequest("无效的数据");
+            }
+            var ets = from su in db.Supps
+                      from si in db.SuppItems
+                      where su.SuppName == si.ItemNo && su.Id == id
+                      select su;
+            return Results.Ok(mapper.Map<List<ItemDto>>(await ets.ToListAsync()));
+        }
+
+
+        [Authorize]
         public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper)
         {
             var et = await db.Supps.SingleOrDefaultAsync(x => x.Id == id);
