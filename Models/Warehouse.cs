@@ -6,34 +6,28 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Table("custom_property")]
-public partial class CustomProperty
+[Keyless]
+[Table("warehouse")]
+public partial class Warehouse
 {
-    [Key]
     public long Id { get; set; }
 
     public Guid Guid { get; set; }
 
-    [StringLength(50)]
-    public string FromNo { get; set; } = null!;
-
-    [StringLength(50)]
-    public string ModuleNo { get; set; } = null!;
-
     [StringLength(100)]
-    public string? PropertyName { get; set; }
+    public string WarehouseName { get; set; } = null!;
 
-    [StringLength(100)]
-    public string? PropertyValue { get; set; }
-
-    [StringLength(50)]
-    public string? PropertyType { get; set; }
+    [StringLength(200)]
+    public string Remark { get; set; } = null!;
 
     [Column(TypeName = "datetime")]
     public DateTime CreateTime { get; set; }
 
     [StringLength(50)]
     public string? Creator { get; set; }
+
+    [Required]
+    public bool? IsUsing { get; set; }
 
     public Guid MerchantGuid { get; set; }
 }

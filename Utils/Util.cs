@@ -20,8 +20,8 @@ namespace FurnitureERP.Utils
         {
             ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             using var ep = new ExcelPackage(fs);
-            var excelWorksheets = ep.Workbook.Worksheets[0];
-            var worksheet = excelWorksheets.Cells.Worksheet;
+            var worksheet = ep.Workbook.Worksheets[0];
+            //var worksheet = excelWorksheets.Cells.Worksheet;
 
             //var v = worksheet.GetValue(0,0);
             //var vals = (from r in Enumerable.Range(0, 10)

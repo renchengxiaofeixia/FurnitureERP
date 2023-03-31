@@ -26,6 +26,14 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<ItemPackage> ItemPackages { get; set; }
 
+    public virtual DbSet<LogisImp> LogisImps { get; set; }
+
+    public virtual DbSet<LogisPoint> LogisPoints { get; set; }
+
+    public virtual DbSet<LogisPointImp> LogisPointImps { get; set; }
+
+    public virtual DbSet<Logistic> Logistics { get; set; }
+
     public virtual DbSet<Menu> Menus { get; set; }
 
     public virtual DbSet<Merchant> Merchants { get; set; }
@@ -54,6 +62,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
+    public virtual DbSet<Warehouse> Warehouses { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:SqlConnection");
 
@@ -64,6 +74,7 @@ public partial class AppDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__custom_property");
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.FromNo).HasDefaultValueSql("(N'‘’')");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
         });
 
@@ -100,6 +111,38 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
             entity.Property(e => e.IsUsing).HasDefaultValueSql("((1))");
+        });
+
+        modelBuilder.Entity<LogisImp>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__logis_im__3214EC07E85E7C45");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
+        modelBuilder.Entity<LogisPoint>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__logis_po__3214EC0753503EFB");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
+        modelBuilder.Entity<LogisPointImp>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__logis_po__3214EC07762695EF");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
+        modelBuilder.Entity<Logistic>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__logis__3214EC07C04E3B4C");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
         });
 
         modelBuilder.Entity<Menu>(entity =>
@@ -230,6 +273,14 @@ public partial class AppDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__userRole__3214EC072E1BDC42");
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+        });
+
+        modelBuilder.Entity<Warehouse>(entity =>
+        {
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.IsUsing).HasDefaultValueSql("((1))");
         });
 
         OnModelCreatingPartial(modelBuilder);

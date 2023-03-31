@@ -21,7 +21,7 @@ namespace FurnitureERP.Dtos
         public int SafeQty { get; set; }
         public decimal Price { get; set; }
 
-        //public IList<ItemDto> SubItems { get; set; }
+        public List<CustomPropertyDto> CustomProperties { get; set; }
     }
 
 

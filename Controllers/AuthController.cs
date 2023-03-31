@@ -10,7 +10,7 @@ namespace FurnitureERP.Controllers
             if (isSubLogin)
             {
                 var merchantName = user.UserName.Substring(0, user.UserName.LastIndexOf(":"));
-                var userName = user.UserName.Substring(user.UserName.LastIndexOf(":"));
+                var userName = user.UserName.Substring(user.UserName.LastIndexOf(":") +1);
                 var et = await db.Users.FirstOrDefaultAsync(k => k.UserName == userName && k.MerchantName == merchantName && k.Password == user.Password);
                 if (et == null)
                 {
@@ -24,7 +24,7 @@ namespace FurnitureERP.Controllers
                 claims.Add(new Claim(ClaimTypes.GivenName, et.MerchantName));
                 var rolePermits = await db.RolePermits.Where(p => roleIds.Any(rid => rid == p.RoleId)).Select(k => k.PermitData).ToListAsync();
                 var token = JwtToken.Build(claims.ToArray(), permitReq, et);
-                return Results.Ok(new { et.Id, user.UserName, et.MerchantName, et.MerchantGuid, Token = token, Permit = rolePermits, IsAdministrator = false});
+                return Results.Ok(new { et.Id, UserName = userName, et.MerchantName, et.MerchantGuid, Token = token, Permit = rolePermits, IsAdministrator = false});
             }
             else
             {
