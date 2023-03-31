@@ -20,4 +20,14 @@
 
         public string? SellerNick { get; set; }
     }
+
+
+    public class CreateSubItemDto
+    {
+        public string? ItemNo { get; set; }
+
+        public string? SubItemNo { get; set; }
+
+        public int Num { get; set; }
+    }
 }

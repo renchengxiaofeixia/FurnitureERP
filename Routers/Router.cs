@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.AspNetCore.Builder;
+
 namespace FurnitureERP.Routers
 {
     public static class Router
@@ -25,8 +27,9 @@ namespace FurnitureERP.Routers
             app.MapDelete("/role/{id}", RoleController.Delete);
             app.MapPost("/userrole", RoleController.CreateUserRole);
 
-            app.MapPost("/customprop", CustomPropertyController.Create);
-            app.MapGet("/customprops/", CustomPropertyController.GetMods);
+            app.MapPost("/propconfig", CustomPropertyController.CreatePropConfig);
+            app.MapGet("/propconfig", CustomPropertyController.SinglePropConfig);
+            app.MapGet("/modules/", CustomPropertyController.GetMods);
 
 
             //app.MapPost("/customer", CustomerController.Create);

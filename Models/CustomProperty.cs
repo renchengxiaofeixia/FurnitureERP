@@ -15,12 +15,16 @@ public partial class CustomProperty
     public Guid Guid { get; set; }
 
     [StringLength(50)]
-    public string ModuleName { get; set; } = null!;
-
-    [StringLength(50)]
     public string ModuleNo { get; set; } = null!;
 
-    public string PropertyConfigJson { get; set; } = null!;
+    [StringLength(100)]
+    public string? PropertyName { get; set; }
+
+    [StringLength(100)]
+    public string? PropertyValue { get; set; }
+
+    [StringLength(50)]
+    public string? PropertyType { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime CreateTime { get; set; }

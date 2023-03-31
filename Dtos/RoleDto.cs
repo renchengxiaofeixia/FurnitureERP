@@ -12,4 +12,11 @@ namespace FurnitureERP.Dtos
         public string? Creator { get; set; }
         public bool? IsUsing { get; set; }
     }
+
+    public class CreateRoleDto
+    {
+        public string RoleName { get; set; }
+        public string Remark { get; set; }
+        public bool IsUsing { get; set; }
+    }
 }

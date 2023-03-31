@@ -32,6 +32,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<PhoneCode> PhoneCodes { get; set; }
 
+    public virtual DbSet<PropertyConfig> PropertyConfigs { get; set; }
+
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<RolePermit> RolePermits { get; set; }
@@ -123,6 +125,14 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
         });
 
+        modelBuilder.Entity<PropertyConfig>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__property_config");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
         modelBuilder.Entity<Role>(entity =>
         {
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
@@ -199,6 +209,8 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<SuppItem>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__supp_ite__3214EC071E0BF171");
+
+            entity.ToTable("supp_item", tb => tb.HasComment("供应商产品表"));
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
