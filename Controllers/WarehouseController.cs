@@ -43,6 +43,7 @@ namespace FurnitureERP.Controllers
             return Results.Ok(et);
         }
 
+        [Authorize]
         public static async Task<IResult> Delete(AppDbContext db, int id, HttpRequest request)
         {
             var et = await db.Warehouses.FirstOrDefaultAsync(x => x.Id == id);

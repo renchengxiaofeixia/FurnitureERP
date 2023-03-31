@@ -52,9 +52,9 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper)
+        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper, HttpRequest request)
         {
-            var et = await db.Logistics.SingleOrDefaultAsync(x => x.Id == id);
+            var et = await db.Logistics.SingleOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             return et == null ? Results.NotFound() : Results.Ok(mapper.Map<LogisticDto>(et));
         }
 
@@ -132,7 +132,7 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> Delete(AppDbContext db, int id, HttpRequest request)
         {
-            var et = await db.Logistics.FirstOrDefaultAsync(x => x.Id == id);
+            var et = await db.Logistics.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
             {
                 return Results.BadRequest("无效的数据");

@@ -40,9 +40,9 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> GetSubItems(AppDbContext db, IMapper mapper,int id)
+        public static async Task<IResult> GetSubItems(AppDbContext db, IMapper mapper,int id, HttpRequest request)
         {
-            if (!await db.Items.AnyAsync(x => x.Id == id))
+            if (!await db.Items.AnyAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid))
             {
                 return Results.BadRequest("无效的数据");
             }
@@ -133,7 +133,7 @@ namespace FurnitureERP.Controllers
         {
             if (!request.HasFormContentType)
                 return Results.BadRequest();
-            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id);
+            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
             {
                 return Results.BadRequest("无效的数据");
@@ -227,7 +227,7 @@ namespace FurnitureERP.Controllers
                 { "商品图","PicPath"},
                 { "商品名称","ItemName" },
                 { "商品编码","ItemNo" },
-                {"供应商","SuppName" },
+                { "供应商","SuppName" },
                 { "采购价","CostPrice" },
                 { "销售价","Price" },
                 { "体积","Volume" },
@@ -258,7 +258,7 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> Delete(AppDbContext db, int id, HttpRequest request)
         {
-            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id);
+            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
             {
                 return Results.BadRequest("无效的数据");
