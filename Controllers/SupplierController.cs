@@ -1,5 +1,7 @@
 ﻿
 
+using Azure.Core;
+
 namespace FurnitureERP.Controllers
 {
     public class SupplierController
@@ -27,9 +29,9 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> GetSuppItems(AppDbContext db, IMapper mapper, int id)
+        public static async Task<IResult> GetSuppItems(AppDbContext db, IMapper mapper, int id, HttpRequest request)
         {
-            if (!await db.Supps.AnyAsync(x => x.Id == id))
+            if (!await db.Supps.AnyAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid))
             {
                 return Results.BadRequest("无效的数据");
             }
@@ -42,9 +44,9 @@ namespace FurnitureERP.Controllers
 
 
         [Authorize]
-        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper)
+        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper, HttpRequest request)
         {
-            var et = await db.Supps.SingleOrDefaultAsync(x => x.Id == id);
+            var et = await db.Supps.SingleOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             return et == null ? Results.NotFound() : Results.Ok(mapper.Map<SuppDto>(et));
         }
 

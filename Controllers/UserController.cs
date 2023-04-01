@@ -1,4 +1,6 @@
 ﻿
+using Azure.Core;
+
 namespace FurnitureERP.Controllers
 {
     public class UserController
@@ -27,16 +29,16 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper)
+        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper, HttpRequest request)
         {
-            var et = await db.Users.SingleOrDefaultAsync(x => x.Id == id);
+            var et = await db.Users.SingleOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             return et == null ? Results.NotFound() : Results.Ok(mapper.Map<UserDto>(et));
         }
 
         [Authorize]
         public static async Task<IResult> Edit(AppDbContext db, int id, CreateUserDto userDto, HttpRequest request, IMapper mapper)
         {
-            var et = await db.Users.FirstOrDefaultAsync(x => x.Id == id);
+            var et = await db.Users.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
             {
                 return Results.BadRequest();

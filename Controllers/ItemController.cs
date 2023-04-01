@@ -81,16 +81,16 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper)
+        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper, HttpRequest request)
         {
-            var et = await db.Items.SingleOrDefaultAsync(x => x.Id == id);
+            var et = await db.Items.SingleOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             return et == null ? Results.NotFound() : Results.Ok(mapper.Map<ItemDto>(et));
         }
 
         [Authorize]
         public static async Task<IResult> Edit(AppDbContext db, int id, CreateItemDto itemDto, HttpRequest request, IMapper mapper)
         {
-            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id);
+            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
             {
                 return Results.BadRequest("无效的数据");
@@ -215,8 +215,7 @@ namespace FurnitureERP.Controllers
                 await db.SubItemImps.AddRangeAsync(items);
                 await db.SaveChangesAsync();
                 await db.Database.ExecuteSqlRawAsync("p_syncimpsubitem @MerchantGuid"
-                     ,new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)
-                    );
+                     ,new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid));
             }
             return Results.Ok(new { isOk = true });
         }
