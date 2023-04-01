@@ -4,9 +4,34 @@ using Microsoft.Data.SqlClient;
 
 namespace FurnitureERP.Controllers
 {
+   
     public class ItemController
     {
-        [Authorize]
+        public static string GetCellSql => @";with t as(
+  SELECT s.ItemNo, d.SubItemNo,d.Num,s.MerchantGuid
+   FROM sub_item_imp s
+  CROSS APPLY (VALUES
+                (SubItemNo1, Num1)
+               ,(SubItemNo2, Num2)
+               ,(SubItemNo3, Num3)
+               ,(SubItemNo4, Num4)
+               ,(SubItemNo5, Num5)
+               ,(SubItemNo6, Num6)
+               ,(SubItemNo7, Num7)
+               ,(SubItemNo8, Num8)
+               ,(SubItemNo9, Num9)
+               ,(SubItemNo10, Num10)
+              ) d (SubItemNo, Num)
+		where s.MerchantGuid = @MerchantGuid
+ )
+ select [SubItemNo] from t where SubItemNo not in (select ItemNo from item)
+AND MerchantGuid = @MerchantGuid
+union
+ select [ItemNo] from t where ItemNo not in (select ItemNo from item)
+AND MerchantGuid = @MerchantGuid
+";
+
+       [Authorize]
         public static async Task<IResult> Create(AppDbContext db, CreateItemDto itemDto, HttpRequest request,IMapper mapper)
         {
             if (await db.Items.FirstOrDefaultAsync(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid && (x.ItemNo == itemDto.ItemNo || x.ItemName == itemDto.ItemName)) != null)
@@ -175,6 +200,8 @@ namespace FurnitureERP.Controllers
             using var fs = File.Create(svrpath);
             await stream.CopyToAsync(fs); 
 
+
+
             return isCom ? await ImportItemComRelation(db, request, fs) : await ImportItem(db, request, fs);
         }
 
@@ -203,6 +230,12 @@ namespace FurnitureERP.Controllers
                     { "子商品编码10","SubItemNo10"},
                     { "数量10","Num10" }
                 };
+
+            //var itemNos = await (from it in db.Items
+            //                     select it.ItemNo).ToListAsync();
+
+           
+
             var (rt, items) = Util.ReadExcel<SubItemImp>(fs, fieldsMapper);
             if (rt)
             {
@@ -214,9 +247,30 @@ namespace FurnitureERP.Controllers
                 });
                 await db.SubItemImps.AddRangeAsync(items);
                 await db.SaveChangesAsync();
-                await db.Database.ExecuteSqlRawAsync("p_syncimpsubitem @MerchantGuid"
-                     ,new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)
+
+                //获取cell
+                var cellValues = db.Database.SqlQueryRaw<string>(GetCellSql, new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)).ToList();
+
+
+                if (cellValues.Count > 0)
+                {
+                    var execlPath = Util.CheckCellValues(fs, fieldsMapper.Count, cellValues);
+
+                    return Results.BadRequest(new { 
+                        url = execlPath,
+                        msg = "导入表格中存在商品表中不存在的商品，已对不存在或错误商品编码标红处理，请修改或者添加好商品再进行组合产品导入！"
+                    });
+                }
+                else
+                {
+                    await db.Database.ExecuteSqlRawAsync("p_syncimpsubitem @MerchantGuid"
+                     , new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)
                     );
+                }
+
+            
+
+                
             }
             return Results.Ok(new { isOk = true });
         }
