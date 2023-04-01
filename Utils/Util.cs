@@ -1,10 +1,48 @@
 ﻿
 using Microsoft.Data.SqlClient;
+using OfficeOpenXml.Style;
+using System.Drawing;
 
 namespace FurnitureERP.Utils
 {
     public class Util
     {
+        //读取表格
+        public static string CheckCellValues(FileStream fs, int totalCol, List<string> cellValues)
+        {
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+            using var ep = new ExcelPackage(fs);
+            var worksheet = ep.Workbook.Worksheets[0];
+            //var worksheet = excelWorksheets.Cells.Worksheet;
+
+
+            var totalRow = worksheet.Dimension.Rows;
+
+            for (var row = 5; row <= totalRow; row++)               
+            {
+                for (var col = 1; col <= totalCol; col++)
+                {
+                    
+                    var value = worksheet.GetValue<string>(row, col);
+                    if (cellValues.Contains(value)) {
+                        worksheet.Cells[row, col].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        worksheet.Cells[row, col].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(255, 0, 0));//设置单元格背景色
+                    }
+                   
+
+                }
+            }
+
+            var svrFn = $"{DateTime.Now.Ticks}.xlsx";
+            var svrpath = Path.Combine(AppContext.BaseDirectory, "excel", svrFn);
+            ep.SaveAs(svrpath);
+
+            var execlPath = $"/excel/{svrFn}";
+            return execlPath;
+           
+            
+        }
+
         /// <summary>
         /// 读取excel的内容
         /// </summary>
@@ -18,6 +56,7 @@ namespace FurnitureERP.Utils
             , string pictureFieldName = ""
             , int tableHeaderRow = 4) where T : new()
         {
+
             ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             using var ep = new ExcelPackage(fs);
             var worksheet = ep.Workbook.Worksheets[0];
@@ -36,9 +75,9 @@ namespace FurnitureERP.Utils
 
             var dlist = new List<T>();
             for (var row = 5; row <= totalRow; row++)
-            { 
+            {
                 var item = new T();
-                for(var col = 1;col <= totalCol; col++)
+                for (var col = 1; col <= totalCol; col++)
                 {
                     var fieldName = worksheet.GetValue<string>(tableHeaderRow, col);
                     var propName = fieldsMapper[fieldName];
@@ -60,7 +99,7 @@ namespace FurnitureERP.Utils
                 {
                     var pictureColIndex = fieldsMapper.Keys.ToList().IndexOf(pictureFieldName);
                     var propName = fieldsMapper[pictureFieldName];
-                    var pic = worksheet.Drawings.FirstOrDefault(p=> p.From.Row == row - 1 && p.From.Column == pictureColIndex) as ExcelPicture;
+                    var pic = worksheet.Drawings.FirstOrDefault(p => p.From.Row == row - 1 && p.From.Column == pictureColIndex) as ExcelPicture;
                     var prop = props.FirstOrDefault(p => p.Name == propName);
                     if (pic != null)
                     {
@@ -69,12 +108,12 @@ namespace FurnitureERP.Utils
                         var imagePath = Path.Combine(svrImagePath, imageName);
                         File.WriteAllBytes(imagePath, pic.Image.ImageBytes);
                         prop.SetValue(item, $"/images/{imageName}");
-                    }                    
+                    }
                 }
 
                 dlist.Add(item);
             }
-            return (true,dlist);
+            return (true, dlist);
         }
 
         /// <summary>

@@ -106,16 +106,16 @@ AND MerchantGuid = @MerchantGuid
         }
 
         [Authorize]
-        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper)
+        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper, HttpRequest request)
         {
-            var et = await db.Items.SingleOrDefaultAsync(x => x.Id == id);
+            var et = await db.Items.SingleOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             return et == null ? Results.NotFound() : Results.Ok(mapper.Map<ItemDto>(et));
         }
 
         [Authorize]
         public static async Task<IResult> Edit(AppDbContext db, int id, CreateItemDto itemDto, HttpRequest request, IMapper mapper)
         {
-            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id);
+            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
             {
                 return Results.BadRequest("无效的数据");
@@ -247,6 +247,10 @@ AND MerchantGuid = @MerchantGuid
                 });
                 await db.SubItemImps.AddRangeAsync(items);
                 await db.SaveChangesAsync();
+<<<<<<< HEAD
+                await db.Database.ExecuteSqlRawAsync("p_syncimpsubitem @MerchantGuid"
+                     ,new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid));
+=======
 
                 //获取cell
                 var cellValues = db.Database.SqlQueryRaw<string>(GetCellSql, new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)).ToList();
@@ -271,6 +275,7 @@ AND MerchantGuid = @MerchantGuid
             
 
                 
+>>>>>>> 1f3adc6982c2a0bec8a7f34bc206efc55d69ffe1
             }
             return Results.Ok(new { isOk = true });
         }
