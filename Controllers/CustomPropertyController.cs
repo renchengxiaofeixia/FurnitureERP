@@ -1,32 +1,33 @@
-﻿using Azure.Core;
-using FurnitureERP.Dtos;
-
+﻿
 namespace FurnitureERP.Controllers
 {
     public class CustomPropertyController
     {
         [Authorize]
-        public static async Task<IResult> Create(AppDbContext db, CreateCustomPropertyDto customPropertyDto, HttpRequest request, IMapper mapper)
+        public static async Task<IResult> CreatePropConfig(AppDbContext db, CreatePropertyConfigDto propertyConfigDto, HttpRequest request, IMapper mapper)
         {
-            var et = await db.CustomProperties.FirstOrDefaultAsync(x => x.ModuleNo == customPropertyDto.ModuleNo && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
+            var et = await db.PropertyConfigs.FirstOrDefaultAsync(x => x.ModuleNo == propertyConfigDto.ModuleNo && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
             {
-                et = mapper.Map<CustomProperty>(customPropertyDto);
+                et = mapper.Map<PropertyConfig>(propertyConfigDto);
+                et.MerchantGuid = request.GetCurrentUser().MerchantGuid;
+                et.Creator = request.GetCurrentUser().UserName;
             }
-            else { 
-                et.PropertyConfigJson = customPropertyDto.PropertyConfigJson;
+            else
+            {
+                et.PropertyConfigJson = JsonSerializer.Serialize(propertyConfigDto.Properties);
             }
 
-            await db.CustomProperties.AddAsync(et);
+            await db.PropertyConfigs.AddAsync(et);
             await db.SaveChangesAsync();
-            return Results.Created($"/customproperty/{et.Id}", et);
+            return Results.Created($"/propconfig/{et.Id}", et);
         }
 
         [Authorize]
-        public static async Task<IResult> Single(AppDbContext db, string moduleNo, IMapper mapper, HttpRequest request)
+        public static async Task<IResult> SinglePropConfig(AppDbContext db, string moduleNo, IMapper mapper, HttpRequest request)
         {
-            var et = await db.CustomProperties.SingleOrDefaultAsync(x => x.ModuleNo == moduleNo && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
-            return et == null ? Results.NotFound() : Results.Ok(mapper.Map<CreateCustomPropertyDto>(et));
+            var et = await db.PropertyConfigs.SingleOrDefaultAsync(x => x.ModuleNo == moduleNo && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
+            return et == null ? Results.NotFound() : Results.Ok(mapper.Map<PropertyConfigDto>(et));
         }
 
         [Authorize]

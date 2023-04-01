@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.AspNetCore.Builder;
+
 namespace FurnitureERP.Routers
 {
     public static class Router
@@ -25,8 +27,9 @@ namespace FurnitureERP.Routers
             app.MapDelete("/role/{id}", RoleController.Delete);
             app.MapPost("/userrole", RoleController.CreateUserRole);
 
-            app.MapPost("/customprop", CustomPropertyController.Create);
-            app.MapGet("/customprops/", CustomPropertyController.GetMods);
+            app.MapPost("/propconfig", CustomPropertyController.CreatePropConfig);
+            app.MapGet("/propconfig", CustomPropertyController.SinglePropConfig);
+            app.MapGet("/modules/", CustomPropertyController.GetMods);
 
 
             //app.MapPost("/customer", CustomerController.Create);
@@ -141,12 +144,11 @@ namespace FurnitureERP.Routers
             //app.MapPut("/menu/{id}", MenuController.Edit);
             //app.MapDelete("/menu/{id}", MenuController.Delete);
 
-            //app.MapPost("/warehouse", WarehouseController.Create);
-            //app.MapGet("/warehouses", WarehouseController.Get);
-            //app.MapGet("/warehouse/{id}", WarehouseController.Single);
-            //app.MapPut("/warehouse/{id}", WarehouseController.Edit);
-            //app.MapDelete("/warehouse/{id}", WarehouseController.Delete);
-            //app.MapGet("/warehouse/prodinfos/{warehouseName?}", WarehouseController.GetWarehouseProdInfos);
+            app.MapPost("/warehouse", WarehouseController.Create);
+            app.MapGet("/warehouses", WarehouseController.Get);
+            app.MapGet("/warehouse/{id}", WarehouseController.Single);
+            app.MapPut("/warehouse/{id}", WarehouseController.Edit);
+            app.MapDelete("/warehouse/{id}", WarehouseController.Delete);
 
             return app;
         }

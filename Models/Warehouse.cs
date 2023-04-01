@@ -6,22 +6,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-/// <summary>
-/// 供应商产品表
-/// </summary>
-[Table("supp_item")]
-public partial class SuppItem
+[Keyless]
+[Table("warehouse")]
+public partial class Warehouse
 {
-    [Key]
     public long Id { get; set; }
 
     public Guid Guid { get; set; }
 
-    [StringLength(50)]
-    public string? SuppName { get; set; }
+    [StringLength(100)]
+    public string WarehouseName { get; set; } = null!;
 
     [StringLength(200)]
-    public string? ItemNo { get; set; }
+    public string Remark { get; set; } = null!;
 
     [Column(TypeName = "datetime")]
     public DateTime CreateTime { get; set; }
@@ -29,8 +26,8 @@ public partial class SuppItem
     [StringLength(50)]
     public string? Creator { get; set; }
 
-    public Guid MerchantGuid { get; set; }
+    [Required]
+    public bool? IsUsing { get; set; }
 
-    [Column(TypeName = "decimal(18, 2)")]
-    public decimal CostPrice { get; set; }
+    public Guid MerchantGuid { get; set; }
 }

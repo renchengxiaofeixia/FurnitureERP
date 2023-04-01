@@ -51,7 +51,7 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> Edit(AppDbContext db, int id, CreateSuppDto SuppDto, HttpRequest request, IMapper mapper)
         {
-            var et = await db.Supps.FirstOrDefaultAsync(x => x.Id == id);
+            var et = await db.Supps.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
             {
                 return Results.BadRequest();
@@ -73,7 +73,7 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> Delete(AppDbContext db, int id, HttpRequest request)
         {
-            var et = await db.Supps.FirstOrDefaultAsync(x => x.Id == id);
+            var et = await db.Supps.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
             {
                 return Results.BadRequest();
