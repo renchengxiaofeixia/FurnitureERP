@@ -13,7 +13,7 @@ namespace FurnitureERP.Profiles
                     WriteIndented = true,
                 })))
                 .ReverseMap()
-                .ForPath(src => src.Properties, opt => opt.MapFrom(dest => JsonSerializer.Deserialize<List<Property>>(dest.PropertyConfigJson,new JsonSerializerOptions
+                .ForPath(src => src.Properties, opt => opt.MapFrom(dest => JsonSerializer.Deserialize<List<PropertyDto>>(dest.PropertyConfigJson,new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = false,
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -29,7 +29,7 @@ namespace FurnitureERP.Profiles
                     WriteIndented = true,
                 })))
                 .ReverseMap()
-                .ForPath(src => src.Properties, opt => opt.MapFrom(dest => JsonSerializer.Deserialize<List<Property>>(dest.PropertyConfigJson, new JsonSerializerOptions
+                .ForPath(src => src.Properties, opt => opt.MapFrom(dest => JsonSerializer.Deserialize<List<PropertyDto>>(dest.PropertyConfigJson, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = false,
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

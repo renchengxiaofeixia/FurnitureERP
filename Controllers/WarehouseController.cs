@@ -24,16 +24,16 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper)
+        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper, HttpRequest request)
         {
-            var et = await db.Warehouses.SingleOrDefaultAsync(x => x.Id == id);
+            var et = await db.Warehouses.SingleOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             return et == null ? Results.NotFound() : Results.Ok(mapper.Map<WarehouseDto>(et));
         }
 
         [Authorize]
         public static async Task<IResult> Edit(AppDbContext db, int id, CreateWarehouseDto warehouseDto, HttpRequest request, IMapper mapper)
         {
-            var et = await db.Warehouses.FirstOrDefaultAsync(x => x.Id == id);
+            var et = await db.Warehouses.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
             {
                 return Results.BadRequest();
@@ -46,7 +46,7 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> Delete(AppDbContext db, int id, HttpRequest request)
         {
-            var et = await db.Warehouses.FirstOrDefaultAsync(x => x.Id == id);
+            var et = await db.Warehouses.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
             {
                 return Results.BadRequest();

@@ -31,7 +31,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> GetMods(AppDbContext db, IMapper mapper, HttpRequest request)
+        public static async Task<IResult> GetMods(AppDbContext db, IMapper mapper)
         {
             var mods = await db.ErpModules.ToListAsync();
             return mods == null ? Results.NotFound() : Results.Ok(mapper.Map<ErpModuleDto>(mods));
