@@ -40,6 +40,28 @@ namespace FurnitureERP.Controllers
             return Results.Ok(mapper.Map<List<ItemDto>>(await ets.ToListAsync()));
         }
 
+        [Authorize]
+        public static async Task<IResult> Import(AppDbContext db, HttpRequest request)
+        {
+            if (!request.HasFormContentType)
+                return Results.BadRequest();
+
+            var form = await request.ReadFormAsync();
+            var fi = form.Files["fi"];
+            if (fi is null || fi.Length == 0)
+                return Results.BadRequest();
+            if (!Path.GetExtension(fi.FileName).EndsWith("xlsx"))
+                return Results.BadRequest("文件格式错误");
+            var svrFn = $"{DateTime.Now.Ticks}{Path.GetExtension(fi.FileName)}";
+            var svrpath = Path.Combine(AppContext.BaseDirectory, "excel", svrFn);
+            await using var stream = fi.OpenReadStream();
+            using var fs = File.Create(svrpath);
+            await stream.CopyToAsync(fs);
+
+
+            return Results.Ok();
+        }
+
 
         [Authorize]
         public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper)
