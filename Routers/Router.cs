@@ -73,6 +73,7 @@ namespace FurnitureERP.Routers
             app.MapPut("/supplier/{id}", SupplierController.Edit);
             app.MapDelete("/supplier/{id}", SupplierController.Delete);
             app.MapGet("/supplier/items/{id}", SupplierController.GetSuppItems);
+            app.MapPost("/supplier/import", SupplierController.Import);
 
             //app.MapGet("/supplier/prodinfos/{id}", SupplierController.GetSupplyProds);
             //app.MapGet("/supplier/purchases/{id}", SupplierController.GetPurchases);

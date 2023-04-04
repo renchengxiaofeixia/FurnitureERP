@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Table("supp_item")]
-public partial class SuppItem
+[Table("supp_item_imp")]
+public partial class SuppItemImp
 {
     [Key]
     public long Id { get; set; }

@@ -47,6 +47,7 @@ AND MerchantGuid = @MerchantGuid
                 subItems.ForEach(si =>
                 {
                     si.Creator = request.GetCurrentUser().UserName;
+                    si.MerchantGuid = request.GetCurrentUser().MerchantGuid;
                 });
                 await db.SubItems.AddRangeAsync(subItems);
                 //标记成组合商品
@@ -73,7 +74,7 @@ AND MerchantGuid = @MerchantGuid
             }
             var ets = from it in db.Items
                       from si in db.SubItems
-                      where it.ItemNo == si.ItemNo && it.Id == id
+                      where it.ItemNo == si.ItemNo && it.Id == id && si.MerchantGuid == request.GetCurrentUser().MerchantGuid  
                       select it;
             return Results.Ok(mapper.Map<List<ItemDto>>(await ets.ToListAsync()));
         }
@@ -127,7 +128,7 @@ AND MerchantGuid = @MerchantGuid
             if (itemDto.SubItems != null && itemDto.SubItems.Count > 0)
             {
                 //删除组合商品下的子商品
-                var removeSubItems = await db.SubItems.Where(k => k.ItemNo == et.ItemNo).ToListAsync();
+                var removeSubItems = await db.SubItems.Where(k => k.ItemNo == et.ItemNo && k.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
                 db.SubItems.RemoveRange(removeSubItems);
                 var subItems = mapper.Map<List<SubItem>>(itemDto.SubItems);
                 subItems.ForEach(si =>

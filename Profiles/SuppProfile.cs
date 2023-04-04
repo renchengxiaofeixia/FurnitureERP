@@ -10,6 +10,12 @@ namespace FurnitureERP.Profiles
 
             CreateMap<SuppDto, Supp>()
                 .ReverseMap();
+
+            CreateMap<SuppItemDto, SuppItem>()
+                .ReverseMap();
+
+            CreateMap<CreateSuppItemDto, SuppItem>() 
+                .ReverseMap();
         }
     }
 }

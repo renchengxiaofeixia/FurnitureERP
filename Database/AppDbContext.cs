@@ -20,6 +20,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<ErpModule> ErpModules { get; set; }
 
+    public virtual DbSet<Inventory> Inventories { get; set; }
+
     public virtual DbSet<Item> Items { get; set; }
 
     public virtual DbSet<ItemImp> ItemImps { get; set; }
@@ -42,6 +44,10 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<PropertyConfig> PropertyConfigs { get; set; }
 
+    public virtual DbSet<Purchase> Purchases { get; set; }
+
+    public virtual DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<RolePermit> RolePermits { get; set; }
@@ -50,6 +56,10 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Shop> Shops { get; set; }
 
+    public virtual DbSet<Storage> Storages { get; set; }
+
+    public virtual DbSet<StorageOrder> StorageOrders { get; set; }
+
     public virtual DbSet<SubItem> SubItems { get; set; }
 
     public virtual DbSet<SubItemImp> SubItemImps { get; set; }
@@ -57,6 +67,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Supp> Supps { get; set; }
 
     public virtual DbSet<SuppItem> SuppItems { get; set; }
+
+    public virtual DbSet<SuppItemImp> SuppItemImps { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -81,6 +93,14 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<ErpModule>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__module");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
+        modelBuilder.Entity<Inventory>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__t_invent__3214EC07035179CE");
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
@@ -176,6 +196,20 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
         });
 
+        modelBuilder.Entity<Purchase>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__purchase__3214EC07BB243744");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Created).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.DeliveryDate).HasDefaultValueSql("(getdate())");
+        });
+
+        modelBuilder.Entity<PurchaseOrder>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__purchase__3214EC07D6033F91");
+        });
+
         modelBuilder.Entity<Role>(entity =>
         {
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
@@ -208,6 +242,23 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<Shop>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__t_shop__3214EC076C390A4C");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
+        modelBuilder.Entity<Storage>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__storage__3214EC07F20AE1A3");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.StorageDate).HasDefaultValueSql("(getdate())");
+        });
+
+        modelBuilder.Entity<StorageOrder>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__storage___3214EC0771BF2F77");
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
@@ -251,9 +302,15 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<SuppItem>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__supp_ite__3214EC071E0BF171");
+            entity.HasKey(e => e.Id).HasName("PK__supp_ite__3214EC07EC22863F");
 
-            entity.ToTable("supp_item", tb => tb.HasComment("供应商产品表"));
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
+        modelBuilder.Entity<SuppItemImp>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__supp_ite__3214EC07E48C6DCB");
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
