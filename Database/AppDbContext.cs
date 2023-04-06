@@ -316,6 +316,14 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
         });
 
+        modelBuilder.Entity<SuppItemImp>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__supp_ite__3214EC07BF48BEAF");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__t_user__3214EC0747C69FAC");
