@@ -46,7 +46,7 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Purchase> Purchases { get; set; }
 
-    public virtual DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+    public virtual DbSet<PurchaseItem> PurchaseItems { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
 
@@ -58,7 +58,7 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Storage> Storages { get; set; }
 
-    public virtual DbSet<StorageOrder> StorageOrders { get; set; }
+    public virtual DbSet<StorageItem> StorageItems { get; set; }
 
     public virtual DbSet<SubItem> SubItems { get; set; }
 
@@ -205,7 +205,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.DeliveryDate).HasDefaultValueSql("(getdate())");
         });
 
-        modelBuilder.Entity<PurchaseOrder>(entity =>
+        modelBuilder.Entity<PurchaseItem>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__purchase__3214EC07D6033F91");
         });
@@ -256,7 +256,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.StorageDate).HasDefaultValueSql("(getdate())");
         });
 
-        modelBuilder.Entity<StorageOrder>(entity =>
+        modelBuilder.Entity<StorageItem>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__storage___3214EC0771BF2F77");
 
@@ -311,14 +311,6 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<SuppItemImp>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__supp_ite__3214EC07E48C6DCB");
-
-            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
-        });
-
-        modelBuilder.Entity<SuppItemImp>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__supp_ite__3214EC07BF48BEAF");
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");

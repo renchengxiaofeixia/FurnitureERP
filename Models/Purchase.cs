@@ -26,6 +26,9 @@ public partial class Purchase
     [Column(TypeName = "decimal(18, 2)")]
     public decimal AggregateAmount { get; set; }
 
+    [Column(TypeName = "datetime")]
+    public DateTime? PurchaseOrderDate { get; set; }
+
     [StringLength(50)]
     public string SettlementMode { get; set; } = null!;
 

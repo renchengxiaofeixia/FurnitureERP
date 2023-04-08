@@ -6,30 +6,7 @@ namespace FurnitureERP.Controllers
 {
    
     public class ItemController
-    {
-        public static string GetCellSql => @";with t as(
-  SELECT s.ItemNo, d.SubItemNo,d.Num,s.MerchantGuid
-   FROM sub_item_imp s
-  CROSS APPLY (VALUES
-                (SubItemNo1, Num1)
-               ,(SubItemNo2, Num2)
-               ,(SubItemNo3, Num3)
-               ,(SubItemNo4, Num4)
-               ,(SubItemNo5, Num5)
-               ,(SubItemNo6, Num6)
-               ,(SubItemNo7, Num7)
-               ,(SubItemNo8, Num8)
-               ,(SubItemNo9, Num9)
-               ,(SubItemNo10, Num10)
-              ) d (SubItemNo, Num)
-		where s.MerchantGuid = @MerchantGuid
- )
- select [SubItemNo] from t where SubItemNo not in (select ItemNo from item)
-AND MerchantGuid = @MerchantGuid
-union
- select [ItemNo] from t where ItemNo not in (select ItemNo from item)
-AND MerchantGuid = @MerchantGuid
-";
+    {       
 
        [Authorize]
         public static async Task<IResult> Create(AppDbContext db, CreateItemDto itemDto, HttpRequest request,IMapper mapper)
@@ -326,5 +303,29 @@ AND MerchantGuid = @MerchantGuid
             await db.SaveChangesAsync();
             return Results.NoContent();
         }
+
+        public static string GetCellSql => @";with t as(
+          SELECT s.ItemNo, d.SubItemNo,d.Num,s.MerchantGuid
+           FROM sub_item_imp s
+          CROSS APPLY (VALUES
+                        (SubItemNo1, Num1)
+                       ,(SubItemNo2, Num2)
+                       ,(SubItemNo3, Num3)
+                       ,(SubItemNo4, Num4)
+                       ,(SubItemNo5, Num5)
+                       ,(SubItemNo6, Num6)
+                       ,(SubItemNo7, Num7)
+                       ,(SubItemNo8, Num8)
+                       ,(SubItemNo9, Num9)
+                       ,(SubItemNo10, Num10)
+                      ) d (SubItemNo, Num)
+		        where s.MerchantGuid = @MerchantGuid
+         )
+         select [SubItemNo] from t where SubItemNo not in (select ItemNo from item)
+        AND MerchantGuid = @MerchantGuid
+        union
+         select [ItemNo] from t where ItemNo not in (select ItemNo from item)
+        AND MerchantGuid = @MerchantGuid
+        ";
     }
 }

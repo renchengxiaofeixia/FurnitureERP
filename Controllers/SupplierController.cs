@@ -100,7 +100,7 @@ AND MerchantGuid = '39672892-6ab8-4ea1-83d4-49a4f714d35e'
 
                 var itemNos =  db.Items.Where(k => k.MerchantGuid == request.GetCurrentUser().MerchantGuid).Select(k => k.ItemNo).ToList();
 
-                var cellValues = db.SuppItemImps.Where(k => !itemNos.Any(i => i == k.ItemNo)).Select(k=>k.ItemNo).ToList();
+                var cellValues = db.SuppItemImps.Where(k => !itemNos.Any(i => i == k.ItemNo && k.MerchantGuid == request.GetCurrentUser().MerchantGuid)).Select(k=>k.ItemNo).ToList();
 
                 if (cellValues.Count > 0)
                 {

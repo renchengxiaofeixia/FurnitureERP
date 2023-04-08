@@ -8,6 +8,7 @@
         public string SuppName { get; set; }
         public string WareName { get; set; }
         public decimal AggregateAmount { get; set; }
+        public string SettlementMode { get; set; }
         public bool IsAudit { get; set; }
         public string? AuditUser { get; set; }
         public DateTime? AuditDate { get; set; }
@@ -31,6 +32,7 @@
         public string PurchaseNo { get; set; }
         public string SuppName { get; set; }
         public string WareName { get; set; }
+        public string SettlementMode { get; set; }
         public string? OuterNo { get; set; }
         public DateTime PurchaseOrderDate { get; set; }
         public DateTime DeliveryDate { get; set; }
@@ -39,10 +41,10 @@
         public bool IsFromTrade { get; set; }
         public string? Tid { get; set; }
 
-        public List<CreatePurchaseOrderDto> ItemDtos { get; set;}
+        public List<CreatePurchaseItemDto> ItemDtos { get; set;}
     }
 
-    public class PurchaseOrderDto
+    public class PurchaseItemDto
     {
         public int Id { get; set; }
         public Guid Guid { get; set; }
@@ -52,7 +54,7 @@
         public string ItemNo { get; set; } 
         public string? StdItemNo { get; set; }
         public decimal CostPrice { get; set; }
-        public int PurchNum { get; set; }
+        public int PurchaseNum { get; set; }
         public decimal Amount { get; set; }
         public int StorageNum { get; set; }
         public string? Remark { get; set; }
@@ -64,7 +66,7 @@
         public Guid MerchantGuid { get; set; }
     }
 
-    public class CreatePurchaseOrderDto
+    public class CreatePurchaseItemDto
     {
         public string PurchaseNo { get; set; }
         public string SuppName { get; set; }
@@ -72,7 +74,7 @@
         public string ItemNo { get; set; }
         public string? StdItemNo { get; set; }
         public decimal CostPrice { get; set; }
-        public int PurchNum { get; set; }
+        public int PurchaseNum { get; set; }
         public string? Remark { get; set; }
         public DateTime? DeliveryDate { get; set; }
         public bool IsMade { get; set; }

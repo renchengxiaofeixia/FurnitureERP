@@ -78,10 +78,10 @@ namespace FurnitureERP.Routers
             //app.MapGet("/supplier/prodinfos/{id}", SupplierController.GetSupplyProds);
             //app.MapGet("/supplier/purchases/{id}", SupplierController.GetPurchases);
 
-            //app.MapPost("/purchase", PurchaseController.Create);
+            app.MapPost("/purchase", PurchaseController.Create);
             //app.MapGet("/purchases", PurchaseController.Get);
             //app.MapGet("/purchase/{id}", PurchaseController.Single);
-            //app.MapPut("/purchase/{id}", PurchaseController.Edit);
+            app.MapPut("/purchase/{id}", PurchaseController.Edit);
             //app.MapDelete("/purchase/{id}", PurchaseController.Delete);
             //app.MapGet("/purchase/prodinfos/{id}", PurchaseController.GetPurchaseProdInfos);
             //app.MapPut("/purchase/audit/{id}", PurchaseController.Audit);
