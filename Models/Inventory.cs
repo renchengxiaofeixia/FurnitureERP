@@ -35,6 +35,9 @@ public partial class Inventory
     public string? PurchaseNo { get; set; }
 
     [StringLength(50)]
+    public string? StorageNo { get; set; }
+
+    [StringLength(50)]
     public string? SuppName { get; set; }
 
     [Column(TypeName = "datetime")]

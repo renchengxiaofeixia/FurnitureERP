@@ -22,6 +22,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Inventory> Inventories { get; set; }
 
+    public virtual DbSet<Inventorybarcode> Inventorybarcodes { get; set; }
+
     public virtual DbSet<Item> Items { get; set; }
 
     public virtual DbSet<ItemImp> ItemImps { get; set; }
@@ -101,6 +103,14 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<Inventory>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__t_invent__3214EC07035179CE");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
+        modelBuilder.Entity<Inventorybarcode>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__inventorybarcode3214EC074D6A6A69");
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
@@ -203,11 +213,14 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Created).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.DeliveryDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
         });
 
         modelBuilder.Entity<PurchaseItem>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__purchase__3214EC07D6033F91");
+
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
         });
 
         modelBuilder.Entity<Role>(entity =>

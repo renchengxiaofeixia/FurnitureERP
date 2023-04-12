@@ -31,7 +31,13 @@ public partial class StorageItem
 
     public int PurchaseNum { get; set; }
 
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal Amount { get; set; }
+
     public int StorageNum { get; set; }
+
+    [StringLength(50)]
+    public string? PurchaseNo { get; set; }
 
     public bool IsMade { get; set; }
 

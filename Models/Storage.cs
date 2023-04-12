@@ -29,6 +29,9 @@ public partial class Storage
     [StringLength(20)]
     public string? WareName { get; set; }
 
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal AggregateAmount { get; set; }
+
     [StringLength(500)]
     public string? Remark { get; set; }
 
