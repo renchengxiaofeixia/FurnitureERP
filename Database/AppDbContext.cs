@@ -22,6 +22,10 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Inventory> Inventories { get; set; }
 
+    public virtual DbSet<InventoryItemAdjust> InventoryItemAdjusts { get; set; }
+
+    public virtual DbSet<InventoryItemMove> InventoryItemMoves { get; set; }
+
     public virtual DbSet<Inventorybarcode> Inventorybarcodes { get; set; }
 
     public virtual DbSet<Item> Items { get; set; }
@@ -106,6 +110,26 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
+        modelBuilder.Entity<InventoryItemAdjust>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__inventor__3214EC076916443D");
+
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.TimeStamp)
+                .IsRowVersion()
+                .IsConcurrencyToken();
+        });
+
+        modelBuilder.Entity<InventoryItemMove>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__inventor__3214EC079E498433");
+
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.TimeStamp)
+                .IsRowVersion()
+                .IsConcurrencyToken();
         });
 
         modelBuilder.Entity<Inventorybarcode>(entity =>

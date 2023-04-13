@@ -244,11 +244,7 @@ namespace FurnitureERP.Controllers
                     await db.Database.ExecuteSqlRawAsync("p_syncimpsubitem @MerchantGuid"
                      , new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)
                     );
-                }
-
-            
-
-                
+                } 
             }
             return Results.Ok(new { isOk = true });
         }

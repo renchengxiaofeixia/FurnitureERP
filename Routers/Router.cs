@@ -79,11 +79,11 @@ namespace FurnitureERP.Routers
             //app.MapGet("/supplier/purchases/{id}", SupplierController.GetPurchases);
 
             app.MapPost("/purchase", PurchaseController.Create);
-            //app.MapGet("/purchases", PurchaseController.Get);
+            app.MapGet("/purchases/page", PurchaseController.Page);
             app.MapGet("/purchase/{id}", PurchaseController.Single);
             app.MapPut("/purchase/{id}", PurchaseController.Edit);
             app.MapDelete("/purchase/{id}", PurchaseController.Delete);
-            app.MapGet("/purchase/prodinfos/{id}", PurchaseController.GetPurchaseProdInfos);
+            app.MapGet("/purchase/items/{id}", PurchaseController.GetPurchaseProdInfos);
             app.MapPut("/purchase/audit/{id}", PurchaseController.Audit);
             app.MapPut("/purchase/unaudit/{id}", PurchaseController.UnAudit);
             app.MapPut("/purchase/cancel/{id}", PurchaseController.CancelPurchaseItem);
@@ -95,14 +95,20 @@ namespace FurnitureERP.Routers
             //app.MapDelete("/purchase/pay/{id}", PurchaseController.DeletePurchasePayment);
 
 
-            //app.MapPost("/enterwarehouse", EnterWarehouseController.Create);
-            //app.MapGet("/enterwarehouses", EnterWarehouseController.Get);
-            //app.MapGet("/enterwarehouse/{id}", EnterWarehouseController.Single);
-            //app.MapPut("/enterwarehouse/{id}", EnterWarehouseController.Edit);
-            //app.MapDelete("/enterwarehouse/{id}", EnterWarehouseController.Delete);
-            //app.MapGet("/enterwarehouse/prodinfos/{id}", EnterWarehouseController.GetEnterWarehouseProdInfos);
-            //app.MapPut("/enterwarehouse/audit/{id}", EnterWarehouseController.Audit);
+            app.MapPost("/storage", StorageController.Create);
+            app.MapGet("/storages/page", StorageController.Page);
+            app.MapGet("/storage/{id}", StorageController.Single);
+            app.MapPut("/storage/{id}", StorageController.Edit);
+            app.MapDelete("/storage/{id}", StorageController.Delete);
+            app.MapGet("/storage/items/{id}", StorageController.GetStorageProdInfos);
+            app.MapPut("/storage/audit/{id}", StorageController.Audit);
+            app.MapPut("/storage/unaudit/{id}", StorageController.UnAudit);
 
+
+            app.MapGet("/inventory", InventoryController.GetInventories);
+            app.MapGet("/inventory/count", InventoryController.GetInventoriesCountForWareName);
+            app.MapPost("/inventory/move", InventoryController.MoveInventoryItems);
+            app.MapPost("/inventory/adjust", InventoryController.AdjustInventoryItems);
 
             //app.MapPost("/check", CheckController.Create);
             //app.MapGet("/check", CheckController.Get);
