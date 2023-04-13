@@ -80,12 +80,13 @@ namespace FurnitureERP.Routers
 
             app.MapPost("/purchase", PurchaseController.Create);
             //app.MapGet("/purchases", PurchaseController.Get);
-            //app.MapGet("/purchase/{id}", PurchaseController.Single);
+            app.MapGet("/purchase/{id}", PurchaseController.Single);
             app.MapPut("/purchase/{id}", PurchaseController.Edit);
-            //app.MapDelete("/purchase/{id}", PurchaseController.Delete);
-            //app.MapGet("/purchase/prodinfos/{id}", PurchaseController.GetPurchaseProdInfos);
-            //app.MapPut("/purchase/audit/{id}", PurchaseController.Audit);
-            //app.MapPut("/purchase/unaudit/{id}", PurchaseController.UnAudit);
+            app.MapDelete("/purchase/{id}", PurchaseController.Delete);
+            app.MapGet("/purchase/prodinfos/{id}", PurchaseController.GetPurchaseProdInfos);
+            app.MapPut("/purchase/audit/{id}", PurchaseController.Audit);
+            app.MapPut("/purchase/unaudit/{id}", PurchaseController.UnAudit);
+            app.MapPut("/purchase/cancel/{id}", PurchaseController.CancelPurchaseItem);
 
             //app.MapPost("/purchase/pay", PurchaseController.CreatePurchasePay);
             //app.MapGet("/purchase/pays/{purchaseId}", PurchaseController.GetPurchasePayments);

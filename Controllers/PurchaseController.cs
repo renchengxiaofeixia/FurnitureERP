@@ -240,6 +240,37 @@ namespace FurnitureERP.Controllers
             return Results.Ok(mapper.Map<List<PurchaseItemDto>>(items));
         }
 
+        [Authorize]
+        public static async Task<IResult> CancelPurchaseItem(AppDbContext db, int id, List<PurchaseItemDto> purchaseItemDtos, HttpRequest request)
+        {
+            var et = await db.Purchases.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
+            if (et == null)
+            {
+                return Results.BadRequest("没有找到采购订单信息!!");
+            }
+
+            var items = await db.PurchaseItems.Where(k => k.PurchaseNo == et.PurchaseNo).ToListAsync();
+            if ((from k in items
+                 from j in purchaseItemDtos
+                 where k.Id == j.Id && k.PurchaseNum != j.PurchaseNum
+                 select k).Any())
+            {
+                return Results.BadRequest("采购单的商品数量不匹配!!");
+            }
+
+            var purchaseForUpdate = from p in db.PurchaseItems
+                                    join e in purchaseItemDtos
+                                    on new { p.Id, p.ItemNo } equals new { e.Id, e.ItemNo }
+                                    select new { p, e };
+            await purchaseForUpdate.ForEachAsync(up =>
+            {
+                up.p.PurchaseNum -= up.e.CancelNum;
+                up.p.CancelNum += up.e.CancelNum;
+            });
+
+            return Results.Ok();
+        }
+
         //[Authorize]
         //public static async Task<IResult> CreatePurchasePay(AppDbContext db, CreatePurchasePaymentDto purchasePaymentDto, HttpRequest request, IMapper mapper)
         //{

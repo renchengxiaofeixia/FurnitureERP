@@ -123,6 +123,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
             entity.Property(e => e.IsUsing).HasDefaultValueSql("((1))");
+            entity.Property(e => e.TimeStamp)
+                .IsRowVersion()
+                .IsConcurrencyToken();
         });
 
         modelBuilder.Entity<ItemImp>(entity =>
@@ -157,6 +160,9 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.TimeStamp)
+                .IsRowVersion()
+                .IsConcurrencyToken();
         });
 
         modelBuilder.Entity<LogisPointImp>(entity =>
@@ -214,6 +220,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Created).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.DeliveryDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.TimeStamp)
+                .IsRowVersion()
+                .IsConcurrencyToken();
         });
 
         modelBuilder.Entity<PurchaseItem>(entity =>
@@ -229,6 +238,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
             entity.Property(e => e.IsUsing).HasDefaultValueSql("((1))");
+            entity.Property(e => e.TimeStamp)
+                .IsRowVersion()
+                .IsConcurrencyToken();
         });
 
         modelBuilder.Entity<RolePermit>(entity =>
@@ -267,6 +279,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
             entity.Property(e => e.StorageDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.TimeStamp)
+                .IsRowVersion()
+                .IsConcurrencyToken();
         });
 
         modelBuilder.Entity<StorageItem>(entity =>
@@ -311,6 +326,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
             entity.Property(e => e.IsUsing).HasDefaultValueSql("((1))");
+            entity.Property(e => e.TimeStamp)
+                .IsRowVersion()
+                .IsConcurrencyToken();
         });
 
         modelBuilder.Entity<SuppItem>(entity =>
@@ -336,6 +354,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
             entity.Property(e => e.IsUsing).HasDefaultValueSql("((1))");
+            entity.Property(e => e.TimeStamp)
+                .IsRowVersion()
+                .IsConcurrencyToken();
         });
 
         modelBuilder.Entity<UserRole>(entity =>
@@ -351,6 +372,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
             entity.Property(e => e.IsUsing).HasDefaultValueSql("((1))");
+            entity.Property(e => e.TimeStamp)
+                .IsRowVersion()
+                .IsConcurrencyToken();
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -11,7 +11,7 @@ namespace FurnitureERP.Controllers
         public static async Task<IResult> Create(AppDbContext db, CreateStorageDto storageDto, HttpRequest request, IMapper mapper)
         {
             var storage = mapper.Map<Storage>(storageDto);
-            storage.PurchaseNo = await Util.GetSerialNoAsync(db, request.GetCurrentUser().MerchantGuid, "Storage");
+            storage.StorageNo = await Util.GetSerialNoAsync(db, request.GetCurrentUser().MerchantGuid, "Storage");
             storage.AggregateAmount = storageDto.ItemDtos.Sum(k => k.CostPrice * k.StorageNum);
             storage.Creator = request.GetCurrentUser().UserName;
             storage.MerchantGuid = request.GetCurrentUser().MerchantGuid;

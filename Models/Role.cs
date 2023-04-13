@@ -30,4 +30,6 @@ public partial class Role
     public bool? IsUsing { get; set; }
 
     public Guid MerchantGuid { get; set; }
+
+    public byte[] TimeStamp { get; set; } = null!;
 }

@@ -56,4 +56,6 @@ public partial class Storage
     public decimal PaidFee { get; set; }
 
     public Guid MerchantGuid { get; set; }
+
+    public byte[] TimeStamp { get; set; } = null!;
 }
