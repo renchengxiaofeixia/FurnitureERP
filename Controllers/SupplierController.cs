@@ -104,8 +104,7 @@ AND MerchantGuid = '39672892-6ab8-4ea1-83d4-49a4f714d35e'
 
                 if (cellValues.Count > 0)
                 {
-                    var execlPath = Util.CheckCellValues(fs, fieldsMapper.Count, cellValues);
-
+                    var execlPath = Util.MarkerCell(fs, fieldsMapper.Count, cellValues);
                     return Results.BadRequest(new
                     {
                         url = execlPath,

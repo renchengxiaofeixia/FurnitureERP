@@ -34,6 +34,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<ItemPackage> ItemPackages { get; set; }
 
+    public virtual DbSet<ItemPackageImp> ItemPackageImps { get; set; }
+
     public virtual DbSet<LogisImp> LogisImps { get; set; }
 
     public virtual DbSet<LogisPoint> LogisPoints { get; set; }
@@ -46,6 +48,10 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Merchant> Merchants { get; set; }
 
+    public virtual DbSet<Package> Packages { get; set; }
+
+    public virtual DbSet<PackageImp> PackageImps { get; set; }
+
     public virtual DbSet<PhoneCode> PhoneCodes { get; set; }
 
     public virtual DbSet<PropertyConfig> PropertyConfigs { get; set; }
@@ -53,6 +59,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Purchase> Purchases { get; set; }
 
     public virtual DbSet<PurchaseItem> PurchaseItems { get; set; }
+
+    public virtual DbSet<RecordDelete> RecordDeletes { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
 
@@ -167,7 +175,24 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.IsUsing).HasDefaultValueSql("((1))");
+        });
+
+        modelBuilder.Entity<ItemPackageImp>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__item_package_imp_3214EC0754710794");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Num1).HasDefaultValueSql("((1))");
+            entity.Property(e => e.Num10).HasDefaultValueSql("((1))");
+            entity.Property(e => e.Num2).HasDefaultValueSql("((1))");
+            entity.Property(e => e.Num3).HasDefaultValueSql("((1))");
+            entity.Property(e => e.Num4).HasDefaultValueSql("((1))");
+            entity.Property(e => e.Num5).HasDefaultValueSql("((1))");
+            entity.Property(e => e.Num6).HasDefaultValueSql("((1))");
+            entity.Property(e => e.Num7).HasDefaultValueSql("((1))");
+            entity.Property(e => e.Num8).HasDefaultValueSql("((1))");
+            entity.Property(e => e.Num9).HasDefaultValueSql("((1))");
         });
 
         modelBuilder.Entity<LogisImp>(entity =>
@@ -221,6 +246,23 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
         });
 
+        modelBuilder.Entity<Package>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__packageC0710AB74EC");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.IsUsing).HasDefaultValueSql("((1))");
+        });
+
+        modelBuilder.Entity<PackageImp>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__package_impC0710AB74EC");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
         modelBuilder.Entity<PhoneCode>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__SmsCode__3214EC073F466844");
@@ -254,6 +296,12 @@ public partial class AppDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__purchase__3214EC07D6033F91");
 
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
+        modelBuilder.Entity<RecordDelete>(entity =>
+        {
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
         });
 
         modelBuilder.Entity<Role>(entity =>

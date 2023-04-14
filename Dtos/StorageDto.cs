@@ -55,7 +55,6 @@
 
     public class CreateStorageItemDto
     {
-        public string? StorageNo { get; set; }
         public string? ItemName { get; set; }
         public string? ItemNo { get; set; }
         public string? StdItemNo { get; set; }
@@ -68,4 +67,20 @@
         public decimal Amount { get; set; }
         public string? PurchaseNo { get; set; }
     }
+
+    public class CreateStoragePackageDto
+    {
+        public string? StorageNo { get; set; }
+        public string? PkName { get; set; }
+        public string? PkNo { get; set; }
+        public decimal CostPrice { get; set; }
+        public int PurchaseNum { get; set; }
+        public int StorageNum { get; set; }
+        public bool IsMade { get; set; }
+        public string? Remark { get; set; }
+        public string? SuppName { get; set; }
+        public decimal Amount { get; set; }
+        public string? PurchaseNo { get; set; }
+    }
+
 }

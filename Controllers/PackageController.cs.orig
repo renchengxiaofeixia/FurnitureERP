@@ -6,7 +6,30 @@ namespace FurnitureERP.Controllers
 {
    
     public class ItemController
-    {       
+    {
+        public static string GetCellSql => @";with t as(
+  SELECT s.ItemNo, d.SubItemNo,d.Num,s.MerchantGuid
+   FROM sub_item_imp s
+  CROSS APPLY (VALUES
+                (SubItemNo1, Num1)
+               ,(SubItemNo2, Num2)
+               ,(SubItemNo3, Num3)
+               ,(SubItemNo4, Num4)
+               ,(SubItemNo5, Num5)
+               ,(SubItemNo6, Num6)
+               ,(SubItemNo7, Num7)
+               ,(SubItemNo8, Num8)
+               ,(SubItemNo9, Num9)
+               ,(SubItemNo10, Num10)
+              ) d (SubItemNo, Num)
+		where s.MerchantGuid = @MerchantGuid
+ )
+ select [SubItemNo] from t where SubItemNo not in (select ItemNo from item)
+AND MerchantGuid = @MerchantGuid
+union
+ select [ItemNo] from t where ItemNo not in (select ItemNo from item)
+AND MerchantGuid = @MerchantGuid
+";
 
        [Authorize]
         public static async Task<IResult> Create(AppDbContext db, CreateItemDto itemDto, HttpRequest request,IMapper mapper)
@@ -24,7 +47,6 @@ namespace FurnitureERP.Controllers
                 subItems.ForEach(si =>
                 {
                     si.Creator = request.GetCurrentUser().UserName;
-                    si.MerchantGuid = request.GetCurrentUser().MerchantGuid;
                 });
                 await db.SubItems.AddRangeAsync(subItems);
                 //标记成组合商品
@@ -51,7 +73,7 @@ namespace FurnitureERP.Controllers
             }
             var ets = from it in db.Items
                       from si in db.SubItems
-                      where it.ItemNo == si.ItemNo && it.Id == id && si.MerchantGuid == request.GetCurrentUser().MerchantGuid  
+                      where it.ItemNo == si.ItemNo && it.Id == id
                       select it;
             return Results.Ok(mapper.Map<List<ItemDto>>(await ets.ToListAsync()));
         }
@@ -84,16 +106,16 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper)
+        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper, HttpRequest request)
         {
-            var et = await db.Items.SingleOrDefaultAsync(x => x.Id == id);
+            var et = await db.Items.SingleOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             return et == null ? Results.NotFound() : Results.Ok(mapper.Map<ItemDto>(et));
         }
 
         [Authorize]
         public static async Task<IResult> Edit(AppDbContext db, int id, CreateItemDto itemDto, HttpRequest request, IMapper mapper)
         {
-            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id);
+            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
             {
                 return Results.BadRequest("无效的数据");
@@ -105,7 +127,7 @@ namespace FurnitureERP.Controllers
             if (itemDto.SubItems != null && itemDto.SubItems.Count > 0)
             {
                 //删除组合商品下的子商品
-                var removeSubItems = await db.SubItems.Where(k => k.ItemNo == et.ItemNo && k.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
+                var removeSubItems = await db.SubItems.Where(k => k.ItemNo == et.ItemNo).ToListAsync();
                 db.SubItems.RemoveRange(removeSubItems);
                 var subItems = mapper.Map<List<SubItem>>(itemDto.SubItems);
                 subItems.ForEach(si =>
@@ -177,6 +199,9 @@ namespace FurnitureERP.Controllers
             await using var stream = fi.OpenReadStream();
             using var fs = File.Create(svrpath);
             await stream.CopyToAsync(fs); 
+
+
+
             return isCom ? await ImportItemComRelation(db, request, fs) : await ImportItem(db, request, fs);
         }
 
@@ -205,6 +230,12 @@ namespace FurnitureERP.Controllers
                     { "子商品编码10","SubItemNo10"},
                     { "数量10","Num10" }
                 };
+
+            //var itemNos = await (from it in db.Items
+            //                     select it.ItemNo).ToListAsync();
+
+           
+
             var (rt, items) = Util.ReadExcel<SubItemImp>(fs, fieldsMapper);
             if (rt)
             {
@@ -216,14 +247,18 @@ namespace FurnitureERP.Controllers
                 });
                 await db.SubItemImps.AddRangeAsync(items);
                 await db.SaveChangesAsync();
+<<<<<<< HEAD
+                await db.Database.ExecuteSqlRawAsync("p_syncimpsubitem @MerchantGuid"
+                     ,new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid));
+=======
 
                 //获取cell
-                var importItemNos = db.Database.SqlQueryRaw<string>(Sql_GetImportSubItemNo, new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)).ToList();
+                var cellValues = db.Database.SqlQueryRaw<string>(GetCellSql, new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)).ToList();
 
 
-                if (importItemNos.Count > 0)
+                if (cellValues.Count > 0)
                 {
-                    var execlPath = Util.MarkerCell(fs, fieldsMapper.Count, importItemNos);
+                    var execlPath = Util.CheckCellValues(fs, fieldsMapper.Count, cellValues);
 
                     return Results.BadRequest(new { 
                         url = execlPath,
@@ -235,7 +270,12 @@ namespace FurnitureERP.Controllers
                     await db.Database.ExecuteSqlRawAsync("p_syncimpsubitem @MerchantGuid"
                      , new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)
                     );
-                } 
+                }
+
+            
+
+                
+>>>>>>> 1f3adc6982c2a0bec8a7f34bc206efc55d69ffe1
             }
             return Results.Ok(new { isOk = true });
         }
@@ -290,124 +330,5 @@ namespace FurnitureERP.Controllers
             await db.SaveChangesAsync();
             return Results.NoContent();
         }
-
-        [Authorize]
-        public static async Task<IResult> ImportPackage(AppDbContext db, HttpRequest request, bool isCom = false, bool isErase = false)
-        {
-            if (!request.HasFormContentType)
-                return Results.BadRequest();
-
-            var form = await request.ReadFormAsync();
-            var fi = form.Files["fi"];
-            if (fi is null || fi.Length == 0)
-                return Results.BadRequest();
-            if (!Path.GetExtension(fi.FileName).EndsWith("xlsx"))
-                return Results.BadRequest("文件格式错误");
-            var svrFn = $"{DateTime.Now.Ticks}{Path.GetExtension(fi.FileName)}";
-            var svrpath = Path.Combine(AppContext.BaseDirectory, "excel", svrFn);
-            await using var stream = fi.OpenReadStream();
-            using var fs = File.Create(svrpath);
-            await stream.CopyToAsync(fs);
-            return isCom ? await ImportPackageComRelation(db, request, fs) : await ImportItemPackage(db, request, fs);
-        }
-
-        private static async Task<IResult> ImportItemPackage(AppDbContext db, HttpRequest request, FileStream fs)
-        {
-            var fieldsMapper = new Dictionary<string, string>() {
-                { "包件名称","PackageName"},
-                { "包件编码","PackageNo" },
-                { "长宽高","LengthWidthHeight" },
-                { "体积","Volume" },
-                { "采购价","CostPrice" },
-                { "采购周期","PurchaseDays" },
-            };
-            var (rt, items) = Util.ReadExcel<PackageImp>(fs, fieldsMapper);
-            if (rt)
-            {
-                items.ForEach(it =>
-                {
-                    it.Guid = Guid.NewGuid();
-                    it.Creator = request.GetCurrentUser().UserName;
-                    it.MerchantGuid = request.GetCurrentUser().MerchantGuid;
-                    it.CreateTime = DateTime.Now;
-                });
-                await db.PackageImps.AddRangeAsync(items);
-                await db.SaveChangesAsync();
-                await db.Database.ExecuteSqlRawAsync("p_syncimppackage @MerchantGuid"
-                    , new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)
-                    );
-
-            }
-            return Results.Ok(new { isOk = true });
-        }
-
-        private static async Task<IResult> ImportPackageComRelation(AppDbContext db, HttpRequest request, FileStream fs)
-        {
-            var fieldsMapper = new Dictionary<string, string>() {
-                    { "商品编码","ItemNo" },
-                    { "包件编码1","PackageNo1"},
-                    { "数量1","Num1" },
-                    { "包件编码2","PackageNo2"},
-                    { "数量2","Num2" },
-                    { "包件编码3","PackageNo3"},
-                    { "数量3","Num3" },
-                    { "包件编码4","PackageNo4"},
-                    { "数量4","Num4" },
-                    { "包件编码5","PackageNo5"},
-                    { "数量5","Num5" },
-                    { "包件编码6","PackageNo6"},
-                    { "数量6","Num6" },
-                    { "包件编码7","PackageNo7"},
-                    { "数量7","Num7" },
-                    { "包件编码8","PackageNo8"},
-                    { "数量8","Num8" },
-                    { "包件编码9","PackageNo9"},
-                    { "数量9","Num9" },
-                    { "包件编码10","PackageNo10"},
-                    { "数量10","Num10" }
-                };
-            var (rt, items) = Util.ReadExcel<ItemPackageImp>(fs, fieldsMapper);
-            if (rt)
-            {
-                items.ForEach(it =>
-                {
-                    it.Guid = Guid.NewGuid();
-                    it.Creator = request.GetCurrentUser().UserName;
-                    it.MerchantGuid = request.GetCurrentUser().MerchantGuid;
-                    it.CreateTime = DateTime.Now;
-                });
-                await db.ItemPackageImps.AddRangeAsync(items);
-                await db.SaveChangesAsync();
-                await db.Database.ExecuteSqlRawAsync("p_syncimppackage @MerchantGuid"
-                    , new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)
-                    );
-            }
-            return Results.Ok(new { isOk = true });
-        }
-
-
-        public static string Sql_GetImportSubItemNo => @";with t as(
-          SELECT s.ItemNo, d.SubItemNo,d.Num,s.MerchantGuid
-           FROM sub_item_imp s
-          CROSS APPLY (VALUES
-                        (SubItemNo1, Num1)
-                       ,(SubItemNo2, Num2)
-                       ,(SubItemNo3, Num3)
-                       ,(SubItemNo4, Num4)
-                       ,(SubItemNo5, Num5)
-                       ,(SubItemNo6, Num6)
-                       ,(SubItemNo7, Num7)
-                       ,(SubItemNo8, Num8)
-                       ,(SubItemNo9, Num9)
-                       ,(SubItemNo10, Num10)
-                      ) d (SubItemNo, Num)
-		        where s.MerchantGuid = @MerchantGuid
-         )
-         select [SubItemNo] from t where SubItemNo not in (select ItemNo from item)
-        AND MerchantGuid = @MerchantGuid
-        union
-         select [ItemNo] from t where ItemNo not in (select ItemNo from item)
-        AND MerchantGuid = @MerchantGuid
-        ";
     }
 }

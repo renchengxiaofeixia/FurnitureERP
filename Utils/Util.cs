@@ -8,7 +8,7 @@ namespace FurnitureERP.Utils
     public class Util
     {
         //读取表格
-        public static string CheckCellValues(FileStream fs, int totalCol, List<string> cellValues)
+        public static string MarkerCell(FileStream fs, int totalCol, List<string> cellValues)
         {
             ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             using var ep = new ExcelPackage(fs);
@@ -21,14 +21,12 @@ namespace FurnitureERP.Utils
             for (var row = 5; row <= totalRow; row++)               
             {
                 for (var col = 1; col <= totalCol; col++)
-                {
-                    
+                {                    
                     var value = worksheet.GetValue<string>(row, col);
                     if (cellValues.Contains(value)) {
                         worksheet.Cells[row, col].Style.Fill.PatternType = ExcelFillStyle.Solid;
                         worksheet.Cells[row, col].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(255, 0, 0));//设置单元格背景色
-                    }
-                   
+                    }                  
 
                 }
             }
@@ -38,8 +36,7 @@ namespace FurnitureERP.Utils
             ep.SaveAs(svrpath);
 
             var execlPath = $"/excel/{svrFn}";
-            return execlPath;
-           
+            return execlPath;          
             
         }
 

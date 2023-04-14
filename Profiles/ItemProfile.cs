@@ -16,6 +16,12 @@ namespace FurnitureERP.Profiles
 
             CreateMap<SubItemDto, SubItem>()
                 .ReverseMap();
+
+            CreateMap<PackageDto, Package>()
+                .ReverseMap();
+
+            CreateMap<CreatePackageDto, Package>()
+                .ReverseMap();
         }
     }
 }

@@ -35,6 +35,9 @@ public partial class Inventorybarcode
     [Column(TypeName = "decimal(18, 2)")]
     public decimal PackageQuantity { get; set; }
 
+    [StringLength(50)]
+    public string? PurchaseNo { get; set; }
+
     [StringLength(200)]
     public string? StorageNo { get; set; }
 

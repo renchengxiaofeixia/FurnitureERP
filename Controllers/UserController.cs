@@ -64,7 +64,14 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest();
             }
-
+            db.RecordDeletes.Add(new RecordDelete { 
+                RecordId = et.Id,
+                CreateTime = DateTime.Now,
+                Creator = request.GetCurrentUser().UserName,
+                MerchantGuid= request.GetCurrentUser().MerchantGuid,
+                JsonTypeName = et.GetType().Name,
+                JsonRecord = JsonSerializer.Serialize(et)
+            });
             db.Users.Remove(et);
             await db.SaveChangesAsync();
             return Results.NoContent();

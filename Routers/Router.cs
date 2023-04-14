@@ -57,15 +57,17 @@ namespace FurnitureERP.Routers
             app.MapPost("/item/import", ItemController.Import);
 
             app.MapPost("/item/upload", ItemController.Upload);
-            //app.MapGet("/prod/suppliers/{id}", ProdController.GetSuppliers);
-            //app.MapGet("/prod/inventorys/{prodNo}", ProdController.GetWarehouseProdInfos);
-            //app.MapGet("/prod/purchases/{prodNo}", ProdController.GetPurchases);
 
-            //app.MapPost("/prodcat", ProdCategoryController.Create);
-            //app.MapGet("/prodcats", ProdCategoryController.Get);
-            //app.MapGet("/prodcat/{id}", ProdCategoryController.Single);
-            //app.MapPut("/prodcat/{id}", ProdCategoryController.Edit);
-            //app.MapDelete("/prodcat/{id}", ProdCategoryController.Delete);
+
+
+            app.MapPost("/package", PackageController.Create);
+            app.MapGet("/packages", PackageController.Get);
+            app.MapGet("/packages/page", PackageController.Page);
+            app.MapGet("/package/{id}", PackageController.Single);
+            app.MapPut("/package/{id}", PackageController.Edit);
+            app.MapDelete("/package/{id}", PackageController.Delete);
+            app.MapPost("/package/import", PackageController.Import);
+
 
             app.MapPost("/supplier", SupplierController.Create);
             app.MapGet("/suppliers", SupplierController.Get);

@@ -32,7 +32,8 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> AdjustInventoryItems(AppDbContext db, List<InventoryItemAdjustDto> inventoryItemAdjustDtos, HttpRequest request,IMapper mapper)
         {
-            var inventories = await db.Inventories.Where(k => inventoryItemAdjustDtos.Any(j=>j.Guid == k.Guid)).ToListAsync();
+            var inventoryIds = inventoryItemAdjustDtos.Select(k => k.Guid);
+            var inventories = await db.Inventories.Where(k => inventoryIds.Any(id=> id == k.Guid)).ToListAsync();
             if ((from k in inventories
                  from j in inventoryItemAdjustDtos
                  where k.Guid == j.Guid && k.Quantity != j.Quantity
@@ -42,35 +43,44 @@ namespace FurnitureERP.Controllers
             }
 
             var adjustNo = await Util.GetSerialNoAsync(db, request.GetCurrentUser().MerchantGuid, "InventoryAdjust");
-
-            //更新库存
-            var inventoryForUpdate = from p in db.Inventories
-                                    join e in inventoryItemAdjustDtos
-                                    on p.Guid equals e.Guid
-                                    select new { p, e };
-            await inventoryForUpdate.ForEachAsync(up =>
+            try
             {
-                up.p.Quantity = up.e.AdjustQuantity;
-            });
+                db.Database.BeginTransaction();
 
-            //插入库存调整记录
-            var inventoryItemAdjusts = mapper.Map<List<InventoryItemAdjust>>(inventoryItemAdjustDtos);
-            inventoryItemAdjusts.ForEach(k =>
-            {
-                k.Creator = request.GetCurrentUser().UserName;
-                k.CreateTime = DateTime.Now;
-                k.MerchantGuid = request.GetCurrentUser().MerchantGuid;
-                k.AdjustNo = adjustNo;
-            });
-            await db.InventoryItemAdjusts.AddRangeAsync(inventoryItemAdjusts);
-            await db.SaveChangesAsync();
+                //插入库存调整记录
+                var inventoryItemAdjusts = mapper.Map<List<InventoryItemAdjust>>(inventoryItemAdjustDtos);
+                inventoryItemAdjusts.ForEach(k =>
+                {
+                    k.Creator = request.GetCurrentUser().UserName;
+                    k.CreateTime = DateTime.Now;
+                    k.MerchantGuid = request.GetCurrentUser().MerchantGuid;
+                    k.AdjustNo = adjustNo;
+                });
+                await db.InventoryItemAdjusts.AddRangeAsync(inventoryItemAdjusts);
+
+                //更新库存
+                var inventoryForUpdate = from p in db.Inventories
+                                         join e in db.InventoryItemAdjusts
+                                         on p.Guid equals e.Guid
+                                         select new { p, e };
+                await inventoryForUpdate.ForEachAsync(up =>
+                {
+                    up.p.Quantity = up.e.AdjustQuantity;
+                });
+
+                await db.SaveChangesAsync();
+                db.Database.CommitTransaction();
+            }
+            catch { 
+            }
             return Results.Ok();
         }
 
         [Authorize]
         public static async Task<IResult> MoveInventoryItems(AppDbContext db, List<InventoryItemMoveDto> inventoryItemMoveDtos, HttpRequest request,IMapper mapper)
         {
-            var inventories = await db.Inventories.Where(k => inventoryItemMoveDtos.Any(j => j.Guid == k.Guid)).ToListAsync();
+            var inventoryIds = inventoryItemMoveDtos.Select(k=>k.Guid);
+            var inventories = await db.Inventories.Where(k => inventoryIds.Any(id => id == k.Guid)).ToListAsync();
             if ((from k in inventories
                  from j in inventoryItemMoveDtos
                  where k.Guid == j.Guid && k.Quantity != j.Quantity
@@ -79,38 +89,46 @@ namespace FurnitureERP.Controllers
                 return Results.BadRequest("选择的库存商品数量不匹配!!");
             }
             var moveNo = await Util.GetSerialNoAsync(db, request.GetCurrentUser().MerchantGuid, "InventoryMove");
+            try
+            {
+                await db.Database.BeginTransactionAsync();  
+                
+                //保存库存移动记录
+                var inventoryItemMoves = mapper.Map<List<InventoryItemMove>>(inventoryItemMoveDtos);
+                inventoryItemMoves.ForEach(k =>
+                {
+                    k.Creator = request.GetCurrentUser().UserName;
+                    k.CreateTime = DateTime.Now;
+                    k.MerchantGuid = request.GetCurrentUser().MerchantGuid;
+                    k.MoveNo = moveNo;
+                });
+                await db.InventoryItemMoves.AddRangeAsync(inventoryItemMoves);
 
-            //更新库存
-            var inventoryForUpdate = from p in db.Inventories
-                                    join e in inventoryItemMoveDtos
+                //更新库存
+                var inventoryForUpdate = from p in db.Inventories
+                                    join e in db.InventoryItemMoves
                                     on p.Guid equals e.Guid
                                     select new { p, e };
-            await inventoryForUpdate.ForEachAsync(up =>
-            {
-                up.p.Quantity -= up.e.MoveQuantity;
-            });
+                await inventoryForUpdate.ForEachAsync(up =>
+                {
+                    up.p.Quantity -= up.e.MoveQuantity;
+                });
 
-            //插入移动到新的仓库的库存
-            inventoryItemMoveDtos.ForEach(k=>k.WareName = k.ToWareName);
-            var inventoryForInsert = mapper.Map<List<Inventory>>(inventoryItemMoveDtos);
-            inventoryForInsert.ForEach(ivt =>
-            {
-                ivt.StorageNo = moveNo;
-            });
-            await db.Inventories.AddRangeAsync(inventoryForInsert);
+                //插入移动到新的仓库的库存
+                inventoryItemMoveDtos.ForEach(k=>k.WareName = k.ToWareName);
+                var inventoryForInsert = mapper.Map<List<Inventory>>(inventoryItemMoveDtos);
+                inventoryForInsert.ForEach(ivt =>
+                {
+                    ivt.StorageNo = moveNo;
+                });
+                await db.Inventories.AddRangeAsync(inventoryForInsert);              
+                await db.SaveChangesAsync();
 
-            //保存库存移动记录
-            var inventoryItemMoves = mapper.Map<List<InventoryItemMove>>(inventoryItemMoveDtos);
-            inventoryItemMoves.ForEach(k =>
+                await db.Database.CommitTransactionAsync();
+            }
+            catch
             {
-                k.Creator = request.GetCurrentUser().UserName;
-                k.CreateTime = DateTime.Now;
-                k.MerchantGuid = request.GetCurrentUser().MerchantGuid;
-                k.MoveNo = moveNo;
-
-            });
-            await db.InventoryItemMoves.AddRangeAsync(inventoryItemMoves);
-            await db.SaveChangesAsync();
+            }
             return Results.Ok();
         }
     }

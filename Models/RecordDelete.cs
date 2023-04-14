@@ -6,19 +6,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Table("item_package")]
-public partial class ItemPackage
+[Keyless]
+[Table("record_delete")]
+public partial class RecordDelete
 {
-    [Key]
     public long Id { get; set; }
 
-    public Guid Guid { get; set; }
+    public long RecordId { get; set; }
 
-    [StringLength(100)]
-    public string ItemNo { get; set; } = null!;
+    [StringLength(50)]
+    public string JsonTypeName { get; set; } = null!;
 
-    [StringLength(100)]
-    public string PackageNo { get; set; } = null!;
+    public string JsonRecord { get; set; } = null!;
 
     [Column(TypeName = "datetime")]
     public DateTime CreateTime { get; set; }

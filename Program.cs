@@ -3,6 +3,9 @@
 dotnet ef dbcontext scaffold Name=ConnectionStrings:SqlConnection Microsoft.EntityFrameworkCore.SqlServer --data-annotations --context AppDbContext --context-dir Database --output-dir Models --force
  */
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc.Filters;
+
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration["ConnectionStrings:SqlConnection"];
@@ -92,12 +95,10 @@ app.UseStaticFiles(new StaticFileOptions()
     RequestPath = new PathString("/images")
 });
 
-#endregion 
+#endregion
 
 #region routers
-
 FurnitureERP.Routers.Router.Use(app);
-
 #endregion
 
 // start 

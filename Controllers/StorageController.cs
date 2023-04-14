@@ -28,6 +28,7 @@ namespace FurnitureERP.Controllers
                 pi.MerchantGuid = storage.MerchantGuid;
                 pi.Amount = pi.CostPrice * pi.StorageNum;
                 pi.PurchaseNo = storage.PurchaseNo;
+                pi.StorageNo = storage.StorageNo;
             });
 
             await db.StorageItems.AddRangeAsync(storageItems);
@@ -111,7 +112,8 @@ namespace FurnitureERP.Controllers
                 PurchaseNo = et.PurchaseNo,
                 PurchaseNum = k.PurchaseNum,
                 Remark = k.Remark,
-                CostPrice = k.CostPrice
+                CostPrice = k.CostPrice,
+                StorageNo = et.StorageNo
             }).ToList();
             var preItems = await db.StorageItems.Where(k => k.StorageNo == et.StorageNo && k.MerchantGuid == et.MerchantGuid).ToListAsync();
             db.StorageItems.RemoveRange(preItems);
