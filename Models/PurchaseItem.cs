@@ -39,6 +39,8 @@ public partial class PurchaseItem
 
     public int StorageNum { get; set; }
 
+    public int CancelNum { get; set; }
+
     [StringLength(500)]
     public string? Remark { get; set; }
 

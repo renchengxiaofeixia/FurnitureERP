@@ -39,4 +39,6 @@ public partial class User
     public string? SellerNick { get; set; }
 
     public Guid MerchantGuid { get; set; }
+
+    public byte[] TimeStamp { get; set; } = null!;
 }

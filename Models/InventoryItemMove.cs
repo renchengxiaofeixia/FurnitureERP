@@ -6,57 +6,52 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Table("inventory")]
-public partial class Inventory
+[Table("inventory_item_move")]
+public partial class InventoryItemMove
 {
     [Key]
     public int Id { get; set; }
 
     public Guid Guid { get; set; }
 
-    [StringLength(200)]
+    [StringLength(50)]
+    public string? MoveNo { get; set; }
+
+    [StringLength(100)]
     public string ItemName { get; set; } = null!;
 
-    [StringLength(200)]
+    [StringLength(100)]
     public string ItemNo { get; set; } = null!;
-
-    [StringLength(200)]
-    public string StdItemNo { get; set; } = null!;
 
     public int Quantity { get; set; }
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal CostPrice { get; set; }
 
-    [StringLength(50)]
-    public string? WareName { get; set; }
-
-    [StringLength(50)]
-    public string? PurchaseNo { get; set; }
-
-    [StringLength(50)]
-    public string? StorageNo { get; set; }
-
-    [StringLength(50)]
-    public string? SuppName { get; set; }
-
     [Column(TypeName = "datetime")]
-    public DateTime? StorageTime { get; set; }
-
-    [StringLength(200)]
-    public string? Remark { get; set; }
-
-    [Column(TypeName = "datetime")]
-    public DateTime CreateTime { get; set; }
+    public DateTime? CreateTime { get; set; }
 
     [StringLength(50)]
     public string? Creator { get; set; }
 
     [StringLength(50)]
-    public string? StorageType { get; set; }
+    public string? WareName { get; set; }
 
     [StringLength(50)]
-    public string? Tid { get; set; }
+    public string? ToWareName { get; set; }
+
+    [StringLength(50)]
+    public string? PurchaseNo { get; set; }
+
+    [StringLength(50)]
+    public string? SuppName { get; set; }
+
+    public int MoveQuantity { get; set; }
+
+    [StringLength(500)]
+    public string? Remark { get; set; }
 
     public Guid MerchantGuid { get; set; }
+
+    public byte[] TimeStamp { get; set; } = null!;
 }

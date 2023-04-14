@@ -60,4 +60,6 @@ public partial class LogisPoint
     public DateTime CreateTime { get; set; }
 
     public Guid MerchantGuid { get; set; }
+
+    public byte[] TimeStamp { get; set; } = null!;
 }

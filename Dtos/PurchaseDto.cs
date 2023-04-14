@@ -57,6 +57,7 @@
         public int PurchaseNum { get; set; }
         public decimal Amount { get; set; }
         public int StorageNum { get; set; }
+        public int CancelNum { get; set; }
         public string? Remark { get; set; }
         public DateTime? CreateTime { get; set; }
         public string? Creator { get; set; }

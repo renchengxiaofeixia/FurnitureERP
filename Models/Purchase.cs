@@ -75,4 +75,6 @@ public partial class Purchase
     public string? Tid { get; set; }
 
     public Guid MerchantGuid { get; set; }
+
+    public byte[] TimeStamp { get; set; } = null!;
 }
