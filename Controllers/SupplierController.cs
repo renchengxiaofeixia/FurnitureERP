@@ -7,9 +7,6 @@ namespace FurnitureERP.Controllers
 {
     public class SupplierController
     {
-        public static string GetCellSql => @"select ItemNo from supp_item_imp where ItemNo not in (select ItemNo from item)
-AND MerchantGuid = '39672892-6ab8-4ea1-83d4-49a4f714d35e'
-";
 
         [Authorize]
         public static async Task<IResult> Create(AppDbContext db, CreateSuppDto SuppDto, HttpRequest request,IMapper mapper)
