@@ -148,7 +148,7 @@ namespace FurnitureERP.Controllers
         private static async Task<IResult> ImportPackageComRelation(AppDbContext db, HttpRequest request, FileStream fs)
         {
             var fieldsMapper = new Dictionary<string, string>() {
-                    { "商品编码","PackageNo" },
+                    { "商品编码","ItemNo" },
                     { "包件编码1","PackageNo1"},
                     { "数量1","Num1" },
                     { "包件编码2","PackageNo2"},
@@ -182,7 +182,7 @@ namespace FurnitureERP.Controllers
                 });
                 await db.ItemPackageImps.AddRangeAsync(items);
                 await db.SaveChangesAsync();
-                await db.Database.ExecuteSqlRawAsync("p_syncimppackage @MerchantGuid"
+                await db.Database.ExecuteSqlRawAsync("p_syncimpitempackage @MerchantGuid"
                     , new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)
                     );
             }
