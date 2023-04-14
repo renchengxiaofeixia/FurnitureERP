@@ -169,7 +169,7 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest("已经审核的采购订单信息，不能删除!!");
             }
-            var items = await db.PurchaseItems.Where(k => k.PurchaseNo == et.PurchaseNo).ToListAsync();
+            var items = await db.PurchaseItems.Where(k => k.PurchaseNo == et.PurchaseNo && k.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
             if (items.Any(k => k.StorageNum > 0))
             {
                 return Results.BadRequest("采购订单已经有物品入库，不能删除!!");
@@ -201,12 +201,12 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> UnAudit(AppDbContext db, int id, HttpRequest request)
         {
-            var et = await db.Purchases.FirstOrDefaultAsync(x => x.Id == id);
+            var et = await db.Purchases.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
             {
                 return Results.BadRequest("没有找到采购订单信息!!");
             }
-            var items = await db.PurchaseItems.Where(k => k.PurchaseNo == et.PurchaseNo).ToListAsync();
+            var items = await db.PurchaseItems.Where(k => k.PurchaseNo == et.PurchaseNo && k.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
             if (items.Any(k => k.StorageNum > 0))
             {
                 return Results.BadRequest("采购订单已经有物品入库，不能退审!!");

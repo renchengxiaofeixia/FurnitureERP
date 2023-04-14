@@ -300,6 +300,7 @@ namespace FurnitureERP.Controllers
                 var removeSubItems = await db.SubItems.Where(k => k.ItemNo == et.ItemNo).ToListAsync();
                 db.SubItems.RemoveRange(removeSubItems);
             }
+            db.Items.Remove(et);
             await db.SaveChangesAsync();
             return Results.NoContent();
         }
