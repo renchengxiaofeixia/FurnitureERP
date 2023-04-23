@@ -141,7 +141,7 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> CreateLogisPoint(AppDbContext db, CreateLogisticDto logisPointDto, HttpRequest request, IMapper mapper)
         {
-            if (await db.LogisPoints.FirstOrDefaultAsync(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.LogisName == logisPointDto.LogisName) != null)
+            if (await db.LogisPoints.FirstOrDefaultAsync(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.PointName == logisPointDto.PointName) != null)
             {
                 return Results.BadRequest("存在相同的物流名称");
             }
