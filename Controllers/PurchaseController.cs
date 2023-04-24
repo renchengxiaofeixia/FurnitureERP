@@ -38,37 +38,39 @@ namespace FurnitureERP.Controllers
 
             await db.PurchaseItems.AddRangeAsync(purchaseItems);
 
-            //var prods = purchaseDto.ItemDtos.Select(k => new PurchaseItem
-            //{
-            //    ItemNo = k.ItemNo,
-            //    ItemName = k.ItemName,
-            //    Amount = k.CostPrice * k.PurchNum,
-            //    CreateTime = DateTime.Now,
-            //    Creator = request.GetCurrentUser().UserName,
-            //    MerchantGuid = purchase.MerchantGuid,
-            //    PurchaseNo = purchase.PurchaseNo,
-            //    PurchaseNum = k.PurchNum,
-            //    Remark = k.Remark,
-            //    CostPrice = k.CostPrice
-            //}).ToList();
-
             await db.Purchases.AddAsync(purchase);
             await db.SaveChangesAsync();
             return Results.Created($"/purchase/{purchase.Id}", purchase);
         }
 
-        //[Authorize]
-        //public static async Task<IResult> Get(AppDbContext db, PagingData pageData,IMapper mapper)
+        //public static async Task<IResult> CreateFromTrade(AppDbContext db, CreatePurchaseDto purchaseDto, HttpRequest request, IMapper mapper)
         //{
-        //    var ets = db.PurchaseOrders.Select(x => x);
-        //    if (!string.IsNullOrEmpty(pageData.SearchString))
+        //    var purchase = mapper.Map<Purchase>(purchaseDto);
+        //    purchase.PurchaseNo = await Util.GetSerialNoAsync(db, request.GetCurrentUser().MerchantGuid, "purchase");
+        //    purchase.AggregateAmount = purchaseDto.ItemDtos.Sum(k => k.CostPrice * k.PurchaseNum);
+        //    purchase.Creator = request.GetCurrentUser().UserName;
+        //    purchase.MerchantGuid = request.GetCurrentUser().MerchantGuid;
+        //    purchase.SettlementMode = "";
+
+        //    if (purchaseDto.ItemDtos == null || purchaseDto.ItemDtos.Count < 1)
         //    {
-        //        ets = ets.Where(s => s.PurchaseNo.Contains(pageData.SearchString));
+        //        return Results.BadRequest();
         //    }
-        //    ets = ets.OrderByDescending(s => s.Id);
-        //    var p = await Page<PurchaseOrder>.CreateAsync(ets, pageData.CurrentPage, pageData.PageSize); 
-        //    p.Data = mapper.Map<List<PurchaseOrderDto>>(p.Data);
-        //    return Results.Ok(p);
+        //    var purchaseItems = mapper.Map<List<PurchaseItem>>(purchaseDto.ItemDtos);
+        //    purchaseItems.ForEach(pi =>
+        //    {
+        //        pi.Amount = pi.CostPrice * pi.PurchaseNum;
+        //        pi.CreateTime = DateTime.Now;
+        //        pi.Creator = request.GetCurrentUser().UserName;
+        //        pi.MerchantGuid = purchase.MerchantGuid;
+        //        pi.PurchaseNo = purchase.PurchaseNo;
+        //    });
+
+        //    await db.PurchaseItems.AddRangeAsync(purchaseItems);
+
+        //    await db.Purchases.AddAsync(purchase);
+        //    await db.SaveChangesAsync();
+        //    return Results.Created($"/purchase/{purchase.Id}", purchase);
         //}
 
         [Authorize]

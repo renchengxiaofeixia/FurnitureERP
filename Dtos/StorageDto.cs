@@ -10,6 +10,7 @@
         public string? SuppName { get; set; }
         public decimal AggregateAmount { get; set; }
         public string? WareName { get; set; }
+        public string Tid { get; set; }
         public string? Remark { get; set; }
         public DateTime CreateTime { get; set; }
         public string? Creator { get; set; }
@@ -22,12 +23,10 @@
 
     public class CreateStorageDto
     {
-        public string? StorageNo { get; set; }
         public DateTime StorageDate { get; set; }
         public string? StorageType { get; set; }
         public string? SuppName { get; set; }
         public string? WareName { get; set; }
-        public decimal AggregateAmount { get; set; }
         public string? Remark { get; set; }
         public string? PurchaseNo { get; set; }
         public List<CreateStorageItemDto> ItemDtos { get; set; }

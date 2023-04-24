@@ -10,7 +10,7 @@ namespace FurnitureERP.Controllers
         public static async Task<IResult> GetInventories(AppDbContext db, IMapper mapper, HttpRequest request
             , string? keyword, int pageNo, int pageSize)
         {
-            IQueryable<Inventory> inventories = db.Inventories.Where(x=>x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
+            IQueryable<Inventory> inventories = db.Inventories.Where(x=>x.Quantity > 0 && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (!string.IsNullOrEmpty(keyword))
             {
                 inventories = inventories.Where(k => k.WareName.Contains(keyword) 
@@ -106,9 +106,9 @@ namespace FurnitureERP.Controllers
 
                 //更新库存
                 var inventoryForUpdate = from p in db.Inventories
-                                    join e in db.InventoryItemMoves
-                                    on p.Guid equals e.Guid
-                                    select new { p, e };
+                                        join e in db.InventoryItemMoves
+                                        on p.Guid equals e.Guid
+                                        select new { p, e };
                 await inventoryForUpdate.ForEachAsync(up =>
                 {
                     up.p.Quantity -= up.e.MoveQuantity;

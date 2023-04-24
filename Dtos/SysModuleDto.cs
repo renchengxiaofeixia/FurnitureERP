@@ -1,6 +1,6 @@
 ﻿namespace FurnitureERP.Dtos
 {
-    public class ErpModuleDto
+    public class SysModuleDto
     {
         public long Id { get; set; }
         public Guid Guid { get; set; }

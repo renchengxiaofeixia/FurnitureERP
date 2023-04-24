@@ -14,11 +14,20 @@ public partial class RolePermit
 
     public Guid Guid { get; set; }
 
+    /// <summary>
+    /// 角色名
+    /// </summary>
     [StringLength(100)]
     public string RoleName { get; set; } = null!;
 
+    /// <summary>
+    /// 角色ID
+    /// </summary>
     public int RoleId { get; set; }
 
+    /// <summary>
+    /// 权限
+    /// </summary>
     public string? PermitData { get; set; }
 
     [Column(TypeName = "datetime")]

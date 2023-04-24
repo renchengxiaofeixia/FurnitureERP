@@ -9,6 +9,10 @@
 
             CreateMap<InventoryItemMoveDto, InventoryItemMove>()
                 .ReverseMap();
+
+            CreateMap<InventoryItemMoveDto, Inventory>()
+                .ReverseMap();
+
         }
     }
 }

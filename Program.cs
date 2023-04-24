@@ -104,5 +104,5 @@ FurnitureERP.Routers.Router.Use(app);
 // start 
 app.MapGet("/", () => "Dotnet Minimal API");
 
-//app.Run($"https://0.0.0.0:31000");
-app.Run();
+app.Run($"https://0.0.0.0:31000");
+//app.Run();

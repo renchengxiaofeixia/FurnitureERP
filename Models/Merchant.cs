@@ -14,15 +14,27 @@ public partial class Merchant
 
     public Guid Guid { get; set; }
 
+    /// <summary>
+    /// 商户账号
+    /// </summary>
     [StringLength(50)]
     public string MerchantName { get; set; } = null!;
 
+    /// <summary>
+    /// 密码
+    /// </summary>
     [StringLength(100)]
     public string? Password { get; set; }
 
+    /// <summary>
+    /// 手机号
+    /// </summary>
     [StringLength(100)]
     public string? MobileNo { get; set; }
 
+    /// <summary>
+    /// 商户公司
+    /// </summary>
     [StringLength(100)]
     public string? CompanyName { get; set; }
 

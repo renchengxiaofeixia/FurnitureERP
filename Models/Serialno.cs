@@ -14,15 +14,27 @@ public partial class SerialNo
 
     public Guid Guid { get; set; }
 
+    /// <summary>
+    /// 模块名
+    /// </summary>
     [StringLength(50)]
     public string ModuleNo { get; set; } = null!;
 
+    /// <summary>
+    /// 前缀
+    /// </summary>
     [StringLength(10)]
     public string Prefix { get; set; } = null!;
 
+    /// <summary>
+    /// 后缀
+    /// </summary>
     [StringLength(10)]
     public string Ending { get; set; } = null!;
 
+    /// <summary>
+    /// 数量（同模块当天）
+    /// </summary>
     public long LoopNum { get; set; }
 
     [Column(TypeName = "datetime")]
@@ -31,8 +43,14 @@ public partial class SerialNo
     [StringLength(200)]
     public string Creator { get; set; } = null!;
 
+    /// <summary>
+    /// 备注
+    /// </summary>
     [StringLength(200)]
     public string Remark { get; set; } = null!;
 
+    /// <summary>
+    /// 商户GUID
+    /// </summary>
     public Guid MerchantGuid { get; set; }
 }

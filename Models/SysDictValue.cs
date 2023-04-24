@@ -6,25 +6,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Keyless]
-[Table("role")]
-public partial class Role
+[Table("sys_dict_value")]
+public partial class SysDictValue
 {
-    public long Id { get; set; }
+    [Key]
+    public int Id { get; set; }
 
     public Guid Guid { get; set; }
 
-    /// <summary>
-    /// 角色名
-    /// </summary>
-    [StringLength(100)]
-    public string RoleName { get; set; } = null!;
-
-    /// <summary>
-    /// 备注
-    /// </summary>
     [StringLength(200)]
-    public string Remark { get; set; } = null!;
+    public string? DictCode { get; set; }
+
+    [StringLength(200)]
+    public string? DataValue { get; set; }
+
+    [StringLength(2000)]
+    public string? Remark { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime CreateTime { get; set; }
@@ -32,16 +29,10 @@ public partial class Role
     [StringLength(50)]
     public string? Creator { get; set; }
 
-    /// <summary>
-    /// 是否启用
-    /// </summary>
     [Required]
     public bool? IsUsing { get; set; }
 
-    /// <summary>
-    /// 商户GUID
-    /// </summary>
-    public Guid MerchantGuid { get; set; }
-
     public byte[] TimeStamp { get; set; } = null!;
+
+    public Guid MerchantGuid { get; set; }
 }

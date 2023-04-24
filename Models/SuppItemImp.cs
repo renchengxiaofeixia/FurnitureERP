@@ -14,12 +14,21 @@ public partial class SuppItemImp
 
     public Guid Guid { get; set; }
 
+    /// <summary>
+    /// 供应商名
+    /// </summary>
     [StringLength(50)]
     public string? SuppName { get; set; }
 
+    /// <summary>
+    /// 商品编码
+    /// </summary>
     [StringLength(200)]
     public string? ItemNo { get; set; }
 
+    /// <summary>
+    /// 成本价
+    /// </summary>
     [Column(TypeName = "decimal(18, 2)")]
     public decimal CostPrice { get; set; }
 
@@ -29,5 +38,8 @@ public partial class SuppItemImp
     [StringLength(50)]
     public string? Creator { get; set; }
 
+    /// <summary>
+    /// 商户GUID
+    /// </summary>
     public Guid MerchantGuid { get; set; }
 }

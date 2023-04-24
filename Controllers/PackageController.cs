@@ -138,9 +138,7 @@ namespace FurnitureERP.Controllers
                 await db.PackageImps.AddRangeAsync(items);
                 await db.SaveChangesAsync();
                 await db.Database.ExecuteSqlRawAsync("p_syncimppackage @MerchantGuid"
-                    , new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)
-                    );
-
+                    , new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid));
             }
             return Results.Ok(new { isOk = true });
         }
@@ -182,11 +180,49 @@ namespace FurnitureERP.Controllers
                 });
                 await db.ItemPackageImps.AddRangeAsync(items);
                 await db.SaveChangesAsync();
-                await db.Database.ExecuteSqlRawAsync("p_syncimpitempackage @MerchantGuid"
+
+                var importPackageNos = db.Database.SqlQueryRaw<string>(Sql_GetImportPackageNo, new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)).ToList();
+                if (importPackageNos.Count > 0)
+                {
+                    var execlPath = Util.MarkerCell(fs, fieldsMapper.Count, importPackageNos);
+                    return Results.BadRequest(new
+                    {
+                        url = execlPath,
+                        msg = "导入表格中存在包件表中不存在的包件，已对不存在或错误包件编码标红处理，请修改或者添加好商品或者包件信息再进行导入！"
+                    });
+                }
+                else
+                {
+                    await db.Database.ExecuteSqlRawAsync("p_syncimpitempackage @MerchantGuid"
                     , new SqlParameter("@MerchantGuid", request.GetCurrentUser().MerchantGuid)
                     );
+                }
             }
             return Results.Ok(new { isOk = true });
         }
+
+        public static string Sql_GetImportPackageNo => @";with t as(
+          SELECT s.ItemNo, d.PackageNo,d.Num,s.MerchantGuid
+           FROM sub_item_imp s
+          CROSS APPLY (VALUES
+                        (PackageNo1, Num1)
+                       ,(PackageNo2, Num2)
+                       ,(PackageNo3, Num3)
+                       ,(PackageNo4, Num4)
+                       ,(PackageNo5, Num5)
+                       ,(PackageNo6, Num6)
+                       ,(PackageNo7, Num7)
+                       ,(PackageNo8, Num8)
+                       ,(PackageNo9, Num9)
+                       ,(PackageNo10, Num10)
+                      ) d (PackageNo, Num)
+		        where s.MerchantGuid = @MerchantGuid
+         )
+         select [PackageNo] from t where PackageNo not in (select PackageNo from item)
+        AND MerchantGuid = @MerchantGuid
+        union
+         select [ItemNo] from t where ItemNo not in (select ItemNo from item)
+        AND MerchantGuid = @MerchantGuid
+        ";
     }
 }

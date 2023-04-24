@@ -33,13 +33,16 @@ public partial class LogisPointImp
     public string? PointAdress { get; set; }
 
     [StringLength(50)]
-    public string? PorintMobile { get; set; }
+    public string? PointMobile { get; set; }
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal LowestPrice { get; set; }
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal Price { get; set; }
+
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal GanPrice { get; set; }
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal ZhiPrice { get; set; }
