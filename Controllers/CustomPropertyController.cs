@@ -20,7 +20,7 @@ namespace FurnitureERP.Controllers
 
             await db.PropertyConfigs.AddAsync(et);
             await db.SaveChangesAsync();
-            return Results.Created($"/propconfig/{et.Id}", et);
+            return Results.Created($"/sysprop/{et.Id}", et);
         }
 
         [Authorize]
@@ -33,8 +33,8 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> GetMods(AppDbContext db, IMapper mapper)
         {
-            var mods = await db.ErpModules.ToListAsync();
-            return mods == null ? Results.NotFound() : Results.Ok(mapper.Map<ErpModuleDto>(mods));
+            var mods = await db.SysModules.ToListAsync();
+            return mods == null ? Results.NotFound() : Results.Ok(mapper.Map<SysModuleDto>(mods));
         }
     }
 }

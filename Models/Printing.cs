@@ -6,23 +6,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Table("phone_code")]
-public partial class PhoneCode
+[Table("printing")]
+public partial class Printing
 {
     [Key]
     public long Id { get; set; }
 
-    /// <summary>
-    /// 手机号
-    /// </summary>
-    [StringLength(100)]
-    public string? MobileNo { get; set; }
+    public long? TradeId { get; set; }
 
-    /// <summary>
-    /// 验证码
-    /// </summary>
-    [StringLength(100)]
-    public string? SmsCode { get; set; }
+    public Guid? PrintSession { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime CreateTime { get; set; }

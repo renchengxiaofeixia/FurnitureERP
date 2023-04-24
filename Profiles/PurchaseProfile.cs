@@ -16,6 +16,9 @@ namespace FurnitureERP.Profiles
 
             CreateMap<CreatePurchaseItemDto, PurchaseItem>() 
                 .ReverseMap();
+
+            //CreateMap<PurchaseItemDto, StorageItem>()
+            //    .ReverseMap();
         }
     }
 }

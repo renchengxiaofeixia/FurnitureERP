@@ -6,40 +6,34 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Table("supp_item_imp")]
-public partial class SuppItemImp
+[Table("trade_pay")]
+public partial class TradePay
 {
     [Key]
     public long Id { get; set; }
 
     public Guid Guid { get; set; }
 
-    /// <summary>
-    /// 供应商名
-    /// </summary>
     [StringLength(50)]
-    public string? SuppName { get; set; }
+    public string? Tid { get; set; }
 
-    /// <summary>
-    /// 商品编码
-    /// </summary>
-    [StringLength(200)]
-    public string? ItemNo { get; set; }
+    [StringLength(50)]
+    public string? PayWay { get; set; }
 
-    /// <summary>
-    /// 成本价
-    /// </summary>
     [Column(TypeName = "decimal(18, 2)")]
-    public decimal CostPrice { get; set; }
+    public decimal Payment { get; set; }
 
     [Column(TypeName = "datetime")]
-    public DateTime CreateTime { get; set; }
+    public DateTime? PayTime { get; set; }
+
+    [StringLength(500)]
+    public string? Remark { get; set; }
 
     [StringLength(50)]
     public string? Creator { get; set; }
 
-    /// <summary>
-    /// 商户GUID
-    /// </summary>
+    [Column(TypeName = "datetime")]
+    public DateTime CreateTime { get; set; }
+
     public Guid MerchantGuid { get; set; }
 }

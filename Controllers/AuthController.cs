@@ -11,7 +11,7 @@ namespace FurnitureERP.Controllers
             {
                 var merchantName = user.UserName.Substring(0, user.UserName.LastIndexOf(":"));
                 var userName = user.UserName.Substring(user.UserName.LastIndexOf(":") +1);
-                var et = await db.Users.FirstOrDefaultAsync(k => k.UserName == userName && k.MerchantName == merchantName && k.Password == user.Password);
+                var et = await db.Users.FirstOrDefaultAsync(k => (k.IsUsing.HasValue && k.IsUsing.Value) && k.UserName == userName && k.MerchantName == merchantName && k.Password == user.Password);
                 if (et == null)
                 {
                     return Results.BadRequest("用户名或密码错误");

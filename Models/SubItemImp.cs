@@ -14,12 +14,21 @@ public partial class SubItemImp
 
     public Guid Guid { get; set; }
 
+    /// <summary>
+    /// 商品编码
+    /// </summary>
     [StringLength(200)]
-    public string? ItemNo { get; set; }
+    public string ItemNo { get; set; } = null!;
 
+    /// <summary>
+    /// 下级编码
+    /// </summary>
     [StringLength(200)]
     public string? SubItemNo1 { get; set; }
 
+    /// <summary>
+    /// 数量
+    /// </summary>
     public int Num1 { get; set; }
 
     [StringLength(200)]
@@ -73,5 +82,8 @@ public partial class SubItemImp
     [StringLength(50)]
     public string? Creator { get; set; }
 
+    /// <summary>
+    /// 商户GUID
+    /// </summary>
     public Guid MerchantGuid { get; set; }
 }

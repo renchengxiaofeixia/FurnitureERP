@@ -26,11 +26,11 @@ public partial class Inventorybarcode
     [StringLength(50)]
     public string StdItemNo { get; set; } = null!;
 
-    [StringLength(50)]
-    public string? PkNo { get; set; }
+    [StringLength(100)]
+    public string? PackageNo { get; set; }
 
-    [StringLength(50)]
-    public string? PkName { get; set; }
+    [StringLength(100)]
+    public string? PackageName { get; set; }
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal PackageQuantity { get; set; }
@@ -60,7 +60,7 @@ public partial class Inventorybarcode
     [StringLength(50)]
     public string? PrintUser { get; set; }
 
-    public Guid? InvtGuid { get; set; }
+    public Guid? InventoryGuid { get; set; }
 
     [StringLength(50)]
     public string? Tid { get; set; }

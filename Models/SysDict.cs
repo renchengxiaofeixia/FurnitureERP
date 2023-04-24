@@ -6,20 +6,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Table("erp_module")]
-public partial class ErpModule
+[Table("sys_dict")]
+public partial class SysDict
 {
     [Key]
-    public long Id { get; set; }
+    public int Id { get; set; }
 
     public Guid Guid { get; set; }
 
-    [StringLength(50)]
-    public string ModuleName { get; set; } = null!;
+    [StringLength(200)]
+    public string? DictCode { get; set; }
 
-    [StringLength(50)]
-    public string ModuleNo { get; set; } = null!;
+    [StringLength(200)]
+    public string? DictName { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime CreateTime { get; set; }
+
+    public byte[] TimeStamp { get; set; } = null!;
 }
