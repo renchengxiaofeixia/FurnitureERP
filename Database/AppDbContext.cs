@@ -54,6 +54,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<PhoneCode> PhoneCodes { get; set; }
 
+    public virtual DbSet<Printing> Printings { get; set; }
+
     public virtual DbSet<PropertyConfig> PropertyConfigs { get; set; }
 
     public virtual DbSet<Purchase> Purchases { get; set; }
@@ -93,6 +95,10 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Trade> Trades { get; set; }
 
     public virtual DbSet<TradeItem> TradeItems { get; set; }
+
+    public virtual DbSet<TradeItemMatchInventory> TradeItemMatchInventories { get; set; }
+
+    public virtual DbSet<TradePay> TradePays { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -346,6 +352,13 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.MobileNo).HasComment("手机号");
             entity.Property(e => e.SmsCode).HasComment("验证码");
+        });
+
+        modelBuilder.Entity<Printing>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__printing__3214EC07F7D789F1");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
         });
 
         modelBuilder.Entity<PropertyConfig>(entity =>
@@ -661,6 +674,25 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.TimeStamp)
                 .IsRowVersion()
                 .IsConcurrencyToken();
+        });
+
+        modelBuilder.Entity<TradeItemMatchInventory>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__trade_item_match_inventory");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.TimeStamp)
+                .IsRowVersion()
+                .IsConcurrencyToken();
+        });
+
+        modelBuilder.Entity<TradePay>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__trade_pa__3214EC0770750D57");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
         });
 
         modelBuilder.Entity<User>(entity =>

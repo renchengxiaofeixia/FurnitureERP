@@ -194,4 +194,81 @@
         public bool IsMade { get; set; }
         public string? Remark { get; set; }
     }
+
+    public class TradeItemMatchInventoryDto
+    {
+        public long Id { get; set; }
+        public Guid Guid { get; set; }
+        public string? Tid { get; set; }
+        public string? PicPath { get; set; }
+        public string? ItemName { get; set; }
+        public string? ItemNo { get; set; }
+        public string? StdItemNo { get; set; }
+        public DateTime? Modified { get; set; }
+        public decimal Num { get; set; }
+        public long? NumIid { get; set; }
+        public string? OrderFrom { get; set; }
+        public decimal Payment { get; set; }
+        public decimal DivideOrderFee { get; set; }
+        public decimal PartMjzDiscount { get; set; }
+        public decimal CostPrice { get; set; }
+        public decimal Price { get; set; }
+        public string? SellerNick { get; set; }
+        public bool IsMade { get; set; }
+        public string? Remark { get; set; }
+        public DateTime CreateTime { get; set; }
+        public string Creator { get; set; }
+        public DateTime? AllocInventoryDate { get; set; }
+        public string? AllocInventoryUser { get; set; }
+        public long? InventoryId { get; set; }
+        public string? SuppName { get; set; }
+    }
+
+    public class CreateTradeItemMatchInventoryDto
+    {
+        public required string Tid { get; set; }
+        public string? PicPath { get; set; }
+        public string? ItemName { get; set; }
+        public string? ItemNo { get; set; }
+        public string? StdItemNo { get; set; }
+        public DateTime? Modified { get; set; }
+        public decimal Num { get; set; }
+        public long? NumIid { get; set; }
+        public string? OrderFrom { get; set; }
+        public decimal Payment { get; set; }
+        public decimal DivideOrderFee { get; set; }
+        public decimal PartMjzDiscount { get; set; }
+        public decimal CostPrice { get; set; }
+        public decimal Price { get; set; }
+        public string? SellerNick { get; set; }
+        public bool IsMade { get; set; }
+        public string? Remark { get; set; }
+        public DateTime? AllocInventoryDate { get; set; }
+        public string? AllocInventoryUser { get; set; }
+        public long? InventoryId { get; set; }
+        public string? SuppName { get; set; }
+    }
+
+    public partial class TradePayDto
+    {
+        public int Id { get; set; }
+        public Guid Guid { get; set; }
+        public required string Tid { get; set; }
+        public string? PayWay { get; set; }
+        public decimal Payment { get; set; }
+        public DateTime? PayTime { get; set; }
+        public string? Remark { get; set; }
+        public string? Creator { get; set; }
+        public DateTime CreateTime { get; set; }
+    }
+
+    public partial class CreateTradePayDto
+    {
+        public required string Tid { get; set; }
+        public string? PayWay { get; set; }
+        public decimal Payment { get; set; }
+        public DateTime? PayTime { get; set; }
+        public string? Remark { get; set; }
+    }
+
 }

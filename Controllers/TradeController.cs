@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FurnitureERP.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 namespace FurnitureERP.Controllers
 {
@@ -30,7 +32,7 @@ namespace FurnitureERP.Controllers
 
             await db.Trades.AddAsync(trade);
             await db.SaveChangesAsync();
-            return Results.Created($"/purchase/{trade.Id}", trade);
+            return Results.Created($"/trade/{trade.Id}", trade);
         }
 
         [Authorize]
@@ -348,6 +350,13 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
+        public static async Task<IResult> MatchInventory(AppDbContext db, List<CreateTradeItemMatchInventoryDto> tradeItemMatchInventoryDtos, IMapper mapper, HttpRequest request)
+        {
+           
+            return Results.Ok();
+        }
+
+        [Authorize]
         public static async Task<IResult> GetTradeProdInfos(AppDbContext db, long id, IMapper mapper, HttpRequest request)
         {
             var et = await db.Trades.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
@@ -359,6 +368,70 @@ namespace FurnitureERP.Controllers
             items = items.OrderByDescending(s => s.Id).ToList();
 
             return Results.Ok(mapper.Map<List<TradeItemDto>>(items));
+        }
+
+        [Authorize]
+        public static async Task<IResult> CreateTradePay(AppDbContext db, CreateTradePayDto tradePayDto, HttpRequest request, IMapper mapper)
+        {
+            var tradePay = mapper.Map<TradePay>(tradePayDto);
+            tradePay.CreateTime = DateTime.Now;
+            tradePay.Creator = request.GetCurrentUser().UserName;
+            tradePay.MerchantGuid = request.GetCurrentUser().MerchantGuid;
+
+            db.TradePays.Add(tradePay);
+            await db.SaveChangesAsync();
+            return Results.Created($"/trade/pay/{tradePay.Id}", tradePay);
+        }
+
+        [Authorize]
+        public static async Task<IResult> EditTradePay(AppDbContext db, int id, CreateTradePayDto tradePayDto)
+        {
+            var et = await db.TradePays.SingleOrDefaultAsync(x => x.Id == id);
+            if (et == null)
+            {
+                return Results.BadRequest("没有找到订单支付信息!!");
+            }
+            et.Tid = tradePayDto.Tid;
+            et.Remark = tradePayDto.Remark;
+            et.Payment = tradePayDto.Payment;
+            et.PayTime = tradePayDto.PayTime;
+            et.PayWay = tradePayDto.PayWay;
+            await db.SaveChangesAsync();
+            return Results.Ok(et);
+        }
+
+        [Authorize]
+        public static async Task<IResult> SingleTradePay(AppDbContext db, int id, IMapper mapper)
+        {
+            var et = await db.TradePays.SingleOrDefaultAsync(x => x.Id == id);
+            var tradePayDto = mapper.Map<TradePayDto>(et);
+            return et == null ? Results.NotFound() : Results.Ok(tradePayDto);
+        }
+
+        [Authorize]
+        public static async Task<IResult> GetTradePays(AppDbContext db, int tid, IMapper mapper)
+        {
+            var et = await db.TradePays.FirstOrDefaultAsync(x => x.Id == tid);
+            if (et == null)
+            {
+                return Results.BadRequest("没有找到订单信息!!");
+            }
+            var payments = await db.TradePays.Where(k => k.Tid == et.Tid).ToListAsync();
+            payments = payments.OrderByDescending(s => s.Id).ToList();
+            return Results.Ok(mapper.Map<List<TradePayDto>>(payments));
+        }
+
+        [Authorize]
+        public static async Task<IResult> DeletePurchasePayment(AppDbContext db, int id)
+        {
+            var et = await db.TradePays.FirstOrDefaultAsync(x => x.Id == id);
+            if (et == null)
+            {
+                return Results.BadRequest();
+            }
+            db.TradePays.Remove(et);
+            await db.SaveChangesAsync();
+            return Results.NoContent();
         }
 
     }
