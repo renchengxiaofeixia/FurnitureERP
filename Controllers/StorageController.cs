@@ -86,7 +86,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper, HttpRequest request)
+        public static async Task<IResult> Single(AppDbContext db, long id, IMapper mapper, HttpRequest request)
         {
             var et = await db.Storages.SingleOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             var storageDto = mapper.Map<StorageDto>(et);
@@ -94,7 +94,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Edit(AppDbContext db, int id, CreateStorageDto storageDto, HttpRequest request)
+        public static async Task<IResult> Edit(AppDbContext db, long id, CreateStorageDto storageDto, HttpRequest request)
         {
             var et = await db.Storages.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
@@ -138,7 +138,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Delete(AppDbContext db, int id, HttpRequest request)
+        public static async Task<IResult> Delete(AppDbContext db, long id, HttpRequest request)
         {
             var et = await db.Storages.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
@@ -155,7 +155,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Audit(AppDbContext db, int id, HttpRequest request, IMapper mapper)
+        public static async Task<IResult> Audit(AppDbContext db, long id, HttpRequest request, IMapper mapper)
         {
             var et = await db.Storages.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
@@ -267,7 +267,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> UnAudit(AppDbContext db, int id, HttpRequest request)
+        public static async Task<IResult> UnAudit(AppDbContext db, long id, HttpRequest request)
         {
             var et = await db.Storages.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
@@ -303,7 +303,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> GetStorageProdInfos(AppDbContext db, int id, IMapper mapper, HttpRequest request)
+        public static async Task<IResult> GetStorageProdInfos(AppDbContext db, long id, IMapper mapper, HttpRequest request)
         {
             var et = await db.Storages.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)

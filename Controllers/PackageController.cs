@@ -53,14 +53,14 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper)
+        public static async Task<IResult> Single(AppDbContext db, long id, IMapper mapper)
         {
             var et = await db.Packages.SingleOrDefaultAsync(x => x.Id == id);
             return et == null ? Results.NotFound() : Results.Ok(mapper.Map<PackageDto>(et));
         }
 
         [Authorize]
-        public static async Task<IResult> Edit(AppDbContext db, int id, CreatePackageDto packageDto, HttpRequest request, IMapper mapper)
+        public static async Task<IResult> Edit(AppDbContext db, long id, CreatePackageDto packageDto, HttpRequest request, IMapper mapper)
         {
             var et = await db.Packages.FirstOrDefaultAsync(x => x.Id == id);
             if (et == null)
@@ -83,7 +83,7 @@ namespace FurnitureERP.Controllers
         }
         
         [Authorize]
-        public static async Task<IResult> Delete(AppDbContext db, int id, HttpRequest request)
+        public static async Task<IResult> Delete(AppDbContext db, long id, HttpRequest request)
         {
             var et = await db.Packages.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)

@@ -3,8 +3,11 @@
 dotnet ef dbcontext scaffold Name=ConnectionStrings:SqlConnection Microsoft.EntityFrameworkCore.SqlServer --data-annotations --context AppDbContext --context-dir Database --output-dir Models --force
  */
 
+using FurnitureERP.Utils;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc.Filters;
+using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -79,6 +82,27 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    Log.Initiate("运行日志");
+    app.UseExceptionHandler(exceptionHandlerApp =>
+    {
+        exceptionHandlerApp.Run(async context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            context.Response.ContentType = Text.Plain;
+            await context.Response.WriteAsync("An exception was thrown.");
+            var exceptionHandlerPathFeature =
+                context.Features.Get<IExceptionHandlerPathFeature>();
+
+            //if (exceptionHandlerPathFeature?.Error is FileNotFoundException)
+            //{
+            //    await context.Response.WriteAsync(" The file was not found.");
+            //}
+            Log.Exception(exceptionHandlerPathFeature.Error);
+        });
+    });
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -103,6 +127,5 @@ FurnitureERP.Routers.Router.Use(app);
 
 // start 
 app.MapGet("/", () => "Dotnet Minimal API");
-
 app.Run($"https://0.0.0.0:31000");
 //app.Run();

@@ -192,6 +192,8 @@ namespace FurnitureERP.Utils
                 _saveLogByDay = saveLogByDay;
                 KeepFileSizeOrBackupFileByDay();
                 _timer = new Thread(WriteLoop);
+                _timer.IsBackground = true; 
+                _timer.Start();
             }
 
             ~LoopSaveFile()
@@ -236,7 +238,7 @@ namespace FurnitureERP.Utils
             private StreamWriter OpenStream(bool append)
             {
                 FileStream stream = new FileStream(FileName, append ? FileMode.Append : FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
-                return new StreamWriter(stream, Encoding.GetEncoding("gb2312"));
+                return new StreamWriter(stream);
             }
 
             private void KeepFileSizeOrBackupFileByDay()
