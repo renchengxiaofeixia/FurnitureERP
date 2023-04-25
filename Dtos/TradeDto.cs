@@ -154,10 +154,10 @@
     {
         public long Id { get; set; }
         public Guid Guid { get; set; }
-        public string? Tid { get; set; }
+        public required string Tid { get; set; }
         public string? PicPath { get; set; }
-        public string? ItemName { get; set; }
-        public string? ItemNo { get; set; }
+        public required string ItemName { get; set; }
+        public required string ItemNo { get; set; }
         public string? StdItemNo { get; set; }
         public DateTime? Modified { get; set; }
         public int Num { get; set; }
@@ -173,7 +173,7 @@
         public string? Remark { get; set; }
         public required string WareName { get; set; }
         public DateTime CreateTime { get; set; }
-        public string Creator { get; set; }
+        public required string Creator { get; set; }
     }
 
     public class CreateTradeItemDto
@@ -181,7 +181,7 @@
         public string? PicPath { get; set; }
         public required string ItemName { get; set; }
         public required string ItemNo { get; set; }
-        public string StdItemNo { get; set; }
+        public required string StdItemNo { get; set; }
         public DateTime? Modified { get; set; }
         public int Num { get; set; }
         public long? NumIid { get; set; }
@@ -219,7 +219,7 @@
         public bool IsMade { get; set; }
         public string? Remark { get; set; }
         public DateTime CreateTime { get; set; }
-        public string Creator { get; set; }
+        public required string Creator { get; set; }
         public DateTime? AllocInventoryDate { get; set; }
         public string? AllocInventoryUser { get; set; }
         public long? InventoryId { get; set; }

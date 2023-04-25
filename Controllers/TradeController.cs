@@ -341,7 +341,7 @@ namespace FurnitureERP.Controllers
                     return Results.BadRequest("商品库存不足，请退审检查库存数!!!");
                 }
 
-             await db.Database.BeginTransactionAsync();
+                await db.Database.BeginTransactionAsync();
                 var tradePickInventoryLogs = new List<TradePickInventoryLog>();
                 foreach (var it in itemDtos)
                 {                    
