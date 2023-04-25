@@ -32,20 +32,28 @@ namespace FurnitureERP.Routers
             app.MapGet("/modules/", CustomPropertyController.GetMods);
 
 
-            //app.MapPost("/customer", CustomerController.Create);
-            //app.MapGet("/customers", CustomerController.Get);
-            //app.MapGet("/customer/{id}", CustomerController.Single);
-            //app.MapPut("/customer/{id}", CustomerController.Edit);
-            //app.MapDelete("/customer/{id}", CustomerController.Delete);
-            //app.MapGet("/contactrecords/{id}", CustomerController.GetContactRecords);
-            //app.MapGet("/customer/orders/{customerNo}", CustomerController.GetOrders);
+            app.MapPost("/trade", TradeController.Create);
+            app.MapGet("/trade/page", TradeController.Page);
+            app.MapGet("/trade/{id}", TradeController.Single);
+            app.MapPut("/trade/{id}", TradeController.Edit);
+            app.MapDelete("/trade/{id}", TradeController.Delete);
+            app.MapGet("/trade/items/{id}", TradeController.GetTradeProdInfos);
+            app.MapGet("/trade/matchinventory/{id}", TradeController.CreateMatchInventory);
+            app.MapPut("/trade/audit/{id}", TradeController.Audit);
+            app.MapPut("/trade/unaudit/{id}", TradeController.UnAudit);
+            app.MapPut("/trade/goodsaudit/{id}", TradeController.GoodsAudit);
+            app.MapPut("/trade/ungoodsaudit/{id}", TradeController.UnGoodsAudit);
+            app.MapPut("/trade/finaudit/{id}", TradeController.FinAudit);
+            app.MapPut("/trade/unfinaudit/{id}", TradeController.UnFinAudit);
+            app.MapPut("/trade/print/{id}", TradeController.Print);
+            app.MapPut("/trade/unprint/{id}", TradeController.UnPrint);
+            app.MapPut("/trade/send/{id}", TradeController.Send);
 
-
-            //app.MapPost("/customercontact", CustomerContactController.Create);
-            //app.MapGet("/customercontacts", CustomerContactController.Get);
-            //app.MapGet("/customercontact/{id}", CustomerContactController.Single);
-            //app.MapPut("/customercontact/{id}", CustomerContactController.Edit);
-            //app.MapDelete("/customercontact/{id}", CustomerContactController.Delete);
+            app.MapPost("/trade/pay", TradeController.CreateTradePay);
+            app.MapGet("/trade/pays/{tid}", TradeController.GetTradePays);
+            app.MapGet("/trade/pay/{id}", TradeController.SingleTradePay);
+            app.MapPut("/trade/pay/{id}", TradeController.EditTradePay);
+            app.MapDelete("/trade/pay/{id}", TradeController.DeleteTradePay);
 
 
             app.MapPost("/item", ItemController.Create);

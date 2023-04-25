@@ -170,6 +170,7 @@
         public decimal Price { get; set; }
         public string? SellerNick { get; set; }
         public bool IsMade { get; set; }
+        public bool IsCom { get; set; }
         public string? Remark { get; set; }
         public required string WareName { get; set; }
         public DateTime CreateTime { get; set; }
@@ -193,6 +194,7 @@
         public decimal Price { get; set; }
         public string? SellerNick { get; set; }
         public bool IsMade { get; set; }
+        public bool IsCom { get; set; }
         public string? Remark { get; set; }
         public required string WareName { get; set; }
     }

@@ -1,4 +1,7 @@
-﻿using FurnitureERP.Models;
+﻿using AutoMapper;
+using Azure.Core;
+using FurnitureERP.Enums;
+using FurnitureERP.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Security.Cryptography;
@@ -307,100 +310,234 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> Print(AppDbContext db, List<long> ids, HttpRequest request,IMapper mapper)
         {
-            var ets = await db.Trades.Where(x => ids.All(k=>k == x.Id)  && x.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
-            if (ets == null || ets.Count < 1)
+            var trades = await db.Trades.Where(x => ids.All(k=>k == x.Id)  && x.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
+            if (trades == null || trades.Count < 1)
             {
                 return Results.BadRequest("没有找到订单信息!!");
             }
-            if (ets.Any(et => !et.IsGoodsAudit))
+            if (trades.Any(et => !et.IsGoodsAudit))
             {
                 return Results.BadRequest("选择的订单中存在未货审订单，请刷新数据后重试!!");
             }
-            if (ets.Any(et => !et.IsFinAudit))
+            if (trades.Any(et => !et.IsFinAudit))
             {
                 return Results.BadRequest("选择的订单中存在未财审订单，请刷新数据后重试!!");
             }
-            if (ets.Any(et => et.IsPrint))
+            if (trades.Any(et => et.IsPrint))
             {
                 return Results.BadRequest("选择的订单中存在已经打印的订单，请刷新数据后重试!!");
             }
             try
             {
-                var tids = ets.Select(k => k.Tid);
-                var tradeItemQueryable = db.TradeItems.Where(k => tids.All(tid => tid == k.Tid));
-                var inventoryQueryable = from invt in db.Inventories
-                                         join it in tradeItemQueryable
-                                         on new { invt.ItemNo, invt.WareName } equals new { it.ItemNo, it.WareName }
-                                         where invt.MerchantGuid == request.GetCurrentUser().MerchantGuid && invt.Quantity > 0 
-                                         select invt;
-                //按商品数量 少->多 排序
-                var items = await tradeItemQueryable.OrderBy(k => k.ItemNo).ThenBy(k => k.Num).ToListAsync();
-                var itemDtos = mapper.Map<List<TradeItemDto>>(items);
+                //if (InventoryReceiveEnum.Scan)
+                //{                    
+                //    if (InventoryDimensionEnum.Item)
+                //    {
+                //        MinusItemInventory(trades, db);
+                //    }
+                //    if (InventoryDimensionEnum.Package)
+                //    {
+                //        MinusPackageInventory(trades, db);
+                //    }
+                //}
+
+                return await MinusItemInventory(trades, db, mapper, request);
+                
+            }
+            catch {
+                return Results.Ok("扣减库存出现异常，请刷新数据重新打印");
+            }
+        }
+
+        private static async Task<IResult> MinusPackageInventory(List<Trade> trades, AppDbContext db, IMapper mapper, HttpRequest request)
+        {
+            var tids = trades.Select(k => k.Tid);
+            var tradeItemQueryable = db.TradeItems.Where(k => tids.All(tid => tid == k.Tid));
+            var inventoryQueryable = from invt in db.Inventories
+                                     join it in tradeItemQueryable
+                                     on new { invt.ItemNo, invt.WareName } equals new { it.ItemNo, it.WareName }
+                                     where invt.MerchantGuid == request.GetCurrentUser().MerchantGuid && invt.Quantity > 0
+                                     select invt;
+            //单品
+            var items = await tradeItemQueryable.Where(k => !k.IsCom).OrderBy(k => k.ItemNo).ThenBy(k => k.Num).ToListAsync();
+            //拆分组合商品
+            var subItems = await (from comit in tradeItemQueryable
+                                  join subit in db.SubItems
+                                  on comit.ItemNo equals subit.ItemNo
+                                  join it in db.Items
+                                  on subit.SubItemNo equals it.ItemNo
+                                  select new TradeItemDto()
+                                  {
+                                      Guid = comit.Guid,
+                                      ItemNo = it.ItemNo,
+                                      ItemName = it.ItemName,
+                                      Num = comit.Num * subit.Num,
+                                      WareName = comit.WareName,
+                                      Tid = comit.Tid,
+                                      Creator = comit.Creator,
+                                  }).ToListAsync();
+            var itemDtos = mapper.Map<List<TradeItemDto>>(items);
+            itemDtos.AddRange(subItems);
+            //按商品数量 少->多 排序
+            itemDtos = itemDtos.OrderBy(k => k.ItemNo).ThenBy(k => k.Num).ToList();
 
 
-                /**
-                 * 库存数  少->多 排序 会优先清空更多的库位
-                 * 库存数  多->少 排序 会提高分拣效率更多的货可以从同一个库位出货
-                 * 还可以按入库时间排序，可以符合仓库先进先出原则
-                 * 清空库位 并且 拣货效率同时优先 ，三个月前的库存优先出货 (暂时只是想法)
-                **/
-                //按库存商品数量 多->少 排序
-                var inventories = await inventoryQueryable.OrderBy(k => k.ItemNo).ThenByDescending(k => k.Quantity).ToListAsync();
+            /**
+             * 库存数  少->多 排序 会优先清空更多的库位
+             * 库存数  多->少 排序 会提高分拣效率更多的货可以从同一个库位出货
+             * 还可以按入库时间排序，可以符合仓库先进先出原则
+             * 清空库位 并且 拣货效率同时优先 ，三个月前的库存优先出货 (暂时只是想法)
+            **/
+            //按库存商品数量 多->少 排序
+            var inventories = await inventoryQueryable.OrderBy(k => k.ItemNo).ThenByDescending(k => k.Quantity).ToListAsync();
 
+            //检查库存数
+            var summaryItems = itemDtos.GroupBy(k => new { k.ItemNo, k.WareName })
+                .Select(g => new { g.Key.WareName, g.Key.ItemNo, Num = g.Sum(k => k.Num) });
+            var summaryInvts = inventories.GroupBy(k => new { k.ItemNo, k.WareName })
+                .Select(g => new { g.Key.WareName, g.Key.ItemNo, Quantity = g.Sum(k => k.Quantity) });
+            if ((from invt in summaryInvts
+                 from it in summaryItems
+                 where invt.Quantity < it.Num
+                 select it.ItemNo).Any())
+            {
+                return Results.BadRequest("商品库存不足，不能打印!!!");
+            }
 
-                //检查库存数
-                var summaryItems = itemDtos.GroupBy(k => new { k.ItemNo, k.WareName })
-                    .Select(g => new { g.Key.WareName, g.Key.ItemNo, Num = g.Sum(k => k.Num) });
-                var summaryInvts = inventories.GroupBy(k => new { k.ItemNo, k.WareName })
-                    .Select(g => new { g.Key.WareName, g.Key.ItemNo, Quantity = g.Sum(k => k.Quantity) });
-                if ((from invt in summaryInvts
-                     from it in summaryItems
-                     where invt.Quantity < it.Num
-                     select it.ItemNo).Any())
+            await db.Database.BeginTransactionAsync();
+            var tradePickInventoryLogs = new List<TradePickInventoryLog>();
+            foreach (var it in itemDtos)
+            {
+                var invts = inventories.Where(invt => invt.ItemNo == it.ItemNo && invt.WareName == it.WareName);
+                foreach (var invt in invts)
                 {
-                    return Results.BadRequest("商品库存不足，请退审检查库存数!!!");
-                }
-
-                await db.Database.BeginTransactionAsync();
-                var tradePickInventoryLogs = new List<TradePickInventoryLog>();
-                foreach (var it in itemDtos)
-                {                    
-                    var invts = inventories.Where(invt=>invt.ItemNo == it.ItemNo && invt.WareName == it.WareName);
-                    foreach(var invt in invts) 
+                    if (invt.Quantity >= it.Num)
                     {
-                        if (invt.Quantity >= it.Num)
-                        {
-                            tradePickInventoryLogs.Add(CreatePickLog(invt,it,it.Num));
-                            invt.Quantity -= it.Num;
-                            it.Num = 0;
-                            break;
-                        }
-                        else
-                        {
-                            tradePickInventoryLogs.Add(CreatePickLog(invt, it, invt.Quantity));
-                            invt.Quantity = 0;
-                            it.Num -= invt.Quantity;
-                        }
+                        tradePickInventoryLogs.Add(CreatePickLog(invt, it, it.Num));
+                        invt.Quantity -= it.Num;
+                        it.Num = 0;
+                        break;
+                    }
+                    else
+                    {
+                        tradePickInventoryLogs.Add(CreatePickLog(invt, it, invt.Quantity));
+                        invt.Quantity = 0;
+                        it.Num -= invt.Quantity;
                     }
                 }
-                if (itemDtos.Any(k => k.Num > 0))
-                {
-                    await db.Database.RollbackTransactionAsync();
-                    return Results.BadRequest("扣减库存出现异常，请刷新数据重新打印");
-                }
-
-                ets.ForEach(k =>
-                {
-                    k.IsPrint = true;
-                    k.PrintDate = DateTime.Now;
-                    k.PrintUser = request.GetCurrentUser().UserName;
-                });
-                await db.TradePickInventoryLogs.AddRangeAsync(tradePickInventoryLogs);
-                await db.SaveChangesAsync();
-                await db.Database.CommitTransactionAsync();
             }
-            catch { }
-            return Results.Ok(null);
+            if (itemDtos.Any(k => k.Num > 0))
+            {
+                await db.Database.RollbackTransactionAsync();
+                return Results.BadRequest("扣减库存出现异常，请刷新数据重新打印");
+            }
+
+            trades.ForEach(k =>
+            {
+                k.IsPrint = true;
+                k.PrintDate = DateTime.Now;
+                k.PrintUser = request.GetCurrentUser().UserName;
+            });
+            await db.TradePickInventoryLogs.AddRangeAsync(tradePickInventoryLogs);
+            await db.SaveChangesAsync();
+            await db.Database.CommitTransactionAsync();
+
+            return Results.Ok(trades);
+        }
+
+
+        private static async Task<IResult> MinusItemInventory(List<Trade> trades, AppDbContext db,IMapper mapper,HttpRequest request)
+        {
+            var tids = trades.Select(k => k.Tid);
+            var tradeItemQueryable = db.TradeItems.Where(k => tids.All(tid => tid == k.Tid));
+            var inventoryQueryable = from invt in db.Inventories
+                                     join it in tradeItemQueryable
+                                     on new { invt.ItemNo, invt.WareName } equals new { it.ItemNo, it.WareName }
+                                     where invt.MerchantGuid == request.GetCurrentUser().MerchantGuid && invt.Quantity > 0
+                                     select invt;
+            //单品
+            var items = await tradeItemQueryable.Where(k => !k.IsCom).OrderBy(k => k.ItemNo).ThenBy(k => k.Num).ToListAsync(); 
+            var itemDtos = mapper.Map<List<TradeItemDto>>(items); 
+            //拆分组合商品
+            var subItems = await (from comit in tradeItemQueryable
+                                  join subit in db.SubItems
+                                  on comit.ItemNo equals subit.ItemNo
+                                  join it in db.Items
+                                  on subit.SubItemNo equals it.ItemNo
+                                  select new TradeItemDto() {
+                                      Guid = comit.Guid,
+                                      ItemNo = it.ItemNo,
+                                      ItemName = it.ItemName,
+                                      Num = comit.Num * subit.Num,
+                                      WareName = comit.WareName,
+                                      Tid = comit.Tid,
+                                      Creator = comit.Creator,
+                                  }).ToListAsync(); 
+            itemDtos.AddRange(subItems);
+            //按商品数量 少->多 排序
+            itemDtos = itemDtos.OrderBy(k => k.ItemNo).ThenBy(k => k.Num).ToList();
+
+            /**
+             * 库存数  少->多 排序 会优先清空更多的库位
+             * 库存数  多->少 排序 会提高分拣效率更多的货可以从同一个库位出货
+             * 还可以按入库时间排序，可以符合仓库先进先出原则
+             * 清空库位 并且 拣货效率同时优先 ，三个月前的库存优先出货 (暂时只是想法)
+            **/
+            //按库存商品数量 多->少 排序
+            var inventories = await inventoryQueryable.OrderBy(k => k.ItemNo).ThenByDescending(k => k.Quantity).ToListAsync();
+
+            //检查库存数
+            var summaryItems = itemDtos.GroupBy(k => new { k.ItemNo, k.WareName })
+                .Select(g => new { g.Key.WareName, g.Key.ItemNo, Num = g.Sum(k => k.Num) });
+            var summaryInvts = inventories.GroupBy(k => new { k.ItemNo, k.WareName })
+                .Select(g => new { g.Key.WareName, g.Key.ItemNo, Quantity = g.Sum(k => k.Quantity) });
+            if ((from invt in summaryInvts
+                 from it in summaryItems
+                 where invt.Quantity < it.Num
+                 select it.ItemNo).Any())
+            {
+                return Results.BadRequest("商品库存不足，不能打印!!!");
+            }
+
+            await db.Database.BeginTransactionAsync();
+            var tradePickInventoryLogs = new List<TradePickInventoryLog>();
+            foreach (var it in itemDtos)
+            {
+                var invts = inventories.Where(invt => invt.ItemNo == it.ItemNo && invt.WareName == it.WareName);
+                foreach (var invt in invts)
+                {
+                    if (invt.Quantity >= it.Num)
+                    {
+                        tradePickInventoryLogs.Add(CreatePickLog(invt, it, it.Num));
+                        invt.Quantity -= it.Num;
+                        it.Num = 0;
+                        break;
+                    }
+                    else
+                    {
+                        tradePickInventoryLogs.Add(CreatePickLog(invt, it, invt.Quantity));
+                        invt.Quantity = 0;
+                        it.Num -= invt.Quantity;
+                    }
+                }
+            }
+            if (itemDtos.Any(k => k.Num > 0))
+            {
+                await db.Database.RollbackTransactionAsync();
+                return Results.BadRequest("扣减库存出现异常，请刷新数据重新打印");
+            }
+
+            trades.ForEach(k =>
+            {
+                k.IsPrint = true;
+                k.PrintDate = DateTime.Now;
+                k.PrintUser = request.GetCurrentUser().UserName;
+            });
+            await db.TradePickInventoryLogs.AddRangeAsync(tradePickInventoryLogs);
+            await db.SaveChangesAsync();
+            await db.Database.CommitTransactionAsync();
+
+            return Results.Ok(trades);
         }
 
         private static TradePickInventoryLog CreatePickLog(Inventory invt, TradeItemDto it,int minusQuantity)
@@ -532,7 +669,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> EditTradePay(AppDbContext db, int id, CreateTradePayDto tradePayDto)
+        public static async Task<IResult> EditTradePay(AppDbContext db, long id, CreateTradePayDto tradePayDto)
         {
             var et = await db.TradePays.SingleOrDefaultAsync(x => x.Id == id);
             if (et == null)
@@ -549,7 +686,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> SingleTradePay(AppDbContext db, int id, IMapper mapper)
+        public static async Task<IResult> SingleTradePay(AppDbContext db, long id, IMapper mapper)
         {
             var et = await db.TradePays.SingleOrDefaultAsync(x => x.Id == id);
             var tradePayDto = mapper.Map<TradePayDto>(et);
@@ -557,20 +694,15 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> GetTradePays(AppDbContext db, int tid, IMapper mapper)
+        public static async Task<IResult> GetTradePays(AppDbContext db, string tid, IMapper mapper)
         {
-            var et = await db.TradePays.FirstOrDefaultAsync(x => x.Id == tid);
-            if (et == null)
-            {
-                return Results.BadRequest("没有找到订单信息!!");
-            }
-            var payments = await db.TradePays.Where(k => k.Tid == et.Tid).ToListAsync();
+            var payments = await db.TradePays.Where(k => k.Tid == tid).ToListAsync();
             payments = payments.OrderByDescending(s => s.Id).ToList();
             return Results.Ok(mapper.Map<List<TradePayDto>>(payments));
         }
 
         [Authorize]
-        public static async Task<IResult> DeleteTradePay(AppDbContext db, int id)
+        public static async Task<IResult> DeleteTradePay(AppDbContext db, long id)
         {
             var et = await db.TradePays.FirstOrDefaultAsync(x => x.Id == id);
             if (et == null)

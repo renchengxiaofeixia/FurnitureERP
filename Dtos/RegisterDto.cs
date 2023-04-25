@@ -7,5 +7,6 @@
         public string RePassword { get; set; }
         public string MobileNo { get; set; }
         public string SmsCode { get; set; }
+        public long SmsCodeId { get; set; }
     }
 }

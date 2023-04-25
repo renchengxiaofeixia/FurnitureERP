@@ -6,6 +6,7 @@ dotnet ef dbcontext scaffold Name=ConnectionStrings:SqlConnection Microsoft.Enti
 using FurnitureERP.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -84,22 +85,22 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    Log.Initiate("运行日志");
+    Log.Initiate("运行日志",true);
     app.UseExceptionHandler(exceptionHandlerApp =>
     {
         exceptionHandlerApp.Run(async context =>
         {
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             context.Response.ContentType = Text.Plain;
-            await context.Response.WriteAsync("An exception was thrown.");
             var exceptionHandlerPathFeature =
                 context.Features.Get<IExceptionHandlerPathFeature>();
 
+            await context.Response.WriteAsync(exceptionHandlerPathFeature?.Error.Message);
             //if (exceptionHandlerPathFeature?.Error is FileNotFoundException)
             //{
             //    await context.Response.WriteAsync(" The file was not found.");
             //}
-            Log.Exception(exceptionHandlerPathFeature.Error);
+            Log.Exception(exceptionHandlerPathFeature?.Error);
         });
     });
 }
