@@ -100,6 +100,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<TradePay> TradePays { get; set; }
 
+    public virtual DbSet<TradePickInventoryLog> TradePickInventoryLogs { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
@@ -690,6 +692,14 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<TradePay>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__trade_pa__3214EC0770750D57");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
+        modelBuilder.Entity<TradePickInventoryLog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__trade_pi__3214EC07C225A873");
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");

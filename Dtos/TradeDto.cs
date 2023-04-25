@@ -160,7 +160,7 @@
         public string? ItemNo { get; set; }
         public string? StdItemNo { get; set; }
         public DateTime? Modified { get; set; }
-        public decimal Num { get; set; }
+        public int Num { get; set; }
         public long? NumIid { get; set; }
         public string? OrderFrom { get; set; }
         public decimal Payment { get; set; }
@@ -171,6 +171,7 @@
         public string? SellerNick { get; set; }
         public bool IsMade { get; set; }
         public string? Remark { get; set; }
+        public required string WareName { get; set; }
         public DateTime CreateTime { get; set; }
         public string Creator { get; set; }
     }
@@ -182,7 +183,7 @@
         public required string ItemNo { get; set; }
         public string StdItemNo { get; set; }
         public DateTime? Modified { get; set; }
-        public decimal Num { get; set; }
+        public int Num { get; set; }
         public long? NumIid { get; set; }
         public string? OrderFrom { get; set; }
         public decimal Payment { get; set; }
@@ -193,6 +194,7 @@
         public string? SellerNick { get; set; }
         public bool IsMade { get; set; }
         public string? Remark { get; set; }
+        public required string WareName { get; set; }
     }
 
     public class TradeItemMatchInventoryDto
@@ -243,8 +245,6 @@
         public string? SellerNick { get; set; }
         public bool IsMade { get; set; }
         public string? Remark { get; set; }
-        public DateTime? AllocInventoryDate { get; set; }
-        public string? AllocInventoryUser { get; set; }
         public long? InventoryId { get; set; }
         public string? SuppName { get; set; }
     }

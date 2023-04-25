@@ -6,27 +6,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Table("inventory")]
-public partial class Inventory
+[Table("trade_pick_inventory_log")]
+public partial class TradePickInventoryLog
 {
     [Key]
     public int Id { get; set; }
 
     public Guid Guid { get; set; }
 
-    [StringLength(200)]
-    public string ItemName { get; set; } = null!;
+    public Guid TradeItemGuid { get; set; }
 
     [StringLength(200)]
     public string ItemNo { get; set; } = null!;
-
-    [StringLength(200)]
-    public string StdItemNo { get; set; } = null!;
-
-    public int Quantity { get; set; }
-
-    [Column(TypeName = "decimal(18, 2)")]
-    public decimal CostPrice { get; set; }
 
     [StringLength(50)]
     public string WareName { get; set; } = null!;
@@ -37,32 +28,34 @@ public partial class Inventory
     [StringLength(50)]
     public string LocationName { get; set; } = null!;
 
+    public Guid InventoryGuid { get; set; }
+
+    public long InventoryId { get; set; }
+
+    [StringLength(50)]
+    public string SuppName { get; set; } = null!;
+
     [StringLength(50)]
     public string? PurchaseNo { get; set; }
 
     [StringLength(50)]
     public string StorageNo { get; set; } = null!;
 
+    public int InventoryQuantity { get; set; }
+
+    public int MinusQuantity { get; set; }
+
     [StringLength(50)]
-    public string SuppName { get; set; } = null!;
+    public string Tid { get; set; } = null!;
 
-    [Column(TypeName = "datetime")]
-    public DateTime StorageTime { get; set; }
-
-    [StringLength(200)]
-    public string? Remark { get; set; }
+    public Guid PrintSession { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime CreateTime { get; set; }
 
-    [StringLength(50)]
-    public string? Creator { get; set; }
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal CostPrice { get; set; }
 
-    [StringLength(50)]
-    public string StorageType { get; set; } = null!;
-
-    [StringLength(50)]
-    public string? Tid { get; set; }
-
-    public Guid MerchantGuid { get; set; }
+    [StringLength(200)]
+    public string? Remark { get; set; }
 }

@@ -15,25 +15,24 @@ public partial class TradeItem
     public Guid Guid { get; set; }
 
     [StringLength(50)]
-    public string? Tid { get; set; }
+    public string Tid { get; set; } = null!;
 
     [StringLength(200)]
     public string? PicPath { get; set; }
 
     [StringLength(200)]
-    public string? ItemName { get; set; }
+    public string ItemName { get; set; } = null!;
 
     [StringLength(200)]
-    public string? ItemNo { get; set; }
+    public string ItemNo { get; set; } = null!;
 
     [StringLength(200)]
-    public string? StdItemNo { get; set; }
+    public string StdItemNo { get; set; } = null!;
 
     [Column(TypeName = "datetime")]
     public DateTime? Modified { get; set; }
 
-    [Column(TypeName = "decimal(18, 0)")]
-    public decimal Num { get; set; }
+    public int Num { get; set; }
 
     public long? NumIid { get; set; }
 
@@ -62,6 +61,9 @@ public partial class TradeItem
 
     [StringLength(200)]
     public string? Remark { get; set; }
+
+    [StringLength(50)]
+    public string? WareName { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime CreateTime { get; set; }
