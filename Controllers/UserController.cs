@@ -29,14 +29,14 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper, HttpRequest request)
+        public static async Task<IResult> Single(AppDbContext db, long id, IMapper mapper, HttpRequest request)
         {
             var et = await db.Users.SingleOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             return et == null ? Results.NotFound() : Results.Ok(mapper.Map<UserDto>(et));
         }
 
         [Authorize]
-        public static async Task<IResult> Edit(AppDbContext db, int id, CreateUserDto userDto, HttpRequest request, IMapper mapper)
+        public static async Task<IResult> Edit(AppDbContext db, long id, CreateUserDto userDto, HttpRequest request, IMapper mapper)
         {
             var et = await db.Users.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
@@ -57,7 +57,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Delete(AppDbContext db, int id, HttpRequest request)
+        public static async Task<IResult> Delete(AppDbContext db, long id, HttpRequest request)
         {
             var et = await db.Users.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)

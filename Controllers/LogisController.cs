@@ -52,14 +52,14 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Single(AppDbContext db, int id, IMapper mapper, HttpRequest request)
+        public static async Task<IResult> Single(AppDbContext db, long id, IMapper mapper, HttpRequest request)
         {
             var et = await db.Logistics.SingleOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             return et == null ? Results.NotFound() : Results.Ok(mapper.Map<LogisticDto>(et));
         }
 
         [Authorize]
-        public static async Task<IResult> Edit(AppDbContext db, int id, CreateLogisticDto logisticDto, HttpRequest request, IMapper mapper)
+        public static async Task<IResult> Edit(AppDbContext db, long id, CreateLogisticDto logisticDto, HttpRequest request, IMapper mapper)
         {
             var et = await db.Logistics.FirstOrDefaultAsync(x => x.Id == id);
             if (et == null)
@@ -127,7 +127,7 @@ namespace FurnitureERP.Controllers
 
 
         [Authorize]
-        public static async Task<IResult> Delete(AppDbContext db, int id, HttpRequest request)
+        public static async Task<IResult> Delete(AppDbContext db, long id, HttpRequest request)
         {
             var et = await db.Logistics.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
@@ -139,7 +139,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> CreateLogisPoint(AppDbContext db, CreateLogisticDto logisPointDto, HttpRequest request, IMapper mapper)
+        public static async Task<IResult> CreateLogisPoint(AppDbContext db, CreateLogisPointDto logisPointDto, HttpRequest request, IMapper mapper)
         {
             if (await db.LogisPoints.FirstOrDefaultAsync(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.PointName == logisPointDto.PointName) != null)
             {
@@ -161,7 +161,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> SingleLogisPoint(AppDbContext db, int id, IMapper mapper, HttpRequest request)
+        public static async Task<IResult> SingleLogisPoint(AppDbContext db, long id, IMapper mapper, HttpRequest request)
         {
             var et = await db.LogisPoints.SingleOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             return et == null ? Results.NotFound() : Results.Ok(mapper.Map<LogisPointDto>(et));
@@ -217,7 +217,7 @@ namespace FurnitureERP.Controllers
 
 
         [Authorize]
-        public static async Task<IResult> DeleteLogisPoint(AppDbContext db, int id, HttpRequest request)
+        public static async Task<IResult> DeleteLogisPoint(AppDbContext db, long id, HttpRequest request)
         {
             var et = await db.LogisPoints.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)

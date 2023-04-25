@@ -41,6 +41,10 @@ namespace FurnitureERP.Controllers
             , string? keyword, DateTime? startCreateTime, DateTime? endCreateTime
             , DateTime? startPayTime, DateTime? endPayTime
             , DateTime? startPrintDate, DateTime? endPrintDate
+            , string? receiverName
+            , string? receiverMobile
+            , string? logisName
+            , string? logisNo
             , int pageNo, int pageSize)
         {
             IQueryable<Trade> trades = db.Trades.Where(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
@@ -71,6 +75,22 @@ namespace FurnitureERP.Controllers
             if (endPrintDate.HasValue)
             {
                 trades = trades.Where(k => k.PrintDate <= endPrintDate.Value);
+            }
+            if (!string.IsNullOrEmpty(receiverName))
+            {
+                trades = trades.Where(k => k.ReceiverName.Contains(receiverName));
+            }
+            if (!string.IsNullOrEmpty(receiverMobile))
+            {
+                trades = trades.Where(k => k.ReceiverMobile.Contains(receiverMobile));
+            }
+            if (!string.IsNullOrEmpty(logisName))
+            {
+                trades = trades.Where(k => k.LogisName.Contains(logisName));
+            }
+            if (!string.IsNullOrEmpty(logisNo))
+            {
+                trades = trades.Where(k => k.LogisNo.Contains(logisNo));
             }
             var page = await Pagination<Trade>.CreateAsync(trades, pageNo, pageSize);
             page.Items = mapper.Map<List<TradeDto>>(page.Items);
@@ -311,7 +331,7 @@ namespace FurnitureERP.Controllers
                 var inventoryQueryable = from invt in db.Inventories
                                          join it in tradeItemQueryable
                                          on new { invt.ItemNo, invt.WareName } equals new { it.ItemNo, it.WareName }
-                                         where invt.Quantity > 0 
+                                         where invt.MerchantGuid == request.GetCurrentUser().MerchantGuid && invt.Quantity > 0 
                                          select invt;
                 //按商品数量 少->多 排序
                 var items = await tradeItemQueryable.OrderBy(k => k.ItemNo).ThenBy(k => k.Num).ToListAsync();
@@ -417,8 +437,10 @@ namespace FurnitureERP.Controllers
             }
             if (et.IsSend)
             {
-                return Results.BadRequest("订单已经发货，不能退打印!!");
+                return Results.BadRequest("订单已经发货，不能退打印!!");            
             }
+
+            var tradePickInventoryLogs = await db.TradePickInventoryLogs.Where(k=>k.Tid == et.Tid).ToListAsync();
 
             var inventoryForUpdate = from p in db.Inventories
                                     join e in db.TradePickInventoryLogs
@@ -429,6 +451,7 @@ namespace FurnitureERP.Controllers
             et.IsPrint = false;
             et.PrintDate = null;
             et.PrintUser = string.Empty;
+            db.TradePickInventoryLogs.RemoveRange(tradePickInventoryLogs);
             await db.SaveChangesAsync();
             return Results.Ok(et);
         }
@@ -457,6 +480,7 @@ namespace FurnitureERP.Controllers
             return Results.Ok(et);
         }
 
+        [Authorize]
         public static async Task<IResult> CreateMatchInventory(AppDbContext db,string tid, List<CreateTradeItemMatchInventoryDto> tradeItemMatchInventoryDtos, IMapper mapper, HttpRequest request)
         {
             var tradeItemMatchInventorys = await db.TradeItemMatchInventories.Where(k=>k.Tid == tid).ToListAsync();
@@ -479,7 +503,6 @@ namespace FurnitureERP.Controllers
             catch { }
            return Results.Ok(addTradeItemMatchInventorys);
         }
-        [Authorize]
 
         [Authorize]
         public static async Task<IResult> GetTradeProdInfos(AppDbContext db, long id, IMapper mapper, HttpRequest request)
@@ -547,7 +570,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> DeletePurchasePayment(AppDbContext db, int id)
+        public static async Task<IResult> DeleteTradePay(AppDbContext db, int id)
         {
             var et = await db.TradePays.FirstOrDefaultAsync(x => x.Id == id);
             if (et == null)

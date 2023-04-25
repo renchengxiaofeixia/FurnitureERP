@@ -10,7 +10,7 @@ namespace FurnitureERP.Utils
 {
     public class Log
     {
-        private static LogWriter? _writer;
+        private static LogWriter _writer;
         private static ConcurrentDictionary<string, int> _errorWithMaxCountDict = new ConcurrentDictionary<string, int>();
 
         private static LogWriter Writer
