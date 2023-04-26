@@ -2,6 +2,7 @@
 using Azure.Core;
 using FurnitureERP.Enums;
 using FurnitureERP.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Security.Cryptography;
@@ -154,9 +155,8 @@ namespace FurnitureERP.Controllers
                 Remark = k.Remark,
                 CostPrice = k.CostPrice
             }).ToList();
-            var preItems = await db.TradeItems.Where(k => k.Tid == et.Tid && k.MerchantGuid == et.MerchantGuid).ToListAsync();
-            db.TradeItems.RemoveRange(preItems);
 
+            await db.TradeItems.Where(k => k.Tid == et.Tid && k.MerchantGuid == et.MerchantGuid).ExecuteDeleteAsync();
             await db.TradeItems.AddRangeAsync(items);
             await db.SaveChangesAsync();
             return Results.Ok(et);
@@ -501,6 +501,8 @@ namespace FurnitureERP.Controllers
 
             await db.Database.BeginTransactionAsync();
             var tradePickInventoryLogs = new List<TradePickInventoryLog>();
+            //需要扣减的库存数据
+            var updateInventories = new Dictionary<long,Inventory>();
             foreach (var it in itemDtos)
             {
                 var invts = inventories.Where(invt => invt.ItemNo == it.ItemNo && invt.WareName == it.WareName);
@@ -519,6 +521,7 @@ namespace FurnitureERP.Controllers
                         invt.Quantity = 0;
                         it.Num -= invt.Quantity;
                     }
+                    updateInventories[invt.Id] = invt;
                 }
             }
             if (itemDtos.Any(k => k.Num > 0))
@@ -534,6 +537,7 @@ namespace FurnitureERP.Controllers
                 k.PrintUser = request.GetCurrentUser().UserName;
             });
             await db.TradePickInventoryLogs.AddRangeAsync(tradePickInventoryLogs);
+            db.UpdateRange(updateInventories.Values);
             await db.SaveChangesAsync();
             await db.Database.CommitTransactionAsync();
 
@@ -618,7 +622,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> CreateMatchInventory(AppDbContext db,string tid, List<CreateTradeItemMatchInventoryDto> tradeItemMatchInventoryDtos, IMapper mapper, HttpRequest request)
+        public static async Task<IResult> CreateMatchInventory(AppDbContext db,string tid,[FromBody] List<CreateTradeItemMatchInventoryDto> tradeItemMatchInventoryDtos, IMapper mapper, HttpRequest request)
         {
             var tradeItemMatchInventorys = await db.TradeItemMatchInventories.Where(k=>k.Tid == tid).ToListAsync();
             var addTradeItemMatchInventorys = mapper.Map<List<TradeItemMatchInventory>>(tradeItemMatchInventoryDtos);

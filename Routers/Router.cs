@@ -9,6 +9,7 @@ namespace FurnitureERP.Routers
         {
             var app = builder as WebApplication;
             app.MapPost("/signin", AuthController.Signin);
+            app.MapPost("/signinforsmscode", AuthController.SigninForSmsCode);
             app.MapPost("/signup", AuthController.Signup);
             app.MapPost("/smscode/{mobileNo}", AuthController.SendSmsCode);
 
@@ -30,6 +31,10 @@ namespace FurnitureERP.Routers
             app.MapPost("/sysprop", CustomPropertyController.CreatePropConfig);
             app.MapGet("/sysprop", CustomPropertyController.SinglePropConfig);
             app.MapGet("/modules/", CustomPropertyController.GetMods);
+
+
+            app.MapPost("/params", SysParamController.Save);
+            app.MapGet("/params", SysParamController.Get);
 
 
             app.MapPost("/trade", TradeController.Create);

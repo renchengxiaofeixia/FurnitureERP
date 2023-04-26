@@ -3,6 +3,7 @@
 dotnet ef dbcontext scaffold Name=ConnectionStrings:SqlConnection Microsoft.EntityFrameworkCore.SqlServer --data-annotations --context AppDbContext --context-dir Database --output-dir Models --force
  */
 
+using FurnitureERP.Extensions;
 using FurnitureERP.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -13,7 +14,12 @@ using static System.Net.Mime.MediaTypeNames;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration["ConnectionStrings:SqlConnection"];
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString)); 
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseSqlServer(connectionString);
+    options.AddInterceptors(new QueryWithNoLockDbCommandInterceptor());
+    options.LogTo(Console.WriteLine);
+}); 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.Configure<JsonOptions>(options =>

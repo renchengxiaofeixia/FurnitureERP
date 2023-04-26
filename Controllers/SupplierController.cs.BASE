@@ -9,19 +9,19 @@ namespace FurnitureERP.Controllers
     {
 
         [Authorize]
-        public static async Task<IResult> Create(AppDbContext db, CreateSuppDto suppDto, HttpRequest request,IMapper mapper)
+        public static async Task<IResult> Create(AppDbContext db, CreateSuppDto SuppDto, HttpRequest request,IMapper mapper)
         {
-            if (await db.Supps.FirstOrDefaultAsync(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.SuppName == suppDto.SuppName) != null)
+            if (await db.Supps.FirstOrDefaultAsync(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.SuppName == SuppDto.SuppName) != null)
             {
                 return Results.BadRequest("存在相同的供应商名");
             }
-            var supp = mapper.Map<Supp>(suppDto);
+            var supp = mapper.Map<Supp>(SuppDto);
             supp.Creator = request.GetCurrentUser().UserName;
             supp.MerchantGuid = request.GetCurrentUser().MerchantGuid;
 
-            if (suppDto.SuppItems != null && suppDto.SuppItems.Count > 0) {
+            if (SuppDto.SuppItems != null && SuppDto.SuppItems.Count > 0) {
 
-                var suppItems = mapper.Map<List<SuppItem>>(suppDto.SuppItems);
+                var suppItems = mapper.Map<List<SuppItem>>(SuppDto.SuppItems);
 
                 suppItems.ForEach(si =>
                 {
@@ -127,7 +127,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Edit(AppDbContext db, long id, CreateSuppDto suppDto, HttpRequest request, IMapper mapper)
+        public static async Task<IResult> Edit(AppDbContext db, long id, CreateSuppDto SuppDto, HttpRequest request, IMapper mapper)
         {
             var UserName = request.GetCurrentUser().UserName;
             var MerchantGuid = request.GetCurrentUser().MerchantGuid;
@@ -137,14 +137,16 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest();
             }
-            if (await db.Supps.FirstOrDefaultAsync(x => x.Id != id && x.MerchantGuid== MerchantGuid && x.SuppName == suppDto.SuppName) != null)
+            if (await db.Supps.FirstOrDefaultAsync(x => x.Id != id && x.MerchantGuid== MerchantGuid && x.SuppName == SuppDto.SuppName) != null)
             {
                 return Results.BadRequest("存在相同的供应商名称");
             }
-            if (suppDto.SuppItems != null && suppDto.SuppItems.Count > 0) { 
+            if (SuppDto.SuppItems != null && SuppDto.SuppItems.Count > 0) { 
                 //删除下级供应商产品
-                await db.SuppItems.Where(k => k.SuppName == et.SuppName && k.MerchantGuid == MerchantGuid).ExecuteDeleteAsync();
-                var suppItems = mapper.Map<List<SuppItem>>(suppDto.SuppItems);
+                var  removeItems = await db.SuppItems.Where(k => k.SuppName == et.SuppName && k.MerchantGuid == MerchantGuid).ToListAsync();
+                db.SuppItems.RemoveRange(removeItems);
+
+                var suppItems = mapper.Map<List<SuppItem>>(SuppDto.SuppItems);
 
                 suppItems.ForEach(si =>
                 {
@@ -154,10 +156,10 @@ namespace FurnitureERP.Controllers
 
                 await db.SuppItems.AddRangeAsync(suppItems);
             }
-            et.SuppName = suppDto.SuppName;
-            et.SuppCompany = suppDto.SuppCompany;
-            et.SuppMobile = suppDto.SuppMobile;
-            et.Remark = suppDto.Remark;
+            et.SuppName = SuppDto.SuppName;
+            et.SuppCompany = SuppDto.SuppCompany;
+            et.SuppMobile = SuppDto.SuppMobile;
+            et.Remark = SuppDto.Remark;
             et.Creator = UserName;
             et.MerchantGuid = MerchantGuid;
             await db.SaveChangesAsync();

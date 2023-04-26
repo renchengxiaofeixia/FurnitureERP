@@ -105,8 +105,7 @@ namespace FurnitureERP.Controllers
             if (itemDto.SubItems != null && itemDto.SubItems.Count > 0)
             {
                 //删除组合商品下的子商品
-                var removeSubItems = await db.SubItems.Where(k => k.ItemNo == et.ItemNo && k.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
-                db.SubItems.RemoveRange(removeSubItems);
+                await db.SubItems.Where(k => k.ItemNo == et.ItemNo && k.MerchantGuid == request.GetCurrentUser().MerchantGuid).ExecuteDeleteAsync();
                 var subItems = mapper.Map<List<SubItem>>(itemDto.SubItems);
                 subItems.ForEach(si =>
                 {

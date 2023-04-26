@@ -65,10 +65,12 @@
         public bool IsMade { get; set; }
         public Guid? OrderGuid { get; set; }
         public Guid MerchantGuid { get; set; }
+        public List<PurchaseItemDto> PackageDtos { get; set; }
     }
 
     public class CreatePurchaseItemDto
     {
+        public Guid Guid { get; set; }
         public string PurchaseNo { get; set; }
         public string SuppName { get; set; }
         public string ItemName { get; set; }
@@ -80,5 +82,6 @@
         public DateTime? DeliveryDate { get; set; }
         public bool IsMade { get; set; }
         public Guid? OrderGuid { get; set; }
+        public List<CreatePurchaseItemDto> PackageDtos { get; set; }
     }
 }
