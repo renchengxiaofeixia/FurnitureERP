@@ -59,6 +59,8 @@ public partial class TradeItem
 
     public bool IsMade { get; set; }
 
+    public bool IsCom { get; set; }
+
     [StringLength(200)]
     public string? Remark { get; set; }
 

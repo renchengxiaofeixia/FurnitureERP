@@ -24,6 +24,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<InventoryItemMove> InventoryItemMoves { get; set; }
 
+    public virtual DbSet<InventoryPackage> InventoryPackages { get; set; }
+
     public virtual DbSet<Inventorybarcode> Inventorybarcodes { get; set; }
 
     public virtual DbSet<Item> Items { get; set; }
@@ -53,8 +55,6 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<PackageImp> PackageImps { get; set; }
 
     public virtual DbSet<PhoneCode> PhoneCodes { get; set; }
-
-    public virtual DbSet<Printing> Printings { get; set; }
 
     public virtual DbSet<PropertyConfig> PropertyConfigs { get; set; }
 
@@ -148,6 +148,14 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.TimeStamp)
                 .IsRowVersion()
                 .IsConcurrencyToken();
+        });
+
+        modelBuilder.Entity<InventoryPackage>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__inventory_package");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
         });
 
         modelBuilder.Entity<Inventorybarcode>(entity =>
@@ -354,13 +362,6 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.MobileNo).HasComment("手机号");
             entity.Property(e => e.SmsCode).HasComment("验证码");
-        });
-
-        modelBuilder.Entity<Printing>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__printing__3214EC07F7D789F1");
-
-            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
         });
 
         modelBuilder.Entity<PropertyConfig>(entity =>
