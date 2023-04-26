@@ -62,6 +62,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<PurchaseItem> PurchaseItems { get; set; }
 
+    public virtual DbSet<PurchasePackage> PurchasePackages { get; set; }
+
     public virtual DbSet<RecordDelete> RecordDeletes { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
@@ -75,6 +77,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Storage> Storages { get; set; }
 
     public virtual DbSet<StorageItem> StorageItems { get; set; }
+
+    public virtual DbSet<StoragePackage> StoragePackages { get; set; }
 
     public virtual DbSet<SubItem> SubItems { get; set; }
 
@@ -427,6 +431,28 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.SuppName).HasComment("供应商名称");
         });
 
+        modelBuilder.Entity<PurchasePackage>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__purchase_package__3214EC07D6033F91");
+
+            entity.Property(e => e.Amount).HasComment("金额");
+            entity.Property(e => e.CancelNum).HasComment("取消数量");
+            entity.Property(e => e.CostPrice).HasComment("采购价");
+            entity.Property(e => e.DeliveryDate).HasComment("交付日期");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.IsMade).HasComment("是否定制");
+            entity.Property(e => e.MerchantGuid).HasComment("商户GUID");
+            entity.Property(e => e.OrderGuid).HasComment("订单商品GUID");
+            entity.Property(e => e.PackageName).HasComment("包件名称");
+            entity.Property(e => e.PackageNo).HasComment("包件编码（可为定制编码）");
+            entity.Property(e => e.PurchaseNo).HasComment("采购单号");
+            entity.Property(e => e.PurchaseNum).HasComment("采购数量");
+            entity.Property(e => e.Remark).HasComment("备注");
+            entity.Property(e => e.StdPackageNo).HasComment("标准包件编码");
+            entity.Property(e => e.StorageNum).HasComment("入库数量");
+            entity.Property(e => e.SuppName).HasComment("供应商名称");
+        });
+
         modelBuilder.Entity<RecordDelete>(entity =>
         {
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
@@ -536,6 +562,27 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.PurchaseNum).HasComment("采购数量");
             entity.Property(e => e.Remark).HasComment("备注");
             entity.Property(e => e.StdItemNo).HasComment("标准商品编码");
+            entity.Property(e => e.StorageNo).HasComment("入库单号");
+            entity.Property(e => e.StorageNum).HasComment("入库数量");
+            entity.Property(e => e.SuppName).HasComment("供应商名");
+        });
+
+        modelBuilder.Entity<StoragePackage>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__storage_package__3214EC0771BF2F77");
+
+            entity.Property(e => e.Amount).HasComment("金额");
+            entity.Property(e => e.CostPrice).HasComment("采购价");
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.IsMade).HasComment("是否定制");
+            entity.Property(e => e.MerchantGuid).HasComment("商户GUID");
+            entity.Property(e => e.PackageName).HasComment("包件名称");
+            entity.Property(e => e.PackageNo).HasComment("包件编码（可为定制编码）");
+            entity.Property(e => e.PurchaseNo).HasComment("采购单号");
+            entity.Property(e => e.PurchaseNum).HasComment("采购数量");
+            entity.Property(e => e.Remark).HasComment("备注");
+            entity.Property(e => e.StdPackageNo).HasComment("标准包件编码");
             entity.Property(e => e.StorageNo).HasComment("入库单号");
             entity.Property(e => e.StorageNum).HasComment("入库数量");
             entity.Property(e => e.SuppName).HasComment("供应商名");
@@ -683,6 +730,8 @@ public partial class AppDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__trade_item_match_inventory");
 
+            entity.ToTable("trade_item_match_inventory", tb => tb.HasComment("主动分配库存"));
+
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
             entity.Property(e => e.TimeStamp)
@@ -701,6 +750,8 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<TradePickInventoryLog>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__trade_pi__3214EC07C225A873");
+
+            entity.ToTable("trade_pick_inventory_log", tb => tb.HasComment("打印减库存"));
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");

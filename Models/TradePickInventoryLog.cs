@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
+/// <summary>
+/// 打印减库存
+/// </summary>
 [Table("trade_pick_inventory_log")]
 public partial class TradePickInventoryLog
 {

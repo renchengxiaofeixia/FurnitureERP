@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
+/// <summary>
+/// 主动分配库存
+/// </summary>
 [Table("trade_item_match_inventory")]
 public partial class TradeItemMatchInventory
 {

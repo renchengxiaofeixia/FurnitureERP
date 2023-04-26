@@ -9,6 +9,7 @@ namespace FurnitureERP.Routers
         {
             var app = builder as WebApplication;
             app.MapPost("/signin", AuthController.Signin);
+            app.MapPost("/signinforsmscode", AuthController.SigninForSmsCode);
             app.MapPost("/signup", AuthController.Signup);
             app.MapPost("/smscode/{mobileNo}", AuthController.SendSmsCode);
 
