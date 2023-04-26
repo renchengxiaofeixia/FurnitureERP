@@ -129,9 +129,7 @@ namespace FurnitureERP.Controllers
                 CostPrice = k.CostPrice,
                 StorageNo = et.StorageNo
             }).ToList();
-            var preItems = await db.StorageItems.Where(k => k.StorageNo == et.StorageNo && k.MerchantGuid == et.MerchantGuid).ToListAsync();
-            db.StorageItems.RemoveRange(preItems);
-
+            await db.StorageItems.Where(k => k.StorageNo == et.StorageNo && k.MerchantGuid == et.MerchantGuid).ExecuteDeleteAsync();
             await db.StorageItems.AddRangeAsync(items);
             await db.SaveChangesAsync();
             return Results.Ok(et);
@@ -149,6 +147,7 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest("已经审核的入库订单信息，不能删除!!");
             }
+            await db.StorageItems.Where(k => k.StorageNo == et.StorageNo).ExecuteDeleteAsync();
             db.Storages.Remove(et);
             await db.SaveChangesAsync();
             return Results.NoContent();

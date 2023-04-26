@@ -155,9 +155,8 @@ namespace FurnitureERP.Controllers
                 Remark = k.Remark,
                 CostPrice = k.CostPrice
             }).ToList();
-            var preItems = await db.TradeItems.Where(k => k.Tid == et.Tid && k.MerchantGuid == et.MerchantGuid).ToListAsync();
-            db.TradeItems.RemoveRange(preItems);
 
+            await db.TradeItems.Where(k => k.Tid == et.Tid && k.MerchantGuid == et.MerchantGuid).ExecuteDeleteAsync();
             await db.TradeItems.AddRangeAsync(items);
             await db.SaveChangesAsync();
             return Results.Ok(et);

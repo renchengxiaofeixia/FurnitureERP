@@ -96,6 +96,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<SysModule> SysModules { get; set; }
 
+    public virtual DbSet<SysParam> SysParams { get; set; }
+
     public virtual DbSet<Trade> Trades { get; set; }
 
     public virtual DbSet<TradeItem> TradeItems { get; set; }
@@ -694,6 +696,14 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<SysModule>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__module");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
+        modelBuilder.Entity<SysParam>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__sys_param");
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");

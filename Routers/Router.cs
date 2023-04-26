@@ -33,6 +33,10 @@ namespace FurnitureERP.Routers
             app.MapGet("/modules/", CustomPropertyController.GetMods);
 
 
+            app.MapPost("/params", SysParamController.Save);
+            app.MapGet("/params", SysParamController.Get);
+
+
             app.MapPost("/trade", TradeController.Create);
             app.MapGet("/trade/page", TradeController.Page);
             app.MapGet("/trade/{id}", TradeController.Single);

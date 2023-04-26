@@ -141,13 +141,9 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest("存在相同的供应商名称");
             }
-            if (SuppDto.SuppItems != null && SuppDto.SuppItems.Count > 0) { 
-                //删除下级供应商产品
-                var  removeItems = await db.SuppItems.Where(k => k.SuppName == et.SuppName && k.MerchantGuid == MerchantGuid).ToListAsync();
-                db.SuppItems.RemoveRange(removeItems);
-
+            if (SuppDto.SuppItems != null && SuppDto.SuppItems.Count > 0) {
+                await db.SuppItems.Where(k => k.SuppName == et.SuppName && k.MerchantGuid == MerchantGuid).ExecuteDeleteAsync();
                 var suppItems = mapper.Map<List<SuppItem>>(SuppDto.SuppItems);
-
                 suppItems.ForEach(si =>
                 {
                     si.MerchantGuid = MerchantGuid;

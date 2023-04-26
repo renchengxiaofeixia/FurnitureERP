@@ -7,6 +7,7 @@ using FurnitureERP.Models;
 using FurnitureERP.Utils;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Azure.Core;
+using FurnitureERP.Enums;
 
 namespace FurnitureERP.Controllers
 {
@@ -23,22 +24,28 @@ namespace FurnitureERP.Controllers
 
             if (purchaseDto.ItemDtos == null || purchaseDto.ItemDtos.Count < 1)
             {
-                return Results.BadRequest();
+                return Results.BadRequest("采购单商品信息不能为空");
             }
-            var purchasePackages = purchaseDto.ItemDtos.SelectMany(k => {
-                k.Guid = Guid.NewGuid();
-                if (k.PackageDtos == null) return null;
-                var dtos = mapper.Map<List<PurchasePackage>>(k.PackageDtos);
-                dtos.ForEach(p => {
-                    p.Amount = p.CostPrice * p.PurchaseNum;
-                    p.CreateTime = DateTime.Now;
-                    p.Creator = request.GetCurrentUser().UserName;
-                    p.MerchantGuid = purchase.MerchantGuid;
-                    p.PurchaseNo = purchase.PurchaseNo;
-                    p.PurchaseItemGuid = k.Guid;
+            if (Params.Inventory.Dimension(purchase.MerchantGuid) == InventoryDimensionEnum.Package)
+            {
+                var purchasePackages = purchaseDto.ItemDtos.SelectMany(k =>
+                {
+                    k.Guid = Guid.NewGuid();
+                    if (k.PackageDtos == null) return null;
+                    var dtos = mapper.Map<List<PurchasePackage>>(k.PackageDtos);
+                    dtos.ForEach(p =>
+                    {
+                        p.Amount = p.CostPrice * p.PurchaseNum;
+                        p.CreateTime = DateTime.Now;
+                        p.Creator = request.GetCurrentUser().UserName;
+                        p.MerchantGuid = purchase.MerchantGuid;
+                        p.PurchaseNo = purchase.PurchaseNo;
+                        p.PurchaseItemGuid = k.Guid;
+                    });
+                    return dtos;
                 });
-                return dtos;
-            });
+                await db.PurchasePackages.AddRangeAsync(purchasePackages);
+            }
 
             var purchaseItems = mapper.Map<List<PurchaseItem>>(purchaseDto.ItemDtos);
             purchaseItems.ForEach(pi =>
@@ -50,10 +57,6 @@ namespace FurnitureERP.Controllers
                 pi.PurchaseNo = purchase.PurchaseNo;
             });
 
-            if (purchasePackages != null)
-            {
-                await db.PurchasePackages.AddRangeAsync(purchasePackages);
-            }
             await db.PurchaseItems.AddRangeAsync(purchaseItems);
             await db.Purchases.AddAsync(purchase);
             await db.SaveChangesAsync();
@@ -146,27 +149,31 @@ namespace FurnitureERP.Controllers
                 CostPrice = k.CostPrice
             });
 
-            var packages = purchaseDto.ItemDtos.SelectMany(k => {
-                k.Guid = Guid.NewGuid();
-                if (k.PackageDtos == null) return null;
-                var dtos = mapper.Map<List<PurchasePackage>>(k.PackageDtos);
-                dtos.ForEach(p => {
-                    p.Amount = p.CostPrice * p.PurchaseNum;
-                    p.CreateTime = DateTime.Now;
-                    p.Creator = request.GetCurrentUser().UserName;
-                    p.MerchantGuid = et.MerchantGuid;
-                    p.PurchaseNo = et.PurchaseNo;
-                    p.PurchaseItemGuid = k.Guid;
+            if (Params.Inventory.Dimension(et.MerchantGuid) == InventoryDimensionEnum.Package)
+            {
+                var packages = purchaseDto.ItemDtos.SelectMany(k =>
+                {
+                    k.Guid = Guid.NewGuid();
+                    if (k.PackageDtos == null) return null;
+                    var dtos = mapper.Map<List<PurchasePackage>>(k.PackageDtos);
+                    dtos.ForEach(p =>
+                    {
+                        p.Amount = p.CostPrice * p.PurchaseNum;
+                        p.CreateTime = DateTime.Now;
+                        p.Creator = request.GetCurrentUser().UserName;
+                        p.MerchantGuid = et.MerchantGuid;
+                        p.PurchaseNo = et.PurchaseNo;
+                        p.PurchaseItemGuid = k.Guid;
+                    });
+                    return dtos;
                 });
-                return dtos;
-            });
+                await db.PurchasePackages.Where(k => k.PurchaseNo == et.PurchaseNo).ExecuteDeleteAsync();
+                await db.PurchasePackages.AddRangeAsync(packages);
+            }
 
 
             await db.PurchaseItems.Where(k => k.PurchaseNo == et.PurchaseNo).ExecuteDeleteAsync();
-            await db.PurchasePackages.Where(k => k.PurchaseNo == et.PurchaseNo).ExecuteDeleteAsync();
-
             await db.PurchaseItems.AddRangeAsync(items);
-            await db.PurchasePackages.AddRangeAsync(packages);
             await db.SaveChangesAsync();
             return Results.Ok(et);
         }
@@ -244,13 +251,18 @@ namespace FurnitureERP.Controllers
                 return Results.BadRequest("没有找到采购订单信息!!");
             }
             var items = await db.PurchaseItems.Where(k => k.PurchaseNo == et.PurchaseNo).ToListAsync();
-            var packages = await db.PurchasePackages.Where(k => k.PurchaseNo == et.PurchaseNo).ToListAsync();
             var itemDtos = mapper.Map<IEnumerable<PurchaseItemDto>>(items);
-            itemDtos = itemDtos.Select(it => {
-                var ips = packages.Where(p=> p.PurchaseItemGuid == it.Guid);
-                it.PackageDtos = mapper.Map<List<PurchaseItemDto>>(ips);
-                return it;
-            });
+
+            if (Params.Inventory.Dimension(et.MerchantGuid) == InventoryDimensionEnum.Package)
+            {
+                var packages = await db.PurchasePackages.Where(k => k.PurchaseNo == et.PurchaseNo).ToListAsync();   
+                itemDtos = itemDtos.Select(it => {
+                    var ips = packages.Where(p=> p.PurchaseItemGuid == it.Guid);
+                    it.PackageDtos = mapper.Map<List<PurchaseItemDto>>(ips);
+                    return it;
+                });
+            }
+
             return Results.Ok(itemDtos);
         }
 
@@ -272,16 +284,6 @@ namespace FurnitureERP.Controllers
                 return Results.BadRequest("采购单的商品数量不匹配!!");
             }
 
-            var packageDtos = purchaseItemDtos.SelectMany(k => k.PackageDtos);
-            var packages = await db.PurchasePackages.Where(k => k.PurchaseNo == et.PurchaseNo).ToListAsync();
-            if ((from k in packages
-                 from j in packageDtos
-                 where k.Id == j.Id && k.PurchaseNum != j.PurchaseNum
-                 select k).Any())
-            {
-                return Results.BadRequest("采购单的包件数量不匹配!!");
-            }
-
             var purchaseItemForUpdate = from p in items
                                     join e in purchaseItemDtos
                                     on p.Id equals e.Id
@@ -291,18 +293,29 @@ namespace FurnitureERP.Controllers
                 up.p.PurchaseNum -= up.e.CancelNum;
                 up.p.CancelNum += up.e.CancelNum;
             }
-
-            var purchasePackageForUpdate = from p in packages
-                                           join e in packageDtos
-                                            on p.Id equals e.Id
-                                            select new { p, e };
-            foreach (var up in purchasePackageForUpdate)
-            {
-                up.p.PurchaseNum -= up.e.CancelNum;
-                up.p.CancelNum += up.e.CancelNum;
+            if (Params.Inventory.Dimension(et.MerchantGuid) == InventoryDimensionEnum.Package)
+            {            
+                var packageDtos = purchaseItemDtos.SelectMany(k => k.PackageDtos);
+                var packages = await db.PurchasePackages.Where(k => k.PurchaseNo == et.PurchaseNo).ToListAsync();
+                if ((from k in packages
+                     from j in packageDtos
+                     where k.Id == j.Id && k.PurchaseNum != j.PurchaseNum
+                     select k).Any())
+                {
+                    return Results.BadRequest("采购单的包件数量不匹配!!");
+                }
+                var purchasePackageForUpdate = from p in packages
+                                               join e in packageDtos
+                                                on p.Id equals e.Id
+                                               select new { p, e };
+                foreach (var up in purchasePackageForUpdate)
+                {
+                    up.p.PurchaseNum -= up.e.CancelNum;
+                    up.p.CancelNum += up.e.CancelNum;
+                }
+                db.PurchasePackages.UpdateRange(purchasePackageForUpdate.Select(k => k.p));
             }
             db.PurchaseItems.UpdateRange(purchaseItemForUpdate.Select(k=> k.p));
-            db.PurchasePackages.UpdateRange(purchasePackageForUpdate.Select(k => k.p));
             await db.SaveChangesAsync();
             return Results.Ok(et);
         }
