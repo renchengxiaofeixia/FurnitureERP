@@ -50,10 +50,12 @@
         public string? SuppName { get; set; }
         public decimal Amount { get; set; }
         public string? PurchaseNo { get; set; }
+        public List<StorageItemDto> PackageDtos { get; set; }
     }
 
     public class CreateStorageItemDto
     {
+        public Guid Guid { get; set; }
         public string? ItemName { get; set; }
         public string? ItemNo { get; set; }
         public string? StdItemNo { get; set; }
@@ -65,6 +67,7 @@
         public string? SuppName { get; set; }
         public decimal Amount { get; set; }
         public string? PurchaseNo { get; set; }
+        public List<CreateStorageItemDto> PackageDtos { get; set; }
     }
 
     public class CreateStoragePackageDto

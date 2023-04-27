@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Azure.Core;
 using FurnitureERP.Dtos;
+using FurnitureERP.Enums;
 using FurnitureERP.Models;
 
 namespace FurnitureERP.Controllers
@@ -20,6 +21,28 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest();
             }
+
+            if (Params.Inventory.Dimension(storage.MerchantGuid) == InventoryDimensionEnum.Package)
+            {
+                var storagePackages = storageDto.ItemDtos.SelectMany(k =>
+                {
+                    k.Guid = Guid.NewGuid();
+                    if (k.PackageDtos == null) return null;
+                    var dtos = mapper.Map<List<StoragePackage>>(k.PackageDtos);
+                    dtos.ForEach(p =>
+                    {
+                        p.Amount = p.CostPrice * p.StorageNum;
+                        p.CreateTime = DateTime.Now;
+                        p.Creator = request.GetCurrentUser().UserName;
+                        p.MerchantGuid = storage.MerchantGuid;
+                        p.StorageNo = storage.StorageNo;
+                        p.StorageItemGuid = k.Guid;
+                    });
+                    return dtos;
+                });
+                await db.StoragePackages.AddRangeAsync(storagePackages);
+            }
+
             var storageItems = mapper.Map<List<StorageItem>>(storageDto.ItemDtos);
             storageItems.ForEach(pi =>
             {
@@ -94,7 +117,7 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Edit(AppDbContext db, long id, CreateStorageDto storageDto, HttpRequest request)
+        public static async Task<IResult> Edit(AppDbContext db, long id, CreateStorageDto storageDto, HttpRequest request, IMapper mapper)
         {
             var et = await db.Storages.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
@@ -113,6 +136,28 @@ namespace FurnitureERP.Controllers
             et.WareName = storageDto.WareName;
             et.Remark = storageDto.Remark;
             et.AggregateAmount = storageDto.ItemDtos.Sum(k => k.CostPrice * k.StorageNum);
+
+            if (Params.Inventory.Dimension(et.MerchantGuid) == InventoryDimensionEnum.Package)
+            {
+                var packages = storageDto.ItemDtos.SelectMany(k =>
+                {
+                    k.Guid = Guid.NewGuid();
+                    if (k.PackageDtos == null) return null;
+                    var dtos = mapper.Map<List<StoragePackage>>(k.PackageDtos);
+                    dtos.ForEach(p =>
+                    {
+                        p.Amount = p.CostPrice * p.StorageNum;
+                        p.CreateTime = DateTime.Now;
+                        p.Creator = request.GetCurrentUser().UserName;
+                        p.MerchantGuid = et.MerchantGuid;
+                        p.StorageNo = et.StorageNo;
+                        p.StorageItemGuid = k.Guid;
+                    });
+                    return dtos;
+                });
+                await db.StoragePackages.Where(k => k.StorageNo == et.StorageNo).ExecuteDeleteAsync();
+                await db.StoragePackages.AddRangeAsync(packages);
+            }
 
             var items = storageDto.ItemDtos.Select(k => new StorageItem
             {
@@ -167,7 +212,7 @@ namespace FurnitureERP.Controllers
             }
             try
             {
-                db.Database.BeginTransaction();
+                await db.Database.BeginTransactionAsync();
                 if (!string.IsNullOrEmpty(et.PurchaseNo) && et.StorageType == "采购入库")
                 {
                     //采购入库，更新采购单的入库数量
@@ -211,14 +256,54 @@ namespace FurnitureERP.Controllers
                     });
                     await db.Inventories.AddRangeAsync(inventoryForInsert);
 
-                    //包件入库
+                    if (Params.Inventory.Dimension(et.MerchantGuid) == InventoryDimensionEnum.Package)
+                    {
+                        //包件入库
+                        //采购入库，更新采购单的入库数量
+                        var purchasePackageForUpdate = from p in db.PurchasePackages
+                                                join e in db.StoragePackages
+                                                on p.PackageNo equals e.PackageNo
+                                                where p.PurchaseNo == et.PurchaseNo && e.StorageNo == et.StorageNo
+                                                select new { p, e };
+                        await purchasePackageForUpdate.ForEachAsync(up => up.p.StorageNum += up.e.StorageNum);
+
+
+                        ////采购入库，更新库存数量
+                        var inventoryPackageForUpdate = from p in db.InventoryPackages
+                                                 join e in db.StoragePackages
+                                                 on p.Guid equals e.Guid
+                                                 select new { p, e };
+                        await inventoryPackageForUpdate.ForEachAsync(up => up.p.Quantity += up.e.StorageNum);
+
+                        //采购入库，插入库存数量
+                        var storagePackageForInsert = await (from p in db.StoragePackages
+                                                          join e in db.InventoryPackages
+                                                          on p.Guid equals e.Guid
+                                                          into grp
+                                                          from g in grp.DefaultIfEmpty()
+                                                          select p).ToListAsync();
+                        var inventoryPackageForInsert = mapper.Map<List<InventoryPackage>>(storagePackageForInsert);
+                        inventoryPackageForInsert.ForEach(ivt =>
+                        {
+                            ivt.Id = 0;
+                            ivt.SuppName = et.SuppName;
+                            ivt.PurchaseNo = et.PurchaseNo;
+                            ivt.WareName = et.WareName;
+                            ivt.StorageTime = et.StorageDate;
+                            ivt.StorageType = et.StorageType;
+                            ivt.CreateTime = DateTime.Now;
+                            ivt.Creator = request.GetCurrentUser().UserName;
+                            ivt.Tid = et.Tid;
+                        });
+                        await db.InventoryPackages.AddRangeAsync(inventoryPackageForInsert);
+                    }
 
                 }
                 else if (et.StorageType == "其他入库")
                 {
                     //其他入库，插入库存数量
-                    var storageItems = await db.StorageItems.Where(k => k.StorageNo == et.StorageNo).ToListAsync();
-                    var inventoryForInsert = mapper.Map<List<Inventory>>(storageItems);
+                    var storageItemsForInsert = await db.StorageItems.Where(k => k.StorageNo == et.StorageNo).ToListAsync();
+                    var inventoryForInsert = mapper.Map<List<Inventory>>(storageItemsForInsert);
                     inventoryForInsert.ForEach(ivt =>
                     {
                         ivt.Id = 0;
@@ -230,29 +315,25 @@ namespace FurnitureERP.Controllers
                     });
                     await db.Inventories.AddRangeAsync(inventoryForInsert);
 
-                    //包件入库
-                    var packageForInsert = await (from p in db.StorageItems
-                                                  from k in db.ItemPackages
-                                                  from j in db.Packages
-                                                  where p.ItemNo == k.ItemNo && k.PackageNo == j.PackageNo
-                                                  select new Inventorybarcode
-                                                  {
-                                                      Guid = Guid.NewGuid(),
-                                                      PackageName = j.PackageName,
-                                                      PackageNo = j.PackageNo,
-                                                      ItemName = p.ItemName,
-                                                      ItemNo = p.ItemNo,
-                                                      BarCode = string.Empty,
-                                                      StdItemNo = p.StdItemNo,
-                                                      StorageNo = et.StorageNo,
-                                                      PurchaseNo = et.PurchaseNo,
-                                                      SuppName = et.SuppName,
-                                                      Tid = et.Tid,
-                                                      WareName = et.WareName,
-                                                      PackageQuantity = p.StorageNum,
-                                                      InventoryGuid = p.Guid
-                                                  }).ToListAsync();
-                    await db.Inventorybarcodes.AddRangeAsync(packageForInsert);
+                    if (Params.Inventory.Dimension(et.MerchantGuid) == InventoryDimensionEnum.Package)
+                    {
+                        //包件入库
+                        var storagePackageForInsert = await db.StoragePackages.Where(k => k.StorageNo == et.StorageNo).ToListAsync();
+                        var inventoryPackageForInsert = mapper.Map<List<InventoryPackage>>(storagePackageForInsert);
+                        inventoryPackageForInsert.ForEach(ivt =>
+                        {
+                            ivt.Id = 0;
+                            ivt.SuppName = et.SuppName;
+                            ivt.PurchaseNo = et.PurchaseNo;
+                            ivt.WareName = et.WareName;
+                            ivt.StorageTime = et.StorageDate;
+                            ivt.StorageType = et.StorageType;
+                            ivt.CreateTime = DateTime.Now;
+                            ivt.Creator = request.GetCurrentUser().UserName;
+                            ivt.Tid = et.Tid;
+                        });
+                        await db.InventoryPackages.AddRangeAsync(inventoryPackageForInsert);
+                    }                      
 
                 }
                 et.IsAudit = true;
@@ -310,7 +391,17 @@ namespace FurnitureERP.Controllers
                 return Results.BadRequest("没有找到入库订单信息!!");
             }
             var items = await db.StorageItems.Where(k => k.StorageNo == et.StorageNo).ToListAsync();
-            //items = items.OrderByDescending(s => s.Id).ToList();
+            var itemDtos = mapper.Map<IEnumerable<StorageItemDto>>(items);
+
+            if (Params.Inventory.Dimension(et.MerchantGuid) == InventoryDimensionEnum.Package)
+            {
+                var packages = await db.StoragePackages.Where(k => k.StorageNo == et.StorageNo).ToListAsync();
+                itemDtos = itemDtos.Select(it => {
+                    var ips = packages.Where(p => p.StorageItemGuid == it.Guid);
+                    it.PackageDtos = mapper.Map<List<StorageItemDto>>(ips);
+                    return it;
+                });
+            }
 
             return Results.Ok(mapper.Map<List<StorageItemDto>>(items));
         }
