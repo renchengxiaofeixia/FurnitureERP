@@ -239,6 +239,14 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest("订单已经货审!!");
             }
+            if (Params.Inventory.Dimension(request.GetCurrentUser().MerchantGuid) == InventoryDimensionEnum.Item)
+            {
+
+            }
+            else if(Params.Inventory.Dimension(request.GetCurrentUser().MerchantGuid) == InventoryDimensionEnum.Package)
+            {
+
+            }
             et.IsGoodsAudit = true;
             et.GoodsAuditDate = DateTime.Now;
             et.GoodsAuditUser = request.GetCurrentUser().UserName;
@@ -444,7 +452,6 @@ namespace FurnitureERP.Controllers
 
             return Results.Ok(trades);
         }
-
 
         private static async Task<IResult> MinusItemInventory(List<Trade> trades, AppDbContext db,IMapper mapper,HttpRequest request)
         {
