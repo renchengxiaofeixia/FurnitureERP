@@ -8,6 +8,9 @@ namespace FurnitureERP.Routers
         public static IApplicationBuilder Use(IApplicationBuilder builder)
         {
             var app = builder as WebApplication;
+
+            app.MapPost("/public/upload", PublicController.Upload);
+
             app.MapPost("/signin", AuthController.Signin);
             app.MapPost("/signinforsmscode", AuthController.SigninForSmsCode);
             app.MapPost("/signup", AuthController.Signup);

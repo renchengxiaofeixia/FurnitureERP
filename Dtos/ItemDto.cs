@@ -17,7 +17,7 @@ namespace FurnitureERP.Dtos
         public DateTime CreateTime { get; set; }
         public string? Creator { get; set; }
         public bool? IsUsing { get; set; }
-        public string? PicPath { get; set; }
+        public string? PicPath { get; set; } = string.Empty;
         public int SafeQty { get; set; }
         public decimal Price { get; set; }
 
