@@ -224,6 +224,7 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest("无效的数据");
             }
+            db.LogisPoints.Remove(et);
             await db.SaveChangesAsync();
             return Results.NoContent();
         }

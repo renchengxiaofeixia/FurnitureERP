@@ -63,7 +63,7 @@
         public string? Creator { get; set; }
         public DateTime? DeliveryDate { get; set; }
         public bool IsMade { get; set; }
-        public Guid? OrderGuid { get; set; }
+        public Guid? TradeItemGuid { get; set; }
         public Guid MerchantGuid { get; set; }
         public List<PurchaseItemDto> PackageDtos { get; set; }
     }
@@ -81,7 +81,7 @@
         public string? Remark { get; set; }
         public DateTime? DeliveryDate { get; set; }
         public bool IsMade { get; set; }
-        public Guid? OrderGuid { get; set; }
+        public Guid? TradeItemGuid { get; set; }
         public List<CreatePurchaseItemDto> PackageDtos { get; set; }
     }
 }

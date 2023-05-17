@@ -104,6 +104,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<TradeItemMatchInventory> TradeItemMatchInventories { get; set; }
 
+    public virtual DbSet<TradePackage> TradePackages { get; set; }
+
     public virtual DbSet<TradePay> TradePays { get; set; }
 
     public virtual DbSet<TradePickInventoryLog> TradePickInventoryLogs { get; set; }
@@ -424,13 +426,13 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.ItemName).HasComment("商品名称");
             entity.Property(e => e.ItemNo).HasComment("商品编码（可为定制编码）");
             entity.Property(e => e.MerchantGuid).HasComment("商户GUID");
-            entity.Property(e => e.OrderGuid).HasComment("订单商品GUID");
             entity.Property(e => e.PurchaseNo).HasComment("采购单号");
             entity.Property(e => e.PurchaseNum).HasComment("采购数量");
             entity.Property(e => e.Remark).HasComment("备注");
             entity.Property(e => e.StdItemNo).HasComment("标准商品编码");
             entity.Property(e => e.StorageNum).HasComment("入库数量");
             entity.Property(e => e.SuppName).HasComment("供应商名称");
+            entity.Property(e => e.TradeItemGuid).HasComment("订单商品GUID");
         });
 
         modelBuilder.Entity<PurchasePackage>(entity =>
@@ -741,6 +743,17 @@ public partial class AppDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__trade_item_match_inventory");
 
             entity.ToTable("trade_item_match_inventory", tb => tb.HasComment("主动分配库存"));
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.TimeStamp)
+                .IsRowVersion()
+                .IsConcurrencyToken();
+        });
+
+        modelBuilder.Entity<TradePackage>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__trade_package");
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");

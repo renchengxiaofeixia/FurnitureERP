@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using Azure.Core;
+using FurnitureERP.Dtos;
 using FurnitureERP.Enums;
 using FurnitureERP.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using static FurnitureERP.Utils.Params;
 
 namespace FurnitureERP.Controllers
 {
@@ -15,7 +17,7 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> Create(AppDbContext db, CreateTradeDto tradeDto, HttpRequest request, IMapper mapper)
         {
-            var trade = mapper.Map<Trade>(tradeDto);
+            var trade = mapper.Map<Models.Trade>(tradeDto);
             trade.Tid = await Util.GetSerialNoAsync(db, request.GetCurrentUser().MerchantGuid, "trade");
             trade.Creator = request.GetCurrentUser().UserName;
             trade.MerchantGuid = request.GetCurrentUser().MerchantGuid;
@@ -23,6 +25,27 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest("订单中必须包含产品信息");
             }
+
+            if (Params.Inventory.Dimension(trade.MerchantGuid) == InventoryDimensionEnum.Package)
+            {
+                var tradePackages = tradeDto.ItemDtos.SelectMany(k =>
+                {
+                    k.Guid = Guid.NewGuid();
+                    if (k.PackageDtos == null) return null;
+                    var dtos = mapper.Map<List<TradePackage>>(k.PackageDtos);
+                    dtos.ForEach(p =>
+                    {
+                        p.CreateTime = DateTime.Now;
+                        p.Creator = request.GetCurrentUser().UserName;
+                        p.MerchantGuid = trade.MerchantGuid;
+                        p.Tid = trade.Tid;
+                        p.TradeItemGuid = k.Guid;
+                    });
+                    return dtos;
+                });
+                await db.TradePackages.AddRangeAsync(tradePackages);
+            }
+
             var purchaseItems = mapper.Map<List<TradeItem>>(tradeDto.ItemDtos);
             purchaseItems.ForEach(pi =>
             {
@@ -51,7 +74,7 @@ namespace FurnitureERP.Controllers
             , string? logisNo
             , int pageNo, int pageSize)
         {
-            IQueryable<Trade> trades = db.Trades.Where(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
+            IQueryable<Models.Trade> trades = db.Trades.Where(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (!string.IsNullOrEmpty(keyword))
             {
                 trades = trades.Where(k => k.Tid.Contains(keyword) || k.ReceiverName.Contains(keyword) || k.BuyerNick.Contains(keyword));
@@ -96,7 +119,7 @@ namespace FurnitureERP.Controllers
             {
                 trades = trades.Where(k => k.LogisNo.Contains(logisNo));
             }
-            var page = await Pagination<Trade>.CreateAsync(trades, pageNo, pageSize);
+            var page = await Pagination<Models.Trade>.CreateAsync(trades, pageNo, pageSize);
             page.Items = mapper.Map<List<TradeDto>>(page.Items);
             return Results.Ok(page);
         }
@@ -156,6 +179,28 @@ namespace FurnitureERP.Controllers
                 CostPrice = k.CostPrice
             }).ToList();
 
+
+            if (Params.Inventory.Dimension(et.MerchantGuid) == InventoryDimensionEnum.Package)
+            {
+                var packages = tradeDto.ItemDtos.SelectMany(k =>
+                {
+                    k.Guid = Guid.NewGuid();
+                    if (k.PackageDtos == null) return null;
+                    var dtos = mapper.Map<List<TradePackage>>(k.PackageDtos);
+                    dtos.ForEach(p =>
+                    {
+                        p.CreateTime = DateTime.Now;
+                        p.Creator = request.GetCurrentUser().UserName;
+                        p.MerchantGuid = et.MerchantGuid;
+                        p.Tid = et.Tid;
+                        p.TradeItemGuid = k.Guid;
+                    });
+                    return dtos;
+                });
+                await db.TradePackages.Where(k => k.Tid == et.Tid).ExecuteDeleteAsync();
+                await db.TradePackages.AddRangeAsync(packages);
+            }
+
             await db.TradeItems.Where(k => k.Tid == et.Tid && k.MerchantGuid == et.MerchantGuid).ExecuteDeleteAsync();
             await db.TradeItems.AddRangeAsync(items);
             await db.SaveChangesAsync();
@@ -174,9 +219,8 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest("已经审核的订单，不能删除!!");
             }
-            var items = await db.TradeItems.Where(k=>k.Tid== et.Tid).ToListAsync();
+            await db.TradeItems.Where(k=>k.Tid== et.Tid).ExecuteDeleteAsync();
             db.Trades.Remove(et);
-            db.TradeItems.RemoveRange(items);
             await db.SaveChangesAsync();
             return Results.NoContent();
         }
@@ -213,8 +257,7 @@ namespace FurnitureERP.Controllers
                 return Results.BadRequest("订单已经货审，不能退客审!!");
             }
             //删除手动分配库存记录
-            var tradeItemMatchInventorys = await db.TradeItemMatchInventories.Where(k => k.Tid == et.Tid).ToListAsync();
-            db.TradeItemMatchInventories.RemoveRange(tradeItemMatchInventorys);
+            await db.TradeItemMatchInventories.Where(k => k.Tid == et.Tid).ExecuteDeleteAsync();
 
             et.IsAudit = false;
             et.AuditDate = null;
@@ -337,57 +380,32 @@ namespace FurnitureERP.Controllers
             }
             try
             {
-                //if (InventoryReceiveEnum.Scan)
-                //{                    
-                //    if (InventoryDimensionEnum.Item)
-                //    {
-                //        MinusItemInventory(trades, db);
-                //    }
-                //    if (InventoryDimensionEnum.Package)
-                //    {
-                //        MinusPackageInventory(trades, db);
-                //    }
-                //}
-
-                return await MinusItemInventory(trades, db, mapper, request);
-                
+                if (Params.Inventory.Dimension(request.GetCurrentUser().MerchantGuid) == InventoryDimensionEnum.Package)
+                {
+                    return await MinusPackageInventory(trades, db, mapper, request);
+                }
+                else if (Params.Inventory.Dimension(request.GetCurrentUser().MerchantGuid) == InventoryDimensionEnum.Item)
+                {
+                    return await MinusItemInventory(trades, db, mapper, request);
+                }
+                return Results.BadRequest("服务器异常");
             }
             catch {
                 return Results.Ok("扣减库存出现异常，请刷新数据重新打印");
             }
         }
 
-        private static async Task<IResult> MinusPackageInventory(List<Trade> trades, AppDbContext db, IMapper mapper, HttpRequest request)
+        private static async Task<IResult> MinusPackageInventory(List<Models.Trade> trades, AppDbContext db, IMapper mapper, HttpRequest request)
         {
             var tids = trades.Select(k => k.Tid);
-            var tradeItemQueryable = db.TradeItems.Where(k => tids.All(tid => tid == k.Tid));
-            var inventoryQueryable = from invt in db.Inventories
-                                     join it in tradeItemQueryable
-                                     on new { invt.ItemNo, invt.WareName } equals new { it.ItemNo, it.WareName }
+            var tradePackageQueryable = db.TradePackages.Where(k => tids.All(tid => tid == k.Tid));
+            var inventoryQueryable = from invt in db.InventoryPackages
+                                     join it in tradePackageQueryable
+                                     on new { invt.PackageNo, invt.WareName } equals new { it.PackageNo, it.WareName }
                                      where invt.MerchantGuid == request.GetCurrentUser().MerchantGuid && invt.Quantity > 0
                                      select invt;
-            //单品
-            var items = await tradeItemQueryable.Where(k => !k.IsCom).OrderBy(k => k.ItemNo).ThenBy(k => k.Num).ToListAsync();
-            //拆分组合商品
-            var subItems = await (from comit in tradeItemQueryable
-                                  join subit in db.SubItems
-                                  on comit.ItemNo equals subit.ItemNo
-                                  join it in db.Items
-                                  on subit.SubItemNo equals it.ItemNo
-                                  select new TradeItemDto()
-                                  {
-                                      Guid = comit.Guid,
-                                      ItemNo = it.ItemNo,
-                                      ItemName = it.ItemName,
-                                      Num = comit.Num * subit.Num,
-                                      WareName = comit.WareName,
-                                      Tid = comit.Tid,
-                                      Creator = comit.Creator,
-                                  }).ToListAsync();
-            var itemDtos = mapper.Map<List<TradeItemDto>>(items);
-            itemDtos.AddRange(subItems);
-            //按商品数量 少->多 排序
-            itemDtos = itemDtos.OrderBy(k => k.ItemNo).ThenBy(k => k.Num).ToList();
+            //包件
+            var packages = await tradePackageQueryable.Where(k => !k.IsCom).OrderBy(k => k.PackageNo).ThenBy(k => k.Num).ToListAsync();
 
 
             /**
@@ -397,26 +415,26 @@ namespace FurnitureERP.Controllers
              * 清空库位 并且 拣货效率同时优先 ，三个月前的库存优先出货 (暂时只是想法)
             **/
             //按库存商品数量 多->少 排序
-            var inventories = await inventoryQueryable.OrderBy(k => k.ItemNo).ThenByDescending(k => k.Quantity).ToListAsync();
+            var inventories = await inventoryQueryable.OrderBy(k => k.PackageNo).ThenByDescending(k => k.Quantity).ToListAsync();
 
             //检查库存数
-            var summaryItems = itemDtos.GroupBy(k => new { k.ItemNo, k.WareName })
-                .Select(g => new { g.Key.WareName, g.Key.ItemNo, Num = g.Sum(k => k.Num) });
-            var summaryInvts = inventories.GroupBy(k => new { k.ItemNo, k.WareName })
-                .Select(g => new { g.Key.WareName, g.Key.ItemNo, Quantity = g.Sum(k => k.Quantity) });
+            var summaryPackages = packages.GroupBy(k => new { k.PackageNo, k.WareName })
+                .Select(g => new { g.Key.WareName, g.Key.PackageNo, Num = g.Sum(k => k.Num) });
+            var summaryInvts = inventories.GroupBy(k => new { k.PackageNo, k.WareName })
+                .Select(g => new { g.Key.WareName, g.Key.PackageNo, Quantity = g.Sum(k => k.Quantity) });
             if ((from invt in summaryInvts
-                 from it in summaryItems
+                 from it in summaryPackages
                  where invt.Quantity < it.Num
-                 select it.ItemNo).Any())
+                 select it.PackageNo).Any())
             {
                 return Results.BadRequest("商品库存不足，不能打印!!!");
             }
 
             await db.Database.BeginTransactionAsync();
             var tradePickInventoryLogs = new List<TradePickInventoryLog>();
-            foreach (var it in itemDtos)
+            foreach (var it in packages)
             {
-                var invts = inventories.Where(invt => invt.ItemNo == it.ItemNo && invt.WareName == it.WareName);
+                var invts = inventories.Where(invt => invt.PackageNo == it.PackageNo && invt.WareName == it.WareName);
                 foreach (var invt in invts)
                 {
                     if (invt.Quantity >= it.Num)
@@ -434,7 +452,7 @@ namespace FurnitureERP.Controllers
                     }
                 }
             }
-            if (itemDtos.Any(k => k.Num > 0))
+            if (packages.Any(k => k.Num > 0))
             {
                 await db.Database.RollbackTransactionAsync();
                 return Results.BadRequest("扣减库存出现异常，请刷新数据重新打印");
@@ -453,7 +471,7 @@ namespace FurnitureERP.Controllers
             return Results.Ok(trades);
         }
 
-        private static async Task<IResult> MinusItemInventory(List<Trade> trades, AppDbContext db,IMapper mapper,HttpRequest request)
+        private static async Task<IResult> MinusItemInventory(List<Models.Trade> trades, AppDbContext db,IMapper mapper,HttpRequest request)
         {
             var tids = trades.Select(k => k.Tid);
             var tradeItemQueryable = db.TradeItems.Where(k => tids.All(tid => tid == k.Tid));
@@ -509,7 +527,7 @@ namespace FurnitureERP.Controllers
             await db.Database.BeginTransactionAsync();
             var tradePickInventoryLogs = new List<TradePickInventoryLog>();
             //需要扣减的库存数据
-            var updateInventories = new Dictionary<long,Inventory>();
+            var updateInventories = new Dictionary<long, Models.Inventory>();
             foreach (var it in itemDtos)
             {
                 var invts = inventories.Where(invt => invt.ItemNo == it.ItemNo && invt.WareName == it.WareName);
@@ -551,7 +569,7 @@ namespace FurnitureERP.Controllers
             return Results.Ok(trades);
         }
 
-        private static TradePickInventoryLog CreatePickLog(Inventory invt, TradeItemDto it,int minusQuantity)
+        private static TradePickInventoryLog CreatePickLog(Models.Inventory invt, TradeItemDto it,int minusQuantity)
         {
             return new TradePickInventoryLog {
                 Guid = Guid.NewGuid(),
@@ -575,6 +593,31 @@ namespace FurnitureERP.Controllers
             };
         }
 
+        private static TradePickInventoryLog CreatePickLog(InventoryPackage invt, TradePackage pk, int minusQuantity)
+        {
+            return new TradePickInventoryLog
+            {
+                Guid = Guid.NewGuid(),
+                AreaName = invt.AreaName,
+                WareName = invt.WareName,
+                LocationName = invt.LocationName,
+                CreateTime = DateTime.Now,
+                CostPrice = invt.CostPrice,
+                InventoryGuid = invt.Guid,
+                InventoryId = invt.Id,
+                InventoryQuantity = invt.Quantity,
+                ItemNo = invt.PackageNo,
+                MinusQuantity = minusQuantity,
+                TradeItemGuid = pk.Guid,
+                PrintSession = Guid.NewGuid(),
+                PurchaseNo = invt.PurchaseNo,
+                StorageNo = invt.StorageNo,
+                Remark = invt.Remark,
+                SuppName = invt.SuppName,
+                Tid = pk.Tid
+            };
+        }
+
         [Authorize]
         public static async Task<IResult> UnPrint(AppDbContext db, long id, HttpRequest request)
         {
@@ -588,18 +631,16 @@ namespace FurnitureERP.Controllers
                 return Results.BadRequest("订单已经发货，不能退打印!!");            
             }
 
-            var tradePickInventoryLogs = await db.TradePickInventoryLogs.Where(k=>k.Tid == et.Tid).ToListAsync();
-
             var inventoryForUpdate = from p in db.Inventories
                                     join e in db.TradePickInventoryLogs
                                     on p.Id equals e.InventoryId
                                     where e.Tid == et.Tid
                                     select new { p, e };
             await inventoryForUpdate.ForEachAsync(up => up.p.Quantity += up.e.MinusQuantity);
+            await db.TradePickInventoryLogs.Where(k => k.Tid == et.Tid).ExecuteDeleteAsync();
             et.IsPrint = false;
             et.PrintDate = null;
             et.PrintUser = string.Empty;
-            db.TradePickInventoryLogs.RemoveRange(tradePickInventoryLogs);
             await db.SaveChangesAsync();
             return Results.Ok(et);
         }
@@ -631,7 +672,6 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> CreateMatchInventory(AppDbContext db,string tid,[FromBody] List<CreateTradeItemMatchInventoryDto> tradeItemMatchInventoryDtos, IMapper mapper, HttpRequest request)
         {
-            var tradeItemMatchInventorys = await db.TradeItemMatchInventories.Where(k=>k.Tid == tid).ToListAsync();
             var addTradeItemMatchInventorys = mapper.Map<List<TradeItemMatchInventory>>(tradeItemMatchInventoryDtos);
             addTradeItemMatchInventorys.ForEach(k => {
                 k.AllocInventoryDate = DateTime.Now;
@@ -643,7 +683,7 @@ namespace FurnitureERP.Controllers
             try
             {
                 await db.Database.BeginTransactionAsync();
-                db.TradeItemMatchInventories.RemoveRange(tradeItemMatchInventorys);
+                await db.TradeItemMatchInventories.Where(k => k.Tid == tid).ExecuteDeleteAsync();
                 await db.TradeItemMatchInventories.AddRangeAsync(addTradeItemMatchInventorys);
                 await db.SaveChangesAsync();
                 await db.Database.CommitTransactionAsync();
@@ -661,8 +701,18 @@ namespace FurnitureERP.Controllers
                 return Results.BadRequest("没有找到订单信息!!");
             }
             var items = await db.TradeItems.Where(k => k.Tid == et.Tid).ToListAsync();
-            items = items.OrderByDescending(s => s.Id).ToList();
 
+            var itemDtos = mapper.Map<IEnumerable<TradeItemDto>>(items);
+
+            if (Params.Inventory.Dimension(et.MerchantGuid) == InventoryDimensionEnum.Package)
+            {
+                var packages = await db.TradePackages.Where(k => k.Tid == et.Tid).ToListAsync();
+                itemDtos = itemDtos.Select(it => {
+                    var ips = packages.Where(p => p.TradeItemGuid == it.Guid);
+                    it.PackageDtos = mapper.Map<List<TradeItemDto>>(ips);
+                    return it;
+                });
+            }
             return Results.Ok(mapper.Map<List<TradeItemDto>>(items));
         }
 

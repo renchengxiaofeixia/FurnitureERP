@@ -97,7 +97,7 @@ public partial class PurchaseItem
     /// <summary>
     /// 订单商品GUID
     /// </summary>
-    public Guid? OrderGuid { get; set; }
+    public Guid? TradeItemGuid { get; set; }
 
     /// <summary>
     /// 商户GUID
