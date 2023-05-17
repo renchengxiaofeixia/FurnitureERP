@@ -22,6 +22,12 @@ namespace FurnitureERP.Profiles
 
             CreateMap<CreatePackageDto, Package>()
                 .ReverseMap();
+
+            CreateMap<ItemCatDto, ItemCat>()
+                .ReverseMap();
+
+            CreateMap<CreateItemCatDto, ItemCat>()
+                .ReverseMap();
         }
     }
 }

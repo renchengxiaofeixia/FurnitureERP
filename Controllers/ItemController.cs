@@ -36,6 +36,42 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
+        public static async Task<IResult> CreateCat(AppDbContext db,CreateItemCatDto itemCatDto,HttpRequest request,IMapper mapper)
+        {
+            if(await db.ItemCats.FirstOrDefaultAsync(x =>  x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.CateName == itemCatDto.CateName ) != null)
+            {
+                return Results.BadRequest("存在相同的分类");
+            }
+            var c = mapper.Map<ItemCat>(itemCatDto);
+            c.Creator = request.GetCurrentUser().UserName;
+            c.MerchantGuid = request.GetCurrentUser().MerchantGuid;
+            await db.ItemCats.AddAsync(c);
+            await db.SaveChangesAsync();
+            return Results.Created($"/item/cat/{c.Id}",c);
+        }
+
+        [Authorize]
+        public static async Task<IResult> EditCat(AppDbContext db,CreateItemCatDto itemCatDto,HttpRequest request,IMapper mapper,long id)
+        {
+            var et = await db.ItemCats.FirstOrDefaultAsync(x => x.Id ==  id);
+            if (et == null) 
+            {
+                return Results.BadRequest("数据不存在");
+            }
+            if(await db.ItemCats.FirstOrDefaultAsync(x => x.Id !=id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.CateName == itemCatDto.CateName) != null) 
+            {
+                return Results.BadRequest("存在相同的分类");
+            }
+            et.CateName = itemCatDto.CateName;
+            et.Type = itemCatDto.Type;
+            et.IsUsing = itemCatDto.IsUsing;
+            
+            await db.SaveChangesAsync();
+
+            return Results.Ok(et);
+        }
+
+        [Authorize]
         public static async Task<IResult> Get(AppDbContext db, IMapper mapper, HttpRequest request)
         {
             var ets = await db.Items.Where(x=> x.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
@@ -125,6 +161,10 @@ namespace FurnitureERP.Controllers
             et.Price = itemDto.Price;
             et.IsUsing = itemDto.IsUsing;
             et.IsCom = itemDto.IsCom;
+            et.Style = itemDto.Style;
+            et.Class = itemDto.Class;
+            et.Space = itemDto.Space;
+            et.Brand = itemDto.Brand;
             et.MerchantGuid = request.GetCurrentUser().MerchantGuid;
             await db.SaveChangesAsync();
             return Results.Ok(et);

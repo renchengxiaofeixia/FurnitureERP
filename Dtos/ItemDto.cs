@@ -20,6 +20,10 @@ namespace FurnitureERP.Dtos
         public string? PicPath { get; set; } = string.Empty;
         public int SafeQty { get; set; }
         public decimal Price { get; set; }
+        public string Style { get; set; }
+        public string Class { get; set; }
+        public string Brand { get; set; }
+        public string Space { get; set; }
 
         public List<CustomPropertyDto> CustomProperties { get; set; }
         public List<PackageDto> ItemPackages { get; set; }
@@ -40,6 +44,10 @@ namespace FurnitureERP.Dtos
         public string? PicPath { get; set; }
         public int SafeQty { get; set; }
         public decimal Price { get; set; }
+        public string Style { get; set; }
+        public string Class { get; set; }
+        public string Brand { get; set; }
+        public string Space { get; set; }
         public IList<CreateSubItemDto> SubItems { get; set; }
     }
 
@@ -73,4 +81,23 @@ namespace FurnitureERP.Dtos
         public bool? IsUsing { get; set; }
         public int SafeQty { get; set; }
     }
+
+    public class ItemCatDto
+    {
+        public long Id { get; set; }
+        public Guid Guid { get; set; }
+        public string? CateName { get; set; }
+        public string? Type { get; set; }
+        public DateTime CreateTime { get; set; }
+        public string? Creator { get; set; }
+        public bool? IsUsing { get; set; }
+    }
+
+    public class CreateItemCatDto
+    {
+        public string? CateName { get; set; }
+        public string? Type { get; set; }
+        public bool? IsUsing { get; set; }
+    }
+
 }

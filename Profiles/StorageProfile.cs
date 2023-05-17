@@ -26,7 +26,7 @@
                 .ReverseMap()
                 .ForPath(src => src.StorageNum, opt => opt.MapFrom(dest => dest.Quantity));
 
-            CreateMap<StorageItemDto, PurchasePackage>()
+            CreateMap<StorageItemDto, StoragePackage>()
                 .ForMember(dest => dest.PackageName, opt => opt.MapFrom(src => src.ItemName))
                 .ForMember(dest => dest.PackageNo, opt => opt.MapFrom(src => src.ItemNo))
                 .ForMember(dest => dest.StdPackageNo, opt => opt.MapFrom(src => src.StdItemNo))
@@ -35,7 +35,7 @@
                 .ForPath(src => src.ItemNo, opt => opt.MapFrom(dest => dest.PackageNo))
                 .ForPath(src => src.StdItemNo, opt => opt.MapFrom(dest => dest.StdPackageNo));
 
-            CreateMap<CreateStorageItemDto, PurchasePackage>()
+            CreateMap<CreateStorageItemDto, StoragePackage>()
                 .ForMember(dest => dest.PackageName, opt => opt.MapFrom(src => src.ItemName))
                 .ForMember(dest => dest.PackageNo, opt => opt.MapFrom(src => src.ItemNo))
                 .ForMember(dest => dest.StdPackageNo, opt => opt.MapFrom(src => src.StdItemNo))

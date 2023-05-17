@@ -74,6 +74,9 @@ namespace FurnitureERP.Routers
 
             app.MapPost("/item/upload", ItemController.Upload);
 
+            app.MapPost("/item/cat", ItemController.CreateCat);
+            app.MapPost("/item/cat/{id}", ItemController.EditCat);
+
 
 
             app.MapPost("/package", PackageController.Create);
