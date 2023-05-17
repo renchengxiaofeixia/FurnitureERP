@@ -175,10 +175,12 @@
         public required string WareName { get; set; }
         public DateTime CreateTime { get; set; }
         public required string Creator { get; set; }
+        public List<TradeItemDto> PackageDtos { get; set; }
     }
 
     public class CreateTradeItemDto
     {
+        public Guid Guid { get; set; }
         public string? PicPath { get; set; }
         public required string ItemName { get; set; }
         public required string ItemNo { get; set; }
@@ -197,6 +199,7 @@
         public bool IsCom { get; set; }
         public string? Remark { get; set; }
         public required string WareName { get; set; }
+        public List<CreateTradeItemDto> PackageDtos { get; set; } 
     }
 
     public class TradeItemMatchInventoryDto
