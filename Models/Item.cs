@@ -52,8 +52,7 @@ public partial class Item
     /// <summary>
     /// 包装件数
     /// </summary>
-    [Column(TypeName = "decimal(18, 2)")]
-    public decimal PackageQty { get; set; }
+    public int PackageQty { get; set; }
 
     /// <summary>
     /// 是否组合商品
@@ -111,14 +110,12 @@ public partial class Item
     /// <summary>
     /// 风格
     /// </summary>
-    [Column("style")]
     [StringLength(100)]
     public string Style { get; set; } = null!;
 
     /// <summary>
     /// 品类
     /// </summary>
-    [Column("class")]
     [StringLength(100)]
     public string Class { get; set; } = null!;
 
@@ -133,4 +130,11 @@ public partial class Item
     /// </summary>
     [StringLength(100)]
     public string Space { get; set; } = null!;
+
+    /// <summary>
+    /// 自定义分类
+    /// </summary>
+    [StringLength(255)]
+    [Unicode(false)]
+    public string Cate { get; set; } = null!;
 }

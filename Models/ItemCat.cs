@@ -14,12 +14,21 @@ public partial class ItemCat
 
     public Guid Guid { get; set; }
 
+    /// <summary>
+    /// 分类名
+    /// </summary>
     [StringLength(50)]
     public string? CateName { get; set; }
 
+    /// <summary>
+    /// 类型
+    /// </summary>
     [StringLength(200)]
     public string? Type { get; set; }
 
+    /// <summary>
+    /// 是否启用
+    /// </summary>
     public bool? IsUsing { get; set; }
 
     [Column(TypeName = "datetime")]
@@ -29,4 +38,11 @@ public partial class ItemCat
     public string? Creator { get; set; }
 
     public Guid MerchantGuid { get; set; }
+
+    /// <summary>
+    /// 父级id
+    /// </summary>
+    public int Pid { get; set; }
+
+    public int Sort { get; set; }
 }

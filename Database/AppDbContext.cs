@@ -183,6 +183,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Brand)
                 .HasDefaultValueSql("('')")
                 .HasComment("品牌");
+            entity.Property(e => e.Cate)
+                .HasDefaultValueSql("('')")
+                .HasComment("自定义分类");
             entity.Property(e => e.Class)
                 .HasDefaultValueSql("('')")
                 .HasComment("品类");
@@ -196,7 +199,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.ItemName).HasComment("商品名称");
             entity.Property(e => e.ItemNo).HasComment("商品编码");
             entity.Property(e => e.MerchantGuid).HasComment("商户GUID");
-            entity.Property(e => e.PackageQty).HasComment("包装件数");
+            entity.Property(e => e.PackageQty)
+                .HasDefaultValueSql("((1))")
+                .HasComment("包装件数");
             entity.Property(e => e.PicPath).HasComment("商品图");
             entity.Property(e => e.Price).HasComment("销售价");
             entity.Property(e => e.PurchaseDays).HasComment("采购周期");
@@ -220,9 +225,14 @@ public partial class AppDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__item_cat__3214EC07624B5CD8");
 
+            entity.Property(e => e.CateName).HasComment("分类名");
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.IsUsing).HasDefaultValueSql("((0))");
+            entity.Property(e => e.IsUsing)
+                .HasDefaultValueSql("((0))")
+                .HasComment("是否启用");
+            entity.Property(e => e.Pid).HasComment("父级id");
+            entity.Property(e => e.Type).HasComment("类型");
         });
 
         modelBuilder.Entity<ItemImp>(entity =>
@@ -483,7 +493,6 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<RecordDelete>(entity =>
         {
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
         });
 
         modelBuilder.Entity<Role>(entity =>
