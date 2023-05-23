@@ -7,6 +7,8 @@ using OfficeOpenXml.FormulaParsing.ExpressionGraph;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Linq.Dynamic.Core;
+using FurnitureERP.Utils;
+using FurnitureERP.Models;
 
 namespace FurnitureERP.Controllers
 {
@@ -123,7 +125,7 @@ namespace FurnitureERP.Controllers
         public static async Task<IResult> GetSubItems(AppDbContext db, IMapper mapper,long id, HttpRequest request)
         {
             var item = await db.Items.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
-            if (item ==null)
+            if (item == null)
             {
                 return Results.BadRequest("无效的数据");
             }
@@ -140,7 +142,7 @@ namespace FurnitureERP.Controllers
         public static async Task<IResult> Page(AppDbContext db, IMapper mapper
             ,string? keyword, DateTime? startCreateTime, DateTime? endCreateTime
             ,bool? isCom
-            //,[FromBody] List<SearchParam> searchParams
+            ,[FromBody] List<SearchParam>? searchParams
             , int pageNo,int pageSize)
         {
             IQueryable<Item> items = db.Items;
@@ -167,10 +169,25 @@ namespace FurnitureERP.Controllers
             //    });
             //}
 
-            //db.Items.Where()
+            if (searchParams is not null) 
+            {
+                searchParams.ForEach(item =>
+                {
+                    if (item.FieldType == "包含")
+                    {
+                        items = db.Items.Where($"{item.FieldName}.Contains(@0)", item.FieldValue);
+                    }
+                    if (item.FieldType == "等于")
+                    {
+                        items = db.Items.Where($"{item.FieldName} == @0", item.FieldValue);
+                    }
+                });
+            }
+              
+            //db.Items.Where("City == @0 and Orders.Count >= @1", "London", 10)
             //var num = 100;
             //System.Linq.Expressions.Expression.Constant(num >10);
-
+            //items = db.Items.Where($"itemName == \"F6015#1.2米茶几+F8015#电视柜\"");
             if (!string.IsNullOrEmpty(keyword))
             {
                 items = items.Where(k=>k.ItemName.Contains(keyword) || k.ItemNo.Contains(keyword));

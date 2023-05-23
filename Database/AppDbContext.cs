@@ -818,11 +818,17 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.HeadPic)
+                .HasDefaultValueSql("('')")
+                .HasComment("头像");
             entity.Property(e => e.IsUsing)
                 .HasDefaultValueSql("((1))")
                 .HasComment("是否启用");
             entity.Property(e => e.MerchantGuid).HasComment("商户GUID");
             entity.Property(e => e.MerchantName).HasComment("商户名");
+            entity.Property(e => e.MobileNo)
+                .HasDefaultValueSql("('')")
+                .HasComment("手机号");
             entity.Property(e => e.Password).HasComment("密码");
             entity.Property(e => e.Remark).HasComment("备注");
             entity.Property(e => e.TimeStamp)

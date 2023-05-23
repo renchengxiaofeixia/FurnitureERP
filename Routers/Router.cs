@@ -22,14 +22,15 @@ namespace FurnitureERP.Routers
             app.MapGet("/user/{id}", UserController.Single);
             app.MapPut("/user/{id}", UserController.Edit);
             app.MapDelete("/user/{id}", UserController.Delete);
-
+            app.MapGet("users/page", UserController.Page);
+            app.MapPost("/user/userrole", UserController.CreateUserRole);
 
             app.MapPost("/role", RoleController.Create);
             app.MapGet("/roles", RoleController.Get);
             app.MapGet("/role/{id}", RoleController.Single);
             app.MapPut("/role/{id}", RoleController.Edit);
             app.MapDelete("/role/{id}", RoleController.Delete);
-            app.MapPost("/userrole", RoleController.CreateUserRole);
+            app.MapPost("/role/userrole", RoleController.CreateUserRole);
 
             app.MapPost("/sysprop", CustomPropertyController.CreatePropConfig);
             app.MapGet("/sysprop", CustomPropertyController.SinglePropConfig);

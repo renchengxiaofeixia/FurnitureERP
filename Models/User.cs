@@ -59,4 +59,16 @@ public partial class User
     public Guid MerchantGuid { get; set; }
 
     public byte[] TimeStamp { get; set; } = null!;
+
+    /// <summary>
+    /// 头像
+    /// </summary>
+    [StringLength(255)]
+    public string HeadPic { get; set; } = null!;
+
+    /// <summary>
+    /// 手机号
+    /// </summary>
+    [StringLength(100)]
+    public string MobileNo { get; set; } = null!;
 }
