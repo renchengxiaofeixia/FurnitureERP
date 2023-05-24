@@ -93,18 +93,23 @@ namespace FurnitureERP.Dtos
         public DateTime CreateTime { get; set; }
         public string? Creator { get; set; }
         public bool? IsUsing { get; set; }
-        public int Pid { get; set; }
+        public Guid? Pid { get; set; }
         public int Sort { get; set; }
+        public int PrevId { get; set; }
+        public int NextId { get; set; }
         public IEnumerable<ItemCatDto> ItemCats { get; set; }
     }
 
     public class CreateItemCatDto
     {
+        public Guid Guid { get; set; }
         public string? CateName { get; set; }
         public string? Type { get; set; }
         public bool? IsUsing { get; set; }
-        public int Pid { get; set; }
+        public Guid? Pid { get; set; }
         public int Sort { get; set; }
+        public int PrevId { get; set; }
+        public int NextId { get; set; }
     }
 
 }

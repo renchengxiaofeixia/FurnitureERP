@@ -79,7 +79,7 @@ namespace FurnitureERP.Controllers
         {
             await db.UserRoles.Where(x => x.UserId == userRole.UserId).ExecuteDeleteAsync();
 
-            var roles = db.Roles.Where(x => userRole.RoleIds.Contains(x.Id));
+            //var roles = db.Roles.Where(x => userRole.RoleIds.Contains(x.Id));
             db.UserRoles.AddRange(userRole.RoleIds.Select(rid => new UserRole()
             {
                 RoleId = rid,

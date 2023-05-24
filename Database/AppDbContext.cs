@@ -231,7 +231,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IsUsing)
                 .HasDefaultValueSql("((0))")
                 .HasComment("是否启用");
-            entity.Property(e => e.Pid).HasComment("父级id");
+            entity.Property(e => e.Pid).HasComment("父级Guid");
             entity.Property(e => e.Type).HasComment("类型");
         });
 

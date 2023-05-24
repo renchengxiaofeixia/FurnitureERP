@@ -40,9 +40,11 @@ public partial class ItemCat
     public Guid MerchantGuid { get; set; }
 
     /// <summary>
-    /// 父级id
+    /// 父级Guid
     /// </summary>
-    public int Pid { get; set; }
+    public Guid? Pid { get; set; }
 
-    public int Sort { get; set; }
+    public int PrevId { get; set; }
+
+    public int Next { get; set; }
 }

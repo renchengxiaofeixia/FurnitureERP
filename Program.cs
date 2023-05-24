@@ -11,13 +11,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
 using static System.Net.Mime.MediaTypeNames;
 
+using EntityFrameworkCore.UseRowNumberForPaging;
+
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration["ConnectionStrings:SqlConnection"];
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseSqlServer(connectionString);
-    options.AddInterceptors(new QueryWithNoLockDbCommandInterceptor());
+    options.UseSqlServer(connectionString, i => i.UseRowNumberForPaging());
+
+    //options.AddInterceptors(new QueryWithNoLockDbCommandInterceptor());
     options.LogTo(Console.WriteLine);
 }); 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -137,5 +140,5 @@ Console.WriteLine(args);
 
 // start 
 app.MapGet("/", () => "Dotnet Minimal API");
-app.Run($"https://0.0.0.0:31000");
-//app.Run();
+//app.Run($"http://0.0.0.0:21000");
+app.Run();

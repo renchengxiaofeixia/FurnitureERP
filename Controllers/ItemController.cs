@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using System.Linq.Dynamic.Core;
 using FurnitureERP.Utils;
 using FurnitureERP.Models;
+using FurnitureERP.Enums;
 
 namespace FurnitureERP.Controllers
 {
@@ -74,21 +75,39 @@ namespace FurnitureERP.Controllers
             et.Type = itemCatDto.Type;
             et.IsUsing = itemCatDto.IsUsing;
             et.Pid = itemCatDto.Pid;
-            et.Sort = itemCatDto.Sort;
 
             await db.SaveChangesAsync();
 
             return Results.Ok(et);
         }
 
+        [Authorize]
+        public static async Task<IResult> EditCats(AppDbContext db, List<CreateItemCatDto> itemCatDtos, HttpRequest request, IMapper mapper)
+        {
+            await db.ItemCats.Where(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid).ExecuteDeleteAsync();
+
+            var dtos = mapper.Map<List<ItemCat>>(itemCatDtos);
+
+            dtos.ForEach(k =>
+            {
+                k.Creator = request.GetCurrentUser().UserName;
+                k.MerchantGuid = request.GetCurrentUser().MerchantGuid;
+            });
+
+            await db.ItemCats.AddRangeAsync(dtos);
+            await db.SaveChangesAsync();
+            return Results.Ok();
+        }
+
+        [Authorize]
         public static async Task<IResult> GetCats(AppDbContext db, IMapper mapper, HttpRequest request)
         {
             var data = await db.ItemCats.Where(k => k.IsUsing.HasValue && k.IsUsing.Value && k.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
             var dtos = mapper.Map<List<ItemCatDto>>(data);
-            dtos.ForEach(item =>{
-                item.ItemCats = dtos.Where(k => k.Pid == item.Id);
-            });
-            dtos = dtos.Where(k => k.Pid == 0).ToList();
+            //dtos.ForEach(item =>{
+            //    item.ItemCats = dtos.Where(k => k.Pid == item.Id);
+            //});
+            //dtos = dtos.Where(k => k.Pid == 0).ToList();
             return Results.Ok(dtos);
         }
 
@@ -138,7 +157,7 @@ namespace FurnitureERP.Controllers
             return Results.Ok(mapper.Map<List<ItemDto>>(await ets.ToListAsync()));
         }
 
-        //[Authorize]
+        [Authorize]
         public static async Task<IResult> Page(AppDbContext db, IMapper mapper
             ,string? keyword, DateTime? startCreateTime, DateTime? endCreateTime
             ,bool? isCom
@@ -146,38 +165,16 @@ namespace FurnitureERP.Controllers
             , int pageNo,int pageSize)
         {
             IQueryable<Item> items = db.Items;
-            //if (searchParams.Count > 0)
-            //{
-            //    searchParams.ForEach(item =>
-            //    {
-            //        if (item.FieldName == "ItemName" && item.FieldType == "包含")
-            //        {
-            //            db.Items.Where(k => k.ItemName.Contains(item.FieldValue));
-            //        }
-            //        else if(item.FieldName == "ItemName" && item.FieldType == "等于")
-            //        {
-            //            db.Items.Where(k => k.ItemName == item.FieldValue);
-            //        }
-            //        else if (item.FieldName == "ItemNo" && item.FieldType == "包含")
-            //        {
-            //            db.Items.Where(k => k.ItemNo.Contains(item.FieldValue));
-            //        }
-            //        else if (item.FieldName == "ItemNo" && item.FieldType == "等于")
-            //        {
-            //            db.Items.Where(k => k.ItemNo == item.FieldValue);
-            //        }
-            //    });
-            //}
 
             if (searchParams is not null) 
             {
                 searchParams.ForEach(item =>
                 {
-                    if (item.FieldType == "包含")
+                    if (item.FieldType == SearchParamEnum.Contains)
                     {
                         items = db.Items.Where($"{item.FieldName}.Contains(@0)", item.FieldValue);
                     }
-                    if (item.FieldType == "等于")
+                    if (item.FieldType == SearchParamEnum.Equals)
                     {
                         items = db.Items.Where($"{item.FieldName} == @0", item.FieldValue);
                     }
