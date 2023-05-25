@@ -30,6 +30,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Item> Items { get; set; }
 
+    public virtual DbSet<ItemCat> ItemCats { get; set; }
+
     public virtual DbSet<ItemImp> ItemImps { get; set; }
 
     public virtual DbSet<ItemPackage> ItemPackages { get; set; }
@@ -178,6 +180,15 @@ public partial class AppDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__t_item__3214EC0710AB74EC");
 
+            entity.Property(e => e.Brand)
+                .HasDefaultValueSql("('')")
+                .HasComment("品牌");
+            entity.Property(e => e.Cate)
+                .HasDefaultValueSql("('')")
+                .HasComment("自定义分类");
+            entity.Property(e => e.Class)
+                .HasDefaultValueSql("('')")
+                .HasComment("品类");
             entity.Property(e => e.CostPrice).HasComment("采购价");
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
@@ -195,11 +206,31 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Remark).HasComment("备注");
             entity.Property(e => e.SafeQty).HasComment("安全库存");
             entity.Property(e => e.SellerNick).HasComment("所属店铺");
+            entity.Property(e => e.Space)
+                .HasDefaultValueSql("('')")
+                .HasComment("空间");
+            entity.Property(e => e.Style)
+                .HasDefaultValueSql("('')")
+                .HasComment("风格");
             entity.Property(e => e.SuppName).HasComment("供应商名");
             entity.Property(e => e.TimeStamp)
                 .IsRowVersion()
                 .IsConcurrencyToken();
             entity.Property(e => e.Volume).HasComment("体积");
+        });
+
+        modelBuilder.Entity<ItemCat>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__item_cat__3214EC07624B5CD8");
+
+            entity.Property(e => e.CateName).HasComment("分类名");
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.IsUsing)
+                .HasDefaultValueSql("((0))")
+                .HasComment("是否启用");
+            entity.Property(e => e.Pid).HasComment("父级id");
+            entity.Property(e => e.Type).HasComment("类型");
         });
 
         modelBuilder.Entity<ItemImp>(entity =>

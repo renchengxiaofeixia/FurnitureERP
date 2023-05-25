@@ -107,4 +107,35 @@ public partial class Item
     public Guid MerchantGuid { get; set; }
 
     public byte[] TimeStamp { get; set; } = null!;
+
+    /// <summary>
+    /// 风格
+    /// </summary>
+    [StringLength(100)]
+    public string Style { get; set; } = null!;
+
+    /// <summary>
+    /// 品类
+    /// </summary>
+    [StringLength(100)]
+    public string Class { get; set; } = null!;
+
+    /// <summary>
+    /// 品牌
+    /// </summary>
+    [StringLength(100)]
+    public string Brand { get; set; } = null!;
+
+    /// <summary>
+    /// 空间
+    /// </summary>
+    [StringLength(100)]
+    public string Space { get; set; } = null!;
+
+    /// <summary>
+    /// 自定义分类
+    /// </summary>
+    [StringLength(255)]
+    [Unicode(false)]
+    public string Cate { get; set; } = null!;
 }
