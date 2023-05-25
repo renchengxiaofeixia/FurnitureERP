@@ -10,6 +10,11 @@ using System.Linq.Dynamic.Core;
 using FurnitureERP.Utils;
 using FurnitureERP.Models;
 using FurnitureERP.Enums;
+using AutoMapper;
+using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Drawing.Printing;
+using System.Drawing;
 
 namespace FurnitureERP.Controllers
 {
@@ -136,7 +141,7 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> Get(AppDbContext db, IMapper mapper, HttpRequest request)
         {
-            var ets = await db.Items.Where(x=> x.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
+            var ets = await db.Items.Where(x=> x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.Status == ItemStatusEnum.Using.ToString()).ToListAsync();
             return Results.Ok(mapper.Map<List<ItemDto>>(ets));
         }
 
@@ -150,7 +155,8 @@ namespace FurnitureERP.Controllers
             }
             var ets = from it in db.Items
                       from si in db.SubItems
-                      where it.ItemNo == si.SubItemNo && si.ItemNo == item.ItemNo && si.MerchantGuid == request.GetCurrentUser().MerchantGuid  
+                      where it.ItemNo == si.SubItemNo && si.ItemNo == item.ItemNo && si.MerchantGuid == request.GetCurrentUser().MerchantGuid && it.Status != 
+                      ItemStatusEnum.Using.ToString()
                       select it;
 
 
@@ -161,6 +167,8 @@ namespace FurnitureERP.Controllers
         public static async Task<IResult> Page(AppDbContext db, IMapper mapper
             ,string? keyword, DateTime? startCreateTime, DateTime? endCreateTime
             ,bool? isCom
+            ,string? Cate
+            ,string? Status
             ,[FromBody] List<SearchParam>? searchParams
             , int pageNo,int pageSize)
         {
@@ -170,24 +178,34 @@ namespace FurnitureERP.Controllers
             {
                 searchParams.ForEach(item =>
                 {
-                    if (item.FieldType == SearchParamEnum.Contains)
+                    if (item.FieldType == SearchParamEnum.Contains && !string.IsNullOrEmpty(item.FieldValue))
                     {
-                        items = db.Items.Where($"{item.FieldName}.Contains(@0)", item.FieldValue);
+                        items = items.Where($"{item.FieldName}.Contains(@0)", item.FieldValue);
                     }
-                    if (item.FieldType == SearchParamEnum.Equals)
+                    if (item.FieldType == SearchParamEnum.Equals && !string.IsNullOrEmpty(item.FieldValue))
                     {
-                        items = db.Items.Where($"{item.FieldName} == @0", item.FieldValue);
+                        items = items.Where($"{item.FieldName} == @0", item.FieldValue);
                     }
                 });
             }
-              
-            //db.Items.Where("City == @0 and Orders.Count >= @1", "London", 10)
-            //var num = 100;
-            //System.Linq.Expressions.Expression.Constant(num >10);
-            //items = db.Items.Where($"itemName == \"F6015#1.2米茶几+F8015#电视柜\"");
+
+
+            if (!string.IsNullOrEmpty(Status))
+            {
+                items = items.Where(k => k.Status == Status);
+            }
+            else //默认读取启用items
+            {
+                items = items.Where(k => k.Status == ItemStatusEnum.Using.ToString());
+            }
+
             if (!string.IsNullOrEmpty(keyword))
             {
                 items = items.Where(k=>k.ItemName.Contains(keyword) || k.ItemNo.Contains(keyword));
+            }
+            if (!string.IsNullOrEmpty(Cate))
+            {
+                items = items.Where(k => k.Cate == Cate);
             }
             if (startCreateTime.HasValue)
             {
@@ -206,16 +224,22 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> Single(AppDbContext db, long id, IMapper mapper)
+        public static async Task<IResult> Single(AppDbContext db, long id, IMapper mapper,HttpRequest request)
         {
-            var et = await db.Items.SingleOrDefaultAsync(x => x.Id == id);
+            var et = await db.Items.SingleOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.Status != ItemStatusEnum.Delete.ToString());
+            return et == null ? Results.NotFound() : Results.Ok(mapper.Map<ItemDto>(et));
+        }
+        [Authorize]
+        public static async Task<IResult> SingleFromItemNo(AppDbContext db, string itemNo, IMapper mapper,HttpRequest request)
+        {
+            var et = await db.Items.SingleOrDefaultAsync(x => x.ItemNo == itemNo && x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.Status != ItemStatusEnum.Delete.ToString());
             return et == null ? Results.NotFound() : Results.Ok(mapper.Map<ItemDto>(et));
         }
 
         [Authorize]
         public static async Task<IResult> Edit(AppDbContext db, long id, CreateItemDto itemDto, HttpRequest request, IMapper mapper)
         {
-            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id);
+            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id && x.Status != ItemStatusEnum.Delete.ToString());
             if (et == null)
             {
                 return Results.BadRequest("无效的数据");
@@ -224,10 +248,12 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest("存在相同的商品名称或编码");
             }
+
+            //删除组合商品下的子商品
+            await db.SubItems.Where(k => k.ItemNo == et.ItemNo && k.MerchantGuid == request.GetCurrentUser().MerchantGuid).ExecuteDeleteAsync();
+
             if (itemDto.SubItems != null && itemDto.SubItems.Count > 0)
             {
-                //删除组合商品下的子商品
-                await db.SubItems.Where(k => k.ItemNo == et.ItemNo && k.MerchantGuid == request.GetCurrentUser().MerchantGuid).ExecuteDeleteAsync();
                 var subItems = mapper.Map<List<SubItem>>(itemDto.SubItems);
                 subItems.ForEach(si =>
                 {
@@ -241,17 +267,19 @@ namespace FurnitureERP.Controllers
             }
 
             et.ItemName = itemDto.ItemName;
+            et.ItemNo = itemDto.ItemNo;
             et.Remark = itemDto.Remark;
             et.CostPrice= itemDto.CostPrice;
             et.PicPath = itemDto.PicPath;
             et.Price = itemDto.Price;
-            et.IsUsing = itemDto.IsUsing;
+            et.Status = itemDto.Status.ToString();
             et.IsCom = itemDto.IsCom;
             et.Style = itemDto.Style;
             et.Class = itemDto.Class;
             et.Space = itemDto.Space;
             et.Brand = itemDto.Brand;
             et.Cate = itemDto.Cate;
+            et.ItemType = itemDto.ItemType.ToString();
             et.MerchantGuid = request.GetCurrentUser().MerchantGuid;
             await db.SaveChangesAsync();
             return Results.Ok(et);
@@ -372,6 +400,8 @@ namespace FurnitureERP.Controllers
                 { "商品图","PicPath"},
                 { "商品名称","ItemName" },
                 { "商品编码","ItemNo" },
+                { "商品类型","ItemType" },
+                { "商品分类","Cate" },
                 { "供应商","SuppName" },
                 { "采购价","CostPrice" },
                 { "销售价","Price" },
@@ -388,6 +418,7 @@ namespace FurnitureERP.Controllers
                     it.Creator = request.GetCurrentUser().UserName;
                     it.MerchantGuid = request.GetCurrentUser().MerchantGuid;
                     it.CreateTime = DateTime.Now;
+                    it.Status = ItemStatusEnum.Using.ToString();
                 });
                 await db.ItemImps.AddRangeAsync(items);
                 await db.SaveChangesAsync();
@@ -403,15 +434,18 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> Delete(AppDbContext db, long id, HttpRequest request)
         {
-            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
+            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.Status != ItemStatusEnum.Delete.ToString());
             if (et == null)
             {
                 return Results.BadRequest("无效的数据");
             }
-            if (et.IsCom)
-            {
-                await db.SubItems.Where(k => k.ItemNo == et.ItemNo).ExecuteDeleteAsync();
-            }
+            //if (et.IsCom)
+            //{
+            //    await db.SubItems.Where(k => k.ItemNo == et.ItemNo).ExecuteDeleteAsync();
+            //}
+
+            et.Status = ItemStatusEnum.Delete.ToString();
+
             
             //增加删除记录
             var recodeDelete = new RecordDelete
@@ -422,11 +456,46 @@ namespace FurnitureERP.Controllers
                 Creator = request.GetCurrentUser().Creator,
                 MerchantGuid = request.GetCurrentUser().MerchantGuid,
             };
-            db.Items.Remove(et);
+            //db.Items.Remove(et);
             await db.AddAsync(recodeDelete);
             await db.SaveChangesAsync();
             return Results.NoContent();
         }
+
+        //[Authorize]
+        //public static async Task<IResult> RecycleItems((AppDbContext db, IMapper mapper
+        //    , string? keyword, DateTime? startCreateTime, DateTime? endCreateTime
+        //    , bool? isCom
+        //    , string? Cate
+        //    , int pageNo, int pageSize)
+        //{
+        //    IQueryable<Item> items = db.Items;
+
+        //    if (!string.IsNullOrEmpty(keyword))
+        //    {
+        //        items = items.Where(k => k.ItemName.Contains(keyword) || k.ItemNo.Contains(keyword));
+        //    }
+        //    if (!string.IsNullOrEmpty(Cate))
+        //    {
+        //        items = items.Where(k => k.Cate == Cate);
+        //    }
+        //    if (startCreateTime.HasValue)
+        //    {
+        //        items = items.Where(k => k.CreateTime >= startCreateTime.Value);
+        //    }
+        //    if (endCreateTime.HasValue)
+        //    {
+        //        items = items.Where(k => k.CreateTime <= endCreateTime.Value);
+        //    }
+        //    if (isCom.HasValue)
+        //    {
+        //        items = items.Where(k => k.IsCom == isCom.Value);
+        //    }
+        //    var page = await Pagination<Item>.CreateAsync(items, pageNo, pageSize);
+        //    page.Items = mapper.Map<List<ItemDto>>(page.Items);
+        //    return Results.Ok(page);
+        //}
+
 
         public static string Sql_GetImportSubItemNo => @";with t as(
           SELECT s.ItemNo, d.SubItemNo,d.Num,s.MerchantGuid
