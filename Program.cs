@@ -85,14 +85,14 @@ var app = builder.Build();
 
 #region middleware
 
-if (app.Environment.IsDevelopment())
+//if (app.Environment.IsDevelopment())
 {
     //异常处理中间件
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-else
+//else
 {
     Log.Initiate("运行日志",true);
     app.UseExceptionHandler(exceptionHandlerApp =>
@@ -140,5 +140,11 @@ Console.WriteLine(args);
 
 // start 
 app.MapGet("/", () => "Dotnet Minimal API");
-//app.Run($"http://0.0.0.0:21000");
-app.Run();
+if (app.Environment.IsProduction())
+{
+    app.Run($"http://0.0.0.0:21000");
+}
+else
+{
+    app.Run();
+}
