@@ -143,7 +143,9 @@ namespace FurnitureERP.Controllers
             }
             if (suppDto.SuppItems != null && suppDto.SuppItems.Count > 0) { 
                 //删除下级供应商产品
-                await db.SuppItems.Where(k => k.SuppName == et.SuppName && k.MerchantGuid == MerchantGuid).ExecuteDeleteAsync();
+                var  removeItems = await db.SuppItems.Where(k => k.SuppName == et.SuppName && k.MerchantGuid == MerchantGuid).ToListAsync();
+                db.SuppItems.RemoveRange(removeItems);
+
                 var suppItems = mapper.Map<List<SuppItem>>(suppDto.SuppItems);
 
                 suppItems.ForEach(si =>

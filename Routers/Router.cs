@@ -8,6 +8,9 @@ namespace FurnitureERP.Routers
         public static IApplicationBuilder Use(IApplicationBuilder builder)
         {
             var app = builder as WebApplication;
+
+            app.MapPost("/public/upload", PublicController.Upload);
+
             app.MapPost("/signin", AuthController.Signin);
             app.MapPost("/signinforsmscode", AuthController.SigninForSmsCode);
             app.MapPost("/signup", AuthController.Signup);
@@ -19,14 +22,15 @@ namespace FurnitureERP.Routers
             app.MapGet("/user/{id}", UserController.Single);
             app.MapPut("/user/{id}", UserController.Edit);
             app.MapDelete("/user/{id}", UserController.Delete);
-
+            app.MapGet("users/page", UserController.Page);
+            app.MapPost("/user/userrole", UserController.CreateUserRole);
 
             app.MapPost("/role", RoleController.Create);
             app.MapGet("/roles", RoleController.Get);
             app.MapGet("/role/{id}", RoleController.Single);
             app.MapPut("/role/{id}", RoleController.Edit);
             app.MapDelete("/role/{id}", RoleController.Delete);
-            app.MapPost("/userrole", RoleController.CreateUserRole);
+            app.MapPost("/role/userrole", RoleController.CreateUserRole);
 
             app.MapPost("/sysprop", CustomPropertyController.CreatePropConfig);
             app.MapGet("/sysprop", CustomPropertyController.SinglePropConfig);
@@ -67,9 +71,16 @@ namespace FurnitureERP.Routers
             app.MapGet("/item/{id}", ItemController.Single);
             app.MapPut("/item/{id}", ItemController.Edit);
             app.MapDelete("/item/{id}", ItemController.Delete);
-            app.MapPost("/item/import", ItemController.Import);
 
+            app.MapGet("/item/subItems/{id}",ItemController.GetSubItems);
+            app.MapPost("/item/import", ItemController.Import);
             app.MapPost("/item/upload", ItemController.Upload);
+
+            app.MapPost("/item/cat", ItemController.CreateCat);
+            app.MapPut("/item/cat/{id}", ItemController.EditCat);
+            app.MapGet("/item/catgories", ItemController.GetCats);
+            app.MapDelete("/item/cat/{id}",ItemController.DelCat);
+            app.MapPut("/item/cats",ItemController.EditCats);
 
 
 

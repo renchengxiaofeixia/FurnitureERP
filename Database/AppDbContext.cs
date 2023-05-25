@@ -199,7 +199,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.ItemName).HasComment("商品名称");
             entity.Property(e => e.ItemNo).HasComment("商品编码");
             entity.Property(e => e.MerchantGuid).HasComment("商户GUID");
-            entity.Property(e => e.PackageQty).HasComment("包装件数");
+            entity.Property(e => e.PackageQty)
+                .HasDefaultValueSql("((1))")
+                .HasComment("包装件数");
             entity.Property(e => e.PicPath).HasComment("商品图");
             entity.Property(e => e.Price).HasComment("销售价");
             entity.Property(e => e.PurchaseDays).HasComment("采购周期");
@@ -229,7 +231,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IsUsing)
                 .HasDefaultValueSql("((0))")
                 .HasComment("是否启用");
-            entity.Property(e => e.Pid).HasComment("父级id");
+            entity.Property(e => e.Pid).HasComment("父级Guid");
             entity.Property(e => e.Type).HasComment("类型");
         });
 
@@ -491,7 +493,6 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<RecordDelete>(entity =>
         {
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
         });
 
         modelBuilder.Entity<Role>(entity =>
@@ -817,11 +818,17 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.HeadPic)
+                .HasDefaultValueSql("('')")
+                .HasComment("头像");
             entity.Property(e => e.IsUsing)
                 .HasDefaultValueSql("((1))")
                 .HasComment("是否启用");
             entity.Property(e => e.MerchantGuid).HasComment("商户GUID");
             entity.Property(e => e.MerchantName).HasComment("商户名");
+            entity.Property(e => e.MobileNo)
+                .HasDefaultValueSql("('')")
+                .HasComment("手机号");
             entity.Property(e => e.Password).HasComment("密码");
             entity.Property(e => e.Remark).HasComment("备注");
             entity.Property(e => e.TimeStamp)

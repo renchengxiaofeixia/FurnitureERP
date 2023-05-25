@@ -12,6 +12,9 @@ namespace FurnitureERP.Dtos
         public DateTime CreateTime { get; set; }
         public string? Creator { get; set; }
         public bool? IsUsing { get; set; }
+        public string HeadPic { get; set; } = string.Empty;
+        public string MobileNo { get; set; } = string.Empty;
+
     }
 
 
@@ -21,5 +24,7 @@ namespace FurnitureERP.Dtos
         public string Password { get; set; }
         public string? Remark { get; set; }
         public bool IsUsing { get; set; }
+        public string HeadPic { get; set; } = string.Empty;
+        public string MobileNo { get; set; } = string.Empty;
     }
 }

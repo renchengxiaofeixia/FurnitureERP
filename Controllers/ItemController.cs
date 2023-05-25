@@ -1,6 +1,15 @@
 ﻿
 using Azure.Core;
+using FurnitureERP.Dtos;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using OfficeOpenXml.FormulaParsing.ExpressionGraph;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Linq.Dynamic.Core;
+using FurnitureERP.Utils;
+using FurnitureERP.Models;
+using FurnitureERP.Enums;
 
 namespace FurnitureERP.Controllers
 {
@@ -36,6 +45,95 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
+        public static async Task<IResult> CreateCat(AppDbContext db,CreateItemCatDto itemCatDto,HttpRequest request,IMapper mapper)
+        {
+            if(await db.ItemCats.FirstOrDefaultAsync(x =>  x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.CateName == itemCatDto.CateName ) != null)
+            {
+                return Results.BadRequest("存在相同的分类");
+            }
+            var c = mapper.Map<ItemCat>(itemCatDto);
+            c.Creator = request.GetCurrentUser().UserName;
+            c.MerchantGuid = request.GetCurrentUser().MerchantGuid;
+            await db.ItemCats.AddAsync(c);
+            await db.SaveChangesAsync();
+            return Results.Created($"/item/cat/{c.Id}",c);
+        }
+
+        [Authorize]
+        public static async Task<IResult> EditCat(AppDbContext db,CreateItemCatDto itemCatDto,HttpRequest request,IMapper mapper,long id)
+        {
+            var et = await db.ItemCats.FirstOrDefaultAsync(x => x.Id ==  id);
+            if (et == null) 
+            {
+                return Results.BadRequest("数据不存在");
+            }
+            if(await db.ItemCats.FirstOrDefaultAsync(x => x.Id !=id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid && x.CateName == itemCatDto.CateName) != null) 
+            {
+                return Results.BadRequest("存在相同的分类");
+            }
+            et.CateName = itemCatDto.CateName;
+            et.Type = itemCatDto.Type;
+            et.IsUsing = itemCatDto.IsUsing;
+            et.Pid = itemCatDto.Pid;
+
+            await db.SaveChangesAsync();
+
+            return Results.Ok(et);
+        }
+
+        [Authorize]
+        public static async Task<IResult> EditCats(AppDbContext db, List<CreateItemCatDto> itemCatDtos, HttpRequest request, IMapper mapper)
+        {
+            await db.ItemCats.Where(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid).ExecuteDeleteAsync();
+
+            var dtos = mapper.Map<List<ItemCat>>(itemCatDtos);
+
+            dtos.ForEach(k =>
+            {
+                k.Creator = request.GetCurrentUser().UserName;
+                k.MerchantGuid = request.GetCurrentUser().MerchantGuid;
+            });
+
+            await db.ItemCats.AddRangeAsync(dtos);
+            await db.SaveChangesAsync();
+            return Results.Ok();
+        }
+
+        [Authorize]
+        public static async Task<IResult> GetCats(AppDbContext db, IMapper mapper, HttpRequest request)
+        {
+            var data = await db.ItemCats.Where(k => k.IsUsing.HasValue && k.IsUsing.Value && k.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
+            var dtos = mapper.Map<List<ItemCatDto>>(data);
+            //dtos.ForEach(item =>{
+            //    item.ItemCats = dtos.Where(k => k.Pid == item.Id);
+            //});
+            //dtos = dtos.Where(k => k.Pid == 0).ToList();
+            return Results.Ok(dtos);
+        }
+
+        public static async Task<IResult> DelCat(AppDbContext db, long id, HttpRequest request)
+        {
+            var et = await db.ItemCats.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid ==  request.GetCurrentUser().MerchantGuid);
+            if (et == null)
+            {
+                return Results.BadRequest("无效的数据");
+            }
+
+            var delRecord = new RecordDelete
+            {
+                RecordId = et.Id,
+                JsonTypeName = et.GetType().Name,
+                JsonRecord = JsonSerializer.Serialize(et),
+                Creator = request.GetCurrentUser().UserName,
+                MerchantGuid = request.GetCurrentUser().MerchantGuid
+            };
+            await db.RecordDeletes.AddAsync(delRecord);
+            db.Remove(et);
+            await db.SaveChangesAsync();
+            return Results.NoContent();
+        }
+
+        [Authorize]
         public static async Task<IResult> Get(AppDbContext db, IMapper mapper, HttpRequest request)
         {
             var ets = await db.Items.Where(x=> x.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
@@ -45,14 +143,17 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> GetSubItems(AppDbContext db, IMapper mapper,long id, HttpRequest request)
         {
-            if (!await db.Items.AnyAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid))
+            var item = await db.Items.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
+            if (item == null)
             {
                 return Results.BadRequest("无效的数据");
             }
             var ets = from it in db.Items
                       from si in db.SubItems
-                      where it.ItemNo == si.ItemNo && it.Id == id && si.MerchantGuid == request.GetCurrentUser().MerchantGuid  
+                      where it.ItemNo == si.SubItemNo && si.ItemNo == item.ItemNo && si.MerchantGuid == request.GetCurrentUser().MerchantGuid  
                       select it;
+
+
             return Results.Ok(mapper.Map<List<ItemDto>>(await ets.ToListAsync()));
         }
 
@@ -60,9 +161,30 @@ namespace FurnitureERP.Controllers
         public static async Task<IResult> Page(AppDbContext db, IMapper mapper
             ,string? keyword, DateTime? startCreateTime, DateTime? endCreateTime
             ,bool? isCom
-            ,int pageNo,int pageSize)
+            ,[FromBody] List<SearchParam>? searchParams
+            , int pageNo,int pageSize)
         {
             IQueryable<Item> items = db.Items;
+
+            if (searchParams is not null) 
+            {
+                searchParams.ForEach(item =>
+                {
+                    if (item.FieldType == SearchParamEnum.Contains)
+                    {
+                        items = db.Items.Where($"{item.FieldName}.Contains(@0)", item.FieldValue);
+                    }
+                    if (item.FieldType == SearchParamEnum.Equals)
+                    {
+                        items = db.Items.Where($"{item.FieldName} == @0", item.FieldValue);
+                    }
+                });
+            }
+              
+            //db.Items.Where("City == @0 and Orders.Count >= @1", "London", 10)
+            //var num = 100;
+            //System.Linq.Expressions.Expression.Constant(num >10);
+            //items = db.Items.Where($"itemName == \"F6015#1.2米茶几+F8015#电视柜\"");
             if (!string.IsNullOrEmpty(keyword))
             {
                 items = items.Where(k=>k.ItemName.Contains(keyword) || k.ItemNo.Contains(keyword));
@@ -125,6 +247,11 @@ namespace FurnitureERP.Controllers
             et.Price = itemDto.Price;
             et.IsUsing = itemDto.IsUsing;
             et.IsCom = itemDto.IsCom;
+            et.Style = itemDto.Style;
+            et.Class = itemDto.Class;
+            et.Space = itemDto.Space;
+            et.Brand = itemDto.Brand;
+            et.Cate = itemDto.Cate;
             et.MerchantGuid = request.GetCurrentUser().MerchantGuid;
             await db.SaveChangesAsync();
             return Results.Ok(et);
@@ -285,7 +412,18 @@ namespace FurnitureERP.Controllers
             {
                 await db.SubItems.Where(k => k.ItemNo == et.ItemNo).ExecuteDeleteAsync();
             }
+            
+            //增加删除记录
+            var recodeDelete = new RecordDelete
+            {
+                JsonRecord = JsonSerializer.Serialize(et),
+                JsonTypeName = et.GetType().Name,
+                RecordId = et.Id,
+                Creator = request.GetCurrentUser().Creator,
+                MerchantGuid = request.GetCurrentUser().MerchantGuid,
+            };
             db.Items.Remove(et);
+            await db.AddAsync(recodeDelete);
             await db.SaveChangesAsync();
             return Results.NoContent();
         }

@@ -52,8 +52,7 @@ public partial class Item
     /// <summary>
     /// 包装件数
     /// </summary>
-    [Column(TypeName = "decimal(18, 2)")]
-    public decimal PackageQty { get; set; }
+    public int PackageQty { get; set; }
 
     /// <summary>
     /// 是否组合商品

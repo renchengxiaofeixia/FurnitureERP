@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Keyless]
 [Table("record_delete")]
 public partial class RecordDelete
 {
+    [Key]
     public long Id { get; set; }
 
     public long RecordId { get; set; }

@@ -66,9 +66,10 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> CreateUserRole(AppDbContext db, UserRoleDto userRole, HttpRequest request)
         {
-            await db.UserRoles.Where(x=>x.RoleId == userRole.RoleId).ExecuteDeleteAsync();
+            var userRoles = await db.UserRoles.Where(x=>x.RoleId == userRole.RoleId).ToListAsync();
+            db.UserRoles.RemoveRange(userRoles);
             
-            var users = db.Users.Where(x=>userRole.UserIds.Contains(x.Id));
+            //var users = db.Users.Where(x=>userRole.UserIds.Contains(x.Id));
             db.UserRoles.AddRange(userRole.UserIds.Select(uid=>new UserRole() {
                 RoleId = userRole.RoleId,
                 UserId = uid,

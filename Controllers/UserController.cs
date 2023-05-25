@@ -1,5 +1,6 @@
 ﻿
 using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FurnitureERP.Controllers
 {
@@ -29,6 +30,23 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
+        public static async Task<IResult> Page(AppDbContext db, IMapper mapper
+            , string? keyword
+            , int pageNo, int pageSize)
+        {
+      
+            IQueryable<User> users = db.Users;          
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                users = users.Where(k => k.UserName.Contains(keyword));
+            }
+           
+            var page = await Pagination<User>.CreateAsync(users, pageNo, pageSize);
+            page.Items = mapper.Map<List<UserDto>>(page.Items);
+            return Results.Ok(page);
+        }
+
+        [Authorize]
         public static async Task<IResult> Single(AppDbContext db, long id, IMapper mapper, HttpRequest request)
         {
             var et = await db.Users.SingleOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
@@ -55,6 +73,25 @@ namespace FurnitureERP.Controllers
             await db.SaveChangesAsync();
             return Results.Ok(et);
         }
+
+        [Authorize]
+        public static async Task<IResult> CreateUserRole(AppDbContext db, RoleUserDto userRole, HttpRequest request)
+        {
+            await db.UserRoles.Where(x => x.UserId == userRole.UserId).ExecuteDeleteAsync();
+
+            //var roles = db.Roles.Where(x => userRole.RoleIds.Contains(x.Id));
+            db.UserRoles.AddRange(userRole.RoleIds.Select(rid => new UserRole()
+            {
+                RoleId = rid,
+                UserId = userRole.UserId,
+                CreateTime = DateTime.Now,
+                Creator = request.GetCurrentUser().UserName
+            }));
+            await db.SaveChangesAsync();
+            var user = await db.Users.SingleOrDefaultAsync(x => x.Id == userRole.UserId);
+            return Results.Ok(user);
+        }
+
 
         [Authorize]
         public static async Task<IResult> Delete(AppDbContext db, long id, HttpRequest request)

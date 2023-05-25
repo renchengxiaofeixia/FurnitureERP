@@ -76,9 +76,9 @@ namespace FurnitureERP.Utils
         public class Inventory
         {
             public static InventoryDimensionEnum Dimension(Guid merchantGuid) => 
-                GetParam($"{merchantGuid}InventoryDimension", InventoryDimensionEnum.Item);
+                GetParam($"{merchantGuid}#InventoryDimension", InventoryDimensionEnum.Item);
             public static InventoryReceiveEnum ReceiveMode(Guid merchantGuid) => 
-                GetParam($"{merchantGuid}InventoryReceive", InventoryReceiveEnum.Erp);
+                GetParam($"{merchantGuid}#InventoryReceive", InventoryReceiveEnum.Erp);
         }
 
         public class AfterSale
