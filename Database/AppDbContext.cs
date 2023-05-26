@@ -58,6 +58,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<PackageImp> PackageImps { get; set; }
 
+    public virtual DbSet<PageColumn> PageColumns { get; set; }
+
     public virtual DbSet<PhoneCode> PhoneCodes { get; set; }
 
     public virtual DbSet<PropertyConfig> PropertyConfigs { get; set; }
@@ -466,6 +468,15 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+        });
+
+        modelBuilder.Entity<PageColumn>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__page_col__3214EC0767BDF93D");
+
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.PageName).HasDefaultValueSql("('')");
         });
 
         modelBuilder.Entity<PhoneCode>(entity =>

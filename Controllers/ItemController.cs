@@ -239,7 +239,7 @@ namespace FurnitureERP.Controllers
         [Authorize]
         public static async Task<IResult> Edit(AppDbContext db, long id, CreateItemDto itemDto, HttpRequest request, IMapper mapper)
         {
-            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id && x.Status != ItemStatusEnum.Delete.ToString());
+            var et = await db.Items.FirstOrDefaultAsync(x => x.Id == id);
             if (et == null)
             {
                 return Results.BadRequest("无效的数据");
@@ -453,7 +453,7 @@ namespace FurnitureERP.Controllers
                 JsonRecord = JsonSerializer.Serialize(et),
                 JsonTypeName = et.GetType().Name,
                 RecordId = et.Id,
-                Creator = request.GetCurrentUser().Creator,
+                Creator = request.GetCurrentUser().UserName,
                 MerchantGuid = request.GetCurrentUser().MerchantGuid,
             };
             //db.Items.Remove(et);
