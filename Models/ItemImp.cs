@@ -39,7 +39,7 @@ public partial class ItemImp
     public decimal CostPrice { get; set; }
 
     /// <summary>
-    /// 供应商
+    /// 供应商名
     /// </summary>
     [StringLength(50)]
     public string? SuppName { get; set; }
@@ -52,11 +52,10 @@ public partial class ItemImp
     /// <summary>
     /// 包装件数
     /// </summary>
-    [Column(TypeName = "decimal(18, 2)")]
-    public decimal PackageQty { get; set; }
+    public int PackageQty { get; set; }
 
     /// <summary>
-    /// 是否组合产品
+    /// 是否组合商品
     /// </summary>
     public bool IsCom { get; set; }
 
@@ -73,13 +72,7 @@ public partial class ItemImp
     public string? Creator { get; set; }
 
     /// <summary>
-    /// 是否启用
-    /// </summary>
-    [Required]
-    public bool? IsUsing { get; set; }
-
-    /// <summary>
-    /// 图片地址
+    /// 商品图
     /// </summary>
     [StringLength(500)]
     public string? PicPath { get; set; }
@@ -105,4 +98,46 @@ public partial class ItemImp
     /// 商户GUID
     /// </summary>
     public Guid MerchantGuid { get; set; }
+
+    public byte[] TimeStamp { get; set; } = null!;
+
+    /// <summary>
+    /// 风格
+    /// </summary>
+    [StringLength(100)]
+    public string Style { get; set; } = null!;
+
+    /// <summary>
+    /// 品类
+    /// </summary>
+    [StringLength(100)]
+    public string Class { get; set; } = null!;
+
+    /// <summary>
+    /// 品牌
+    /// </summary>
+    [StringLength(100)]
+    public string Brand { get; set; } = null!;
+
+    /// <summary>
+    /// 空间
+    /// </summary>
+    [StringLength(100)]
+    public string Space { get; set; } = null!;
+
+    /// <summary>
+    /// 自定义分类
+    /// </summary>
+    [StringLength(255)]
+    [Unicode(false)]
+    public string Cate { get; set; } = null!;
+
+    /// <summary>
+    /// 商品,包件,组合
+    /// </summary>
+    [StringLength(100)]
+    public string ItemType { get; set; } = null!;
+
+    [StringLength(20)]
+    public string Status { get; set; } = null!;
 }

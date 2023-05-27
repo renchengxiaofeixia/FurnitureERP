@@ -140,5 +140,5 @@ Console.WriteLine(args);
 
 // start 
 app.MapGet("/", () => "Dotnet Minimal API");
-//app.Run($"http://0.0.0.0:21000");
-app.Run();
+app.Run($"http://0.0.0.0:31000");
+//app.Run();

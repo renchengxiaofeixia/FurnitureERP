@@ -32,6 +32,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<ItemCat> ItemCats { get; set; }
 
+    public virtual DbSet<ItemDelete> ItemDeletes { get; set; }
+
     public virtual DbSet<ItemImp> ItemImps { get; set; }
 
     public virtual DbSet<ItemPackage> ItemPackages { get; set; }
@@ -193,11 +195,11 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
             entity.Property(e => e.IsCom).HasComment("是否组合商品");
-            entity.Property(e => e.IsUsing)
-                .HasDefaultValueSql("((1))")
-                .HasComment("是否启用");
             entity.Property(e => e.ItemName).HasComment("商品名称");
             entity.Property(e => e.ItemNo).HasComment("商品编码");
+            entity.Property(e => e.ItemType)
+                .HasDefaultValueSql("('')")
+                .HasComment("商品,包件,组合");
             entity.Property(e => e.MerchantGuid).HasComment("商户GUID");
             entity.Property(e => e.PackageQty)
                 .HasDefaultValueSql("((1))")
@@ -211,6 +213,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Space)
                 .HasDefaultValueSql("('')")
                 .HasComment("空间");
+            entity.Property(e => e.Status).HasDefaultValueSql("('')");
             entity.Property(e => e.Style)
                 .HasDefaultValueSql("('')")
                 .HasComment("风格");
@@ -235,28 +238,97 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Type).HasComment("类型");
         });
 
-        modelBuilder.Entity<ItemImp>(entity =>
+        modelBuilder.Entity<ItemDelete>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__itemimp14EC0710AB74EC");
+            entity.HasKey(e => e.Id).HasName("PK__item_cop__3214EC0790186EAA");
 
+            entity.Property(e => e.Brand)
+                .HasDefaultValueSql("('')")
+                .HasComment("品牌");
+            entity.Property(e => e.Cate)
+                .HasDefaultValueSql("('')")
+                .HasComment("自定义分类");
+            entity.Property(e => e.Class)
+                .HasDefaultValueSql("('')")
+                .HasComment("品类");
             entity.Property(e => e.CostPrice).HasComment("采购价");
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.IsCom).HasComment("是否组合产品");
+            entity.Property(e => e.IsCom).HasComment("是否组合商品");
             entity.Property(e => e.IsUsing)
                 .HasDefaultValueSql("((1))")
                 .HasComment("是否启用");
             entity.Property(e => e.ItemName).HasComment("商品名称");
             entity.Property(e => e.ItemNo).HasComment("商品编码");
+            entity.Property(e => e.ItemType)
+                .HasDefaultValueSql("('')")
+                .HasComment("商品,包件,组合");
             entity.Property(e => e.MerchantGuid).HasComment("商户GUID");
-            entity.Property(e => e.PackageQty).HasComment("包装件数");
-            entity.Property(e => e.PicPath).HasComment("图片地址");
+            entity.Property(e => e.PackageQty)
+                .HasDefaultValueSql("((1))")
+                .HasComment("包装件数");
+            entity.Property(e => e.PicPath).HasComment("商品图");
             entity.Property(e => e.Price).HasComment("销售价");
             entity.Property(e => e.PurchaseDays).HasComment("采购周期");
             entity.Property(e => e.Remark).HasComment("备注");
             entity.Property(e => e.SafeQty).HasComment("安全库存");
             entity.Property(e => e.SellerNick).HasComment("所属店铺");
-            entity.Property(e => e.SuppName).HasComment("供应商");
+            entity.Property(e => e.Space)
+                .HasDefaultValueSql("('')")
+                .HasComment("空间");
+            entity.Property(e => e.Style)
+                .HasDefaultValueSql("('')")
+                .HasComment("风格");
+            entity.Property(e => e.SuppName).HasComment("供应商名");
+            entity.Property(e => e.TimeStamp)
+                .IsRowVersion()
+                .IsConcurrencyToken();
+            entity.Property(e => e.Volume).HasComment("体积");
+        });
+
+        modelBuilder.Entity<ItemImp>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__item_cop__3214EC071A8BF09B");
+
+            entity.Property(e => e.Brand)
+                .HasDefaultValueSql("('')")
+                .HasComment("品牌");
+            entity.Property(e => e.Cate)
+                .HasDefaultValueSql("('')")
+                .HasComment("自定义分类");
+            entity.Property(e => e.Class)
+                .HasDefaultValueSql("('')")
+                .HasComment("品类");
+            entity.Property(e => e.CostPrice).HasComment("采购价");
+            entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.IsCom).HasComment("是否组合商品");
+            entity.Property(e => e.ItemName).HasComment("商品名称");
+            entity.Property(e => e.ItemNo).HasComment("商品编码");
+            entity.Property(e => e.ItemType)
+                .HasDefaultValueSql("('')")
+                .HasComment("商品,包件,组合");
+            entity.Property(e => e.MerchantGuid).HasComment("商户GUID");
+            entity.Property(e => e.PackageQty)
+                .HasDefaultValueSql("((1))")
+                .HasComment("包装件数");
+            entity.Property(e => e.PicPath).HasComment("商品图");
+            entity.Property(e => e.Price).HasComment("销售价");
+            entity.Property(e => e.PurchaseDays).HasComment("采购周期");
+            entity.Property(e => e.Remark).HasComment("备注");
+            entity.Property(e => e.SafeQty).HasComment("安全库存");
+            entity.Property(e => e.SellerNick).HasComment("所属店铺");
+            entity.Property(e => e.Space)
+                .HasDefaultValueSql("('')")
+                .HasComment("空间");
+            entity.Property(e => e.Status).HasDefaultValueSql("('')");
+            entity.Property(e => e.Style)
+                .HasDefaultValueSql("('')")
+                .HasComment("风格");
+            entity.Property(e => e.SuppName).HasComment("供应商名");
+            entity.Property(e => e.TimeStamp)
+                .IsRowVersion()
+                .IsConcurrencyToken();
             entity.Property(e => e.Volume).HasComment("体积");
         });
 
@@ -499,7 +571,6 @@ public partial class AppDbContext : DbContext
         {
             entity.Property(e => e.CreateTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
             entity.Property(e => e.IsUsing)
                 .HasDefaultValueSql("((1))")
                 .HasComment("是否启用");

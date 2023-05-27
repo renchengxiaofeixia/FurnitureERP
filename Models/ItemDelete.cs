@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Table("item")]
-public partial class Item
+[Table("item_delete")]
+public partial class ItemDelete
 {
     [Key]
     public long Id { get; set; }
@@ -70,6 +70,12 @@ public partial class Item
 
     [StringLength(50)]
     public string? Creator { get; set; }
+
+    /// <summary>
+    /// 是否启用
+    /// </summary>
+    [Required]
+    public bool? IsUsing { get; set; }
 
     /// <summary>
     /// 商品图
@@ -137,7 +143,4 @@ public partial class Item
     /// </summary>
     [StringLength(100)]
     public string ItemType { get; set; } = null!;
-
-    [StringLength(20)]
-    public string Status { get; set; } = null!;
 }

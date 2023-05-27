@@ -245,7 +245,6 @@ namespace FurnitureERP.Controllers
             et.CostPrice= itemDto.CostPrice;
             et.PicPath = itemDto.PicPath;
             et.Price = itemDto.Price;
-            et.IsUsing = itemDto.IsUsing;
             et.IsCom = itemDto.IsCom;
             et.Style = itemDto.Style;
             et.Class = itemDto.Class;

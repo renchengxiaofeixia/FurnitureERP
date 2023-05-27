@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Keyless]
 [Table("role")]
 public partial class Role
 {
+    [Key]
     public long Id { get; set; }
 
     public Guid Guid { get; set; }
