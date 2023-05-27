@@ -1,5 +1,6 @@
 ﻿
 using Azure.Core;
+using Microsoft.AspNetCore.Identity;
 
 namespace FurnitureERP.Controllers
 {
@@ -24,7 +25,19 @@ namespace FurnitureERP.Controllers
         public static async Task<IResult> Get(AppDbContext db,IMapper mapper, HttpRequest request)
         {
             var ets = await db.Roles.Where(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
-            return Results.Ok(mapper.Map<List<RoleDto>>(ets));
+            var roleIds = ets.Select(k=>k.Id).ToList();
+            var users = await db.Users.Where(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid).ToListAsync();
+            var roleUsers = await db.UserRoles.Where(x => roleIds.Any(j=>j == x.RoleId)).ToListAsync();
+            var dtos = mapper.Map<List<RoleDto>>(ets);
+            dtos.ForEach(r =>
+            {
+                r.UsersName = string.Join(" ", (from u in users
+                                                join ru in roleUsers
+                                                on u.Id equals ru.UserId
+                                                where ru.RoleId == r.Id
+                                                select u.UserName));
+            });
+            return Results.Ok(dtos);
         }
 
         [Authorize]
@@ -47,6 +60,7 @@ namespace FurnitureERP.Controllers
                 return Results.BadRequest("存在相同的角色名");
             }
             et.RoleName = roleDto.RoleName;
+            et.Remark = roleDto.Remark;
             await db.SaveChangesAsync();
             return Results.Ok(et);
         }
@@ -59,6 +73,7 @@ namespace FurnitureERP.Controllers
             {
                 return Results.BadRequest("无效的数据");
             }
+            db.Roles.Remove(et);
             await db.SaveChangesAsync();
             return Results.NoContent();
         }
@@ -82,17 +97,17 @@ namespace FurnitureERP.Controllers
         }
 
         [Authorize]
-        public static async Task<IResult> GetUserRoles(AppDbContext db, long roleId, HttpRequest request) 
+        public static async Task<IResult> GetUserRoles(AppDbContext db, long id, HttpRequest request) 
         {
-            var et = await db.Roles.FirstOrDefaultAsync(x => x.Id == roleId && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
+            var et = await db.Roles.FirstOrDefaultAsync(x => x.Id == id && x.MerchantGuid == request.GetCurrentUser().MerchantGuid);
             if (et == null)
             {
                 return Results.BadRequest("无效的数据");
             }
             return Results.Ok((from u in db.Users
                     join ur in db.UserRoles on u.Id equals ur.UserId
-                    where ur.RoleId == roleId
-                    select u).ToList());
+                    where ur.RoleId == id
+                               select u).ToList());
         }
     }
 }

@@ -139,4 +139,13 @@ public partial class Item
     /// </summary>
     [StringLength(1)]
     public string Cate { get; set; } = null!;
+
+    /// <summary>
+    /// 商品,包件,组合
+    /// </summary>
+    [StringLength(100)]
+    public string ItemType { get; set; } = null!;
+
+    [StringLength(20)]
+    public string Status { get; set; } = null!;
 }
