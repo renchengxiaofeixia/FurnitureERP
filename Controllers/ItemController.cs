@@ -25,7 +25,8 @@ namespace FurnitureERP.Controllers
        [Authorize]
         public static async Task<IResult> Create(AppDbContext db, CreateItemDto itemDto, HttpRequest request,IMapper mapper)
         {
-            if (await db.Items.FirstOrDefaultAsync(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid && (x.ItemNo == itemDto.ItemNo || x.ItemName == itemDto.ItemName)) != null)
+            if (await db.Items.FirstOrDefaultAsync(x => x.MerchantGuid == request.GetCurrentUser().MerchantGuid 
+            && (x.ItemNo == itemDto.ItemNo || x.ItemName == itemDto.ItemName)) != null)
             {
                 return Results.BadRequest("存在相同的商品名称或编码");
             }
@@ -167,8 +168,8 @@ namespace FurnitureERP.Controllers
         public static async Task<IResult> Page(AppDbContext db, IMapper mapper
             ,string? keyword, DateTime? startCreateTime, DateTime? endCreateTime
             ,bool? isCom
-            ,string? Cate
-            ,string? Status
+            ,string? cate
+            ,string? status
             ,[FromBody] List<SearchParam>? searchParams
             , int pageNo,int pageSize)
         {
@@ -190,9 +191,9 @@ namespace FurnitureERP.Controllers
             }
 
 
-            if (!string.IsNullOrEmpty(Status))
+            if (!string.IsNullOrEmpty(status))
             {
-                items = items.Where(k => k.Status == Status);
+                items = items.Where(k => k.Status == status);
             }
             else //默认读取启用items
             {
@@ -203,10 +204,19 @@ namespace FurnitureERP.Controllers
             {
                 items = items.Where(k=>k.ItemName.Contains(keyword) || k.ItemNo.Contains(keyword));
             }
-            if (!string.IsNullOrEmpty(Cate))
+            if (!string.IsNullOrEmpty(cate) && cate != "全部")
             {
-                items = items.Where(k => k.Cate == Cate);
+                if (cate == "未分类")
+                {
+                    items = items.Where(k => string.IsNullOrEmpty(k.Cate));
+                }
+                else 
+                {
+                    items = items.Where(k => k.Cate == cate);
+                }
+                    
             }
+
             if (startCreateTime.HasValue)
             {
                 items = items.Where(k => k.CreateTime >= startCreateTime.Value);
@@ -279,6 +289,10 @@ namespace FurnitureERP.Controllers
             et.Space = itemDto.Space;
             et.Brand = itemDto.Brand;
             et.Cate = itemDto.Cate;
+            et.SuppName = itemDto.SuppName;
+            et.Volume = itemDto.Volume;
+            et.SafeQty = itemDto.SafeQty;
+            et.PackageQty = itemDto.PackageQty;
             et.ItemType = itemDto.ItemType.ToString();
             et.MerchantGuid = request.GetCurrentUser().MerchantGuid;
             await db.SaveChangesAsync();

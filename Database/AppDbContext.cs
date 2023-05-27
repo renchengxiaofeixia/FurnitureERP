@@ -189,7 +189,7 @@ public partial class AppDbContext : DbContext
                 .HasComment("品牌");
             entity.Property(e => e.Cate)
                 .HasDefaultValueSql("('')")
-                .HasComment("自定义分类");
+                .HasComment("分类");
             entity.Property(e => e.Class)
                 .HasDefaultValueSql("('')")
                 .HasComment("品类");
