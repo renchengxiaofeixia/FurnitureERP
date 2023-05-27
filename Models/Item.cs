@@ -131,8 +131,6 @@ public partial class Item
     [StringLength(100)]
     public string ItemType { get; set; } = null!;
 
-    [StringLength(20)]
-    public string Status { get; set; } = null!;
 
     /// <summary>
     /// 分类
@@ -140,11 +138,6 @@ public partial class Item
     [StringLength(1)]
     public string Cate { get; set; } = null!;
 
-    /// <summary>
-    /// 商品,包件,组合
-    /// </summary>
-    [StringLength(100)]
-    public string ItemType { get; set; } = null!;
 
     [StringLength(20)]
     public string Status { get; set; } = null!;
