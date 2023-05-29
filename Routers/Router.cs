@@ -116,7 +116,9 @@ namespace FurnitureERP.Routers
             app.MapPut("/purchase/audit/{id}", PurchaseController.Audit);
             app.MapPut("/purchase/unaudit/{id}", PurchaseController.UnAudit);
             app.MapPut("/purchase/cancel/{id}", PurchaseController.CancelPurchaseItem);
+            app.MapGet("/purchase/settlementmode", PurchaseController.SettlementMode);
 
+            
             //app.MapPost("/purchase/pay", PurchaseController.CreatePurchasePay);
             //app.MapGet("/purchase/pays/{purchaseId}", PurchaseController.GetPurchasePayments);
             //app.MapGet("/purchase/pay/{id}", PurchaseController.SinglePurchasePay);

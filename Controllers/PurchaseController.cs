@@ -127,7 +127,7 @@ namespace FurnitureERP.Controllers
             }
 
             et.PurchaseOrderDate = purchaseDto.PurchaseOrderDate;
-            et.SettlementMode = purchaseDto.SettlementMode;
+            et.SettlementMode = purchaseDto.SettlementMode.ToString();
             et.SuppName = purchaseDto.SuppName;
             et.WareName = purchaseDto.WareName;
             et.DeliveryDate = purchaseDto.DeliveryDate;
@@ -318,6 +318,17 @@ namespace FurnitureERP.Controllers
             db.PurchaseItems.UpdateRange(purchaseItemForUpdate.Select(k=> k.p));
             await db.SaveChangesAsync();
             return Results.Ok(et);
+        }
+
+        [Authorize]
+        public static IResult SettlementMode()
+        {
+            string[] settlementMode = new string[]
+            {
+                SettlementModeEnum.Cash.ToString(),
+                SettlementModeEnum.Monthly.ToString()
+            };
+            return Results.Ok(settlementMode);
         }
 
     }
