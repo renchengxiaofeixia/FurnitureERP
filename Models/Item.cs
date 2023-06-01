@@ -131,6 +131,14 @@ public partial class Item
     [StringLength(100)]
     public string ItemType { get; set; } = null!;
 
+
+    /// <summary>
+    /// 分类
+    /// </summary>
+    [StringLength(1)]
+    public string Cate { get; set; } = null!;
+
+
     [StringLength(20)]
     public string Status { get; set; } = null!;
 

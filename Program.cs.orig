@@ -140,6 +140,7 @@ Console.WriteLine(args);
 
 // start 
 app.MapGet("/", () => "Dotnet Minimal API");
+<<<<<<< HEAD
 if (app.Environment.IsProduction())
 {
     app.Run($"http://0.0.0.0:21000");
@@ -148,3 +149,7 @@ else
 {
     app.Run();
 }
+=======
+app.Run($"http://0.0.0.0:31000");
+//app.Run();
+>>>>>>> origin/xq

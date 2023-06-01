@@ -282,7 +282,10 @@ namespace FurnitureERP.Controllers
             et.CostPrice= itemDto.CostPrice;
             et.PicPath = itemDto.PicPath;
             et.Price = itemDto.Price;
+<<<<<<< HEAD
             et.Status = itemDto.Status.ToString();
+=======
+>>>>>>> origin/xq
             et.IsCom = itemDto.IsCom;
             et.Style = itemDto.Style;
             et.Class = itemDto.Class;

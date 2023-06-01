@@ -1,4 +1,6 @@
-﻿namespace FurnitureERP.Dtos
+﻿using FurnitureERP.Enums;
+
+namespace FurnitureERP.Dtos
 {
     public class PurchaseDto
     {
@@ -8,7 +10,8 @@
         public string SuppName { get; set; }
         public string WareName { get; set; }
         public decimal AggregateAmount { get; set; }
-        public string SettlementMode { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public SettlementModeEnum SettlementMode { get; set; }
         public bool IsAudit { get; set; }
         public string? AuditUser { get; set; }
         public DateTime? AuditDate { get; set; }
@@ -32,7 +35,8 @@
         public string PurchaseNo { get; set; }
         public string SuppName { get; set; }
         public string WareName { get; set; }
-        public string SettlementMode { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public SettlementModeEnum SettlementMode { get; set; }
         public string? OuterNo { get; set; }
         public DateTime PurchaseOrderDate { get; set; }
         public DateTime DeliveryDate { get; set; }

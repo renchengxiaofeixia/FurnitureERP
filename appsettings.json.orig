@@ -1,0 +1,23 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    //"SqliteConnection": "Data Source=Abiz.db3"
+<<<<<<< HEAD
+    "SqlConnection": "Server=192.168.251.249;Database=FurnitureERP;User ID=sa;Password=123456;Trusted_Connection=False;TrustServerCertificate=true",
+    //"SqlConnection": "Server=112.74.19.214;Database=FurnitureERP;User ID=sa;Password=SRx19901012;Trusted_Connection=False;TrustServerCertificate=true"
+=======
+    "SqlConnection": "Server=192.168.251.249;Database=FurnitureERP;User ID=sa;Password=123456;Trusted_Connection=False;TrustServerCertificate=true"
+>>>>>>> origin/xq
+  },
+  "Jwt": {
+    "Key": "5daU6I2TAyE14eyskWuTxhjSttsXamJJ",
+    "Issuer": "renchengxiaofeixia",
+    "Audience": "https://www.github.com/renchengxiaofeixia"
+  }
+}
