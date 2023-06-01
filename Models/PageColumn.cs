@@ -6,25 +6,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FurnitureERP.Models;
 
-[Table("warehouse")]
-public partial class Warehouse
+[Table("page_column")]
+public partial class PageColumn
 {
     [Key]
     public long Id { get; set; }
 
     public Guid Guid { get; set; }
 
-    /// <summary>
-    /// 仓库名称
-    /// </summary>
-    [StringLength(100)]
-    public string WarehouseName { get; set; } = null!;
-
-    /// <summary>
-    /// 备注
-    /// </summary>
     [StringLength(200)]
-    public string Remark { get; set; } = null!;
+    public string PageName { get; set; } = null!;
+
+    public string? ColumnJson { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime CreateTime { get; set; }
@@ -32,16 +25,5 @@ public partial class Warehouse
     [StringLength(50)]
     public string? Creator { get; set; }
 
-    /// <summary>
-    /// 是否启用
-    /// </summary>
-    [Required]
-    public bool? IsUsing { get; set; }
-
-    /// <summary>
-    /// 商户GUID
-    /// </summary>
     public Guid MerchantGuid { get; set; }
-
-    public byte[] TimeStamp { get; set; } = null!;
 }

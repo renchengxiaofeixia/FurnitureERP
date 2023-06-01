@@ -126,13 +126,6 @@ public partial class Item
     public string Space { get; set; } = null!;
 
     /// <summary>
-    /// 自定义分类
-    /// </summary>
-    [StringLength(255)]
-    [Unicode(false)]
-    public string Cate { get; set; } = null!;
-
-    /// <summary>
     /// 商品,包件,组合
     /// </summary>
     [StringLength(100)]
@@ -140,4 +133,10 @@ public partial class Item
 
     [StringLength(20)]
     public string Status { get; set; } = null!;
+
+    /// <summary>
+    /// 分类
+    /// </summary>
+    [StringLength(100)]
+    public string Cate { get; set; } = null!;
 }

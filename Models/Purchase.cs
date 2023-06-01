@@ -90,6 +90,9 @@ public partial class Purchase
     [StringLength(50)]
     public string? OuterNo { get; set; }
 
+    /// <summary>
+    /// 采购下单时间
+    /// </summary>
     [Column(TypeName = "datetime")]
     public DateTime Created { get; set; }
 
@@ -99,9 +102,15 @@ public partial class Purchase
     [Column(TypeName = "datetime")]
     public DateTime DeliveryDate { get; set; }
 
+    /// <summary>
+    /// 创建时间
+    /// </summary>
     [Column(TypeName = "datetime")]
     public DateTime CreateTime { get; set; }
 
+    /// <summary>
+    /// 创建人
+    /// </summary>
     [StringLength(50)]
     public string? Creator { get; set; }
 
