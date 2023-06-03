@@ -15,6 +15,9 @@ using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Drawing.Printing;
 using System.Drawing;
+using FurnitureERP.FilterParameters;
+using Microsoft.IdentityModel.Tokens;
+using System.Linq;
 
 namespace FurnitureERP.Controllers
 {
@@ -166,69 +169,51 @@ namespace FurnitureERP.Controllers
 
         [Authorize]
         public static async Task<IResult> Page(AppDbContext db, IMapper mapper
-            ,string? keyword, DateTime? startCreateTime, DateTime? endCreateTime
-            ,bool? isCom
-            ,string? cate
-            ,string? status
-            ,[FromBody] List<SearchParam>? searchParams
-            , int pageNo,int pageSize)
+            ,[FromQuery] [AsParameters]  ItemFilterParameter? filterParameter
+            //,string? keyword, DateTime? startCreateTime, DateTime? endCreateTime
+            //,bool? isCom
+            //,string? cate
+            //,string? status
+            //,[FromBody] List<SearchParam>? searchParams
+            //, int pageNo,int pageSize
+            )
         {
             IQueryable<Item> items = db.Items;
 
-            if (searchParams is not null) 
+            if (!string.IsNullOrEmpty(filterParameter?.Status))
             {
-                searchParams.ForEach(item =>
-                {
-                    if (item.FieldType == SearchParamEnum.Contains && !string.IsNullOrEmpty(item.FieldValue))
-                    {
-                        items = items.Where($"{item.FieldName}.Contains(@0)", item.FieldValue);
-                    }
-                    if (item.FieldType == SearchParamEnum.Equals && !string.IsNullOrEmpty(item.FieldValue))
-                    {
-                        items = items.Where($"{item.FieldName} == @0", item.FieldValue);
-                    }
-                });
-            }
-
-
-            if (!string.IsNullOrEmpty(status))
-            {
-                items = items.Where(k => k.Status == status);
+                items = items.Where(k => k.Status == filterParameter.Status);
             }
             else //默认读取启用items
             {
                 items = items.Where(k => k.Status == ItemStatusEnum.Using.ToString());
             }
 
-            if (!string.IsNullOrEmpty(keyword))
+            if (!string.IsNullOrEmpty(filterParameter?.Keyword))
             {
-                items = items.Where(k=>k.ItemName.Contains(keyword) || k.ItemNo.Contains(keyword));
+                items = items.Where(k=>k.ItemName.Contains(filterParameter.Keyword) || k.ItemNo.Contains(filterParameter.Keyword));
             }
-            if (!string.IsNullOrEmpty(cate) && cate != "全部")
+            if (!string.IsNullOrEmpty(filterParameter?.Cate) && filterParameter.Cate != "全部")
             {
-                if (cate == "未分类")
+                if (filterParameter.Cate == "未分类")
                 {
                     items = items.Where(k => string.IsNullOrEmpty(k.Cate));
                 }
-                else 
+                else
                 {
-                    items = items.Where(k => k.Cate == cate);
+                    items = items.Where(k => k.Cate == filterParameter.Cate);
                 }
-                    
             }
 
-            if (startCreateTime.HasValue)
+            if (filterParameter?.StartCreateTime !=null)
             {
-                items = items.Where(k => k.CreateTime >= startCreateTime.Value);
+                items = items.Where(k => k.CreateTime >= filterParameter.StartCreateTime);
             }
-            if (endCreateTime.HasValue)
+            if (filterParameter?.EndCreateTime !=null)
             {
-                items = items.Where(k => k.CreateTime <= endCreateTime.Value);
+                items = items.Where(k => k.CreateTime <= filterParameter.EndCreateTime);
             }
-            if (isCom.HasValue) {
-                items = items.Where(k => k.IsCom == isCom.Value) ;
-            }
-            var page = await Pagination<Item>.CreateAsync(items, pageNo, pageSize);
+            var page = await Pagination<Item>.CreateAsync(items, filterParameter?.PageNo, filterParameter?.PageSize);
             page.Items = mapper.Map<List<ItemDto>>(page.Items);
             return Results.Ok(page);
         }

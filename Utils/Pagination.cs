@@ -16,11 +16,13 @@ namespace FurnitureERP.Utils
         }
         public bool HasPreviousPage => PageNo > 1;
         public bool HasNextPage => PageNo < TotalPages;
-        public static async Task<Pagination<T>> CreateAsync(IQueryable<T> source, int pageIndex = 1, int pageSize = 50)
+        public static async Task<Pagination<T>> CreateAsync(IQueryable<T> source, int? pageIndex = 1, int? pageSize = 50)
         {
+            var pageNo = pageIndex.HasValue ? pageIndex.Value : 1;
+            var size = pageSize.HasValue ? pageSize.Value : 50;
             var count = await source.CountAsync();
-            var items = await source.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
-            return new Pagination<T>(items, count, pageIndex, pageSize, count);
+            var items = await source.Skip((pageNo - 1) * size).Take(size).ToListAsync();
+            return new Pagination<T>(items, count, pageNo, size, count);
         }
     }
 }
