@@ -169,7 +169,7 @@ namespace FurnitureERP.Controllers
 
         [Authorize]
         public static async Task<IResult> Page(AppDbContext db, IMapper mapper
-            ,[FromQuery] [AsParameters]  ItemFilterParameter? filterParameter
+            ,[AsParameters]  ItemFilterParameter? filterParameter
             //,string? keyword, DateTime? startCreateTime, DateTime? endCreateTime
             //,bool? isCom
             //,string? cate
